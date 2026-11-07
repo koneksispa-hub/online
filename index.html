@@ -576,6 +576,9 @@ document.querySelectorAll('.svc-card[data-svc-idx]').forEach(card=>{
   card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal(s)}});
 });
 
+// Google Sheets config — must be declared before all fetch calls
+const SHEET_ID='1nnVinOmdSQK2ZF8YKM1aKtJi5PwFz_NwT4d9Wl84sTA';
+let teamData=[];
 // Load service prices & durations from Google Sheets "Datos" (GID 376926335)
 const SVC_GID='376926335';
 function parsePrice(v){return parseInt(String(v).replace(/[^0-9]/g,''),10)||0;}
@@ -583,10 +586,11 @@ function normStr(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'
 async function loadServicePrices(){
   try{
     const url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&gid='+SVC_GID;
-    const text=await(await fetch(url)).text();
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8000);
+    const text=await(await fetch(url,{signal:ctrl.signal})).text();clearTimeout(tid);
     const m=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/);
     if(!m)return;
-    const rows=JSON.parse(m[1]).table.rows||[];
+    const rows=JSON.parse(m[1]).table?.rows||[];
     rows.forEach(r=>{
       if(!r.c||!r.c[0])return;
       const name=String(r.c[0].v||'').trim();
@@ -611,17 +615,16 @@ async function loadServicePrices(){
 loadServicePrices();
 
 // Team from Google Sheets
-let teamData = [];
-const SHEET_ID='1nnVinOmdSQK2ZF8YKM1aKtJi5PwFz_NwT4d9Wl84sTA';
 const GID='49445065';
 async function loadTeam(){
   const teamGrid=document.getElementById('teamGrid');
   try{
     const url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&gid='+GID;
-    const text=await(await fetch(url)).text();
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8000);
+    const text=await(await fetch(url,{signal:ctrl.signal})).text();clearTimeout(tid);
     const m=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/);
     if(!m)throw new Error('parse');
-    const rows=JSON.parse(m[1]).table.rows||[];
+    const rows=JSON.parse(m[1]).table?.rows||[];
     teamData=rows.map(r=>({
       name:(r.c[1]?.v||'').trim(),
       svcs:(r.c[5]?.v||'').trim(),
@@ -676,21 +679,29 @@ function openModal(s){
   }else{
     teamSec.hidden=true;
   }
-  modal.hidden=false;
+  modal.hidden=false;modal.style.display='flex';
   document.body.style.overflow='hidden';
   modal.querySelector('.modal-box').scrollTop=0;
   modalClose.focus();
 }
-function closeModal(){modal.hidden=true;document.body.style.overflow='';}
+function closeModal(){modal.hidden=true;modal.style.display='';document.body.style.overflow='';}
 modalClose.addEventListener('click',closeModal);
 modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeModal();});
 
-// Nav scroll
+// Nav scroll — check both on scroll AND on load (handles anchor-jump page loads)
 const navbar=document.getElementById('navbar');
-function updateNav(){navbar.classList.toggle('scrolled',window.scrollY>60);}
+function updateNav(){navbar.classList.toggle('scrolled',window.scrollY>80);}
 updateNav();
 window.addEventListener('scroll',updateNav,{passive:true});
+window.addEventListener('load',updateNav);
+// IntersectionObserver for robust hero detection (handles direct-to-anchor navigation)
+(function(){
+  if(!('IntersectionObserver' in window))return;
+  const hero=document.getElementById('inicio');
+  if(!hero)return;
+  new IntersectionObserver(([e])=>navbar.classList.toggle('scrolled',!e.isIntersecting),{threshold:0.05}).observe(hero);
+})();
 
 // Mobile menu
 const ham=document.getElementById('navHam');
