@@ -182,6 +182,8 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .team-svcs{font-size:.82rem;color:var(--caramel);font-weight:500;line-height:1.5}
 .team-sched{font-size:.8rem;color:var(--text-muted);line-height:1.5}
 .team-loading,.team-error{grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted)}
+.team-photo-wrap{margin-bottom:2.5rem;border-radius:16px;overflow:hidden;max-height:420px}
+.team-photo-img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
 
 /* CONTACT */
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
@@ -369,6 +371,9 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <span class="eyebrow">Nuestro equipo</span>
         <h2 id="team-h">Profesionales a tu servicio</h2>
         <p>Profesionales certificados con vocación por el bienestar y la excelencia.</p>
+      </div>
+      <div class="team-photo-wrap reveal">
+        <img src="img/equipo.jpg" alt="Equipo de terapeutas de Koneksi Spa" class="team-photo-img">
       </div>
       <div class="team-grid" id="teamGrid" aria-live="polite">
         <div class="team-loading">Cargando equipo&hellip;</div>
@@ -630,7 +635,7 @@ async function loadTeam(){
       svcs:(r.c[5]?.v||'').trim(),
       sched:(r.c[6]?.v||'').trim(),
       days:(r.c[7]?.v||'').trim()
-    })).filter(t=>t.name&&t.name!=='COLABORADOR'&&!t.name.toLowerCase().includes('alexander')&&t.svcs);
+    })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs);
     teamGrid.innerHTML='';
     if(!teamData.length){teamGrid.innerHTML='<p class="team-loading">Equipo disponible próximamente.</p>';return;}
     teamData.forEach(t=>{
