@@ -530,27 +530,27 @@ const WA = 'https://wa.me/573202561705';
 const SERVICES = [
   {id:'masaje-relajante',name:'Masaje Relajante',icon:'💆',duration:'60 min',priceSede:90000,priceDom:130000,
    shortDesc:'Libera el estrés y la tensión muscular con técnicas de masaje sueco.',
-   desc:'El masaje relajante utiliza técnicas de masaje sueco para aliviar el estrés y la tensión acumulada. Con movimientos suaves y rítmicos trabajamos de forma integral, mejorando la circulación y favoreciendo una profunda sensación de bienestar.',
+   desc:'Su propósito es reducir el estrés y la tensión acumulada en el cuerpo y la mente, promoviendo un estado general de bienestar. Está enfocado en proporcionar una experiencia placentera, calmada y reconfortante, más que en tratar dolencias musculares profundas. ⚠️ Contraindicaciones: no realizar si está en estado de embarazo, si presenta fiebre, irritaciones en la piel o algún tipo de condición de salud que se vea afectada con el procedimiento.',
    benefits:['Reduce el estrés y la ansiedad','Alivia la tensión muscular','Mejora la circulación sanguínea','Favorece el sueño reparador','Estimula el sistema linfático'],
    keys:['masaje relajante','relajante','masajes']},
   {id:'chocoterapia',name:'Chocoterapia',icon:'🍫',duration:'90 min',priceSede:170000,priceDom:210000,
    shortDesc:'El poder antioxidante del cacao para nutrir, rejuvenecer y tonificar la piel.',
-   desc:'La chocoterapia aprovecha las propiedades antioxidantes y nutritivas del cacao para realizar un ritual completo de exfoliación, envoltura y masaje que nutre profundamente la piel, dejándola suave, luminosa y rejuvenecida.',
+   desc:'Es una técnica de spa que mejora la elasticidad y tonificación de la piel. Hidrata profundamente y ayuda a combatir la celulitis gracias a sus propiedades antioxidantes.',
    benefits:['Hidratación y nutrición profunda de la piel','Acción antioxidante y antienvejecimiento','Reafirma y tonifica','Estimula la producción de endorfinas','Aroma terapéutico relajante'],
    keys:['chocoterapia','choco','chocolate']},
   {id:'bano-de-luna',name:'Baño de Luna',icon:'🌙',duration:'90 min',priceSede:210000,priceDom:250000,
    shortDesc:'Ritual de luz y perlas para iluminar, suavizar y renovar profundamente tu piel.',
-   desc:'El Baño de Luna es nuestro ritual estrella: una experiencia de lujo que combina ingredientes iluminadores como perlas y extractos lunares para renovar la piel, unificar el tono y dejarte con una luminosidad única y una profunda relajación.',
+   desc:'Es una técnica de spa que sirve para aclarar el vello corporal, unificar el tono de la piel y exfoliar. Elimina células muertas, mejora la firmeza y relaja.',
    benefits:['Ilumina y unifica el tono de la piel','Hidratación de larga duración','Efecto suavizante y regenerador','Relajación profunda','Aroma sofisticado y envolvente'],
    keys:['baño de luna','luna','bano de luna']},
   {id:'frutoterapia',name:'Frutoterapia',icon:'🍓',duration:'90 min',priceSede:200000,priceDom:240000,
    shortDesc:'Vitaminas y antioxidantes de frutas tropicales para renovar y vitalizar tu piel.',
-   desc:'La frutoterapia utiliza el poder de las frutas tropicales —ricas en vitaminas, minerales y antioxidantes— para realizar un tratamiento de exfoliación, envoltura y masaje que revitaliza la piel, mejora su textura y te deja fresca y luminosa.',
+   desc:'Es una técnica de spa que sirve para la hidratación y nutrición de la piel, combate el envejecimiento prematuro de la piel.',
    benefits:['Renueva y vitaliza la piel','Acción antioxidante por vitaminas naturales','Mejora la textura y el tono','Estimula la microcirculación','Aroma fresco y refrescante'],
    keys:['frutoterapia','fruto','frutas']},
   {id:'bambuterapia',name:'Bambuterapia',icon:'🎍',duration:'90 min',priceSede:150000,priceDom:190000,
    shortDesc:'Masaje con cañas de bambú para liberar tensiones profundas y mejorar la circulación.',
-   desc:'La bambuterapia emplea cañas de bambú de diferentes diámetros para realizar un masaje profundo que libera la tensión muscular, drena toxinas, mejora la circulación y aporta una sensación de ligereza que se prolonga después de la sesión.',
+   desc:'Es una técnica de spa que mediante masajes con cañas de bambú mejora la circulación, el drenaje linfático y reduce la celulitis. Además de remodelar la figura, ayuda a liberar tensiones musculares, reduce el estrés y libera toxinas.',
    benefits:['Libera tensiones musculares profundas','Mejora la circulación y el drenaje linfático','Reduce la celulitis y retención de líquidos','Tonifica y reafirma la piel','Sensación de ligereza duradera'],
    keys:['bambuterapia','bambú','bambu','bamboo']},
   {id:'masaje-localizado',name:'Masaje Localizado',icon:'💪',duration:'30 min',priceSede:80000,priceDom:120000,
@@ -560,7 +560,7 @@ const SERVICES = [
    keys:['masaje localizado','localizado','masajes']},
   {id:'pindas',name:'Pindas',icon:'🌿',duration:'90 min',priceSede:150000,priceDom:190000,
    shortDesc:'Bolsas de hierbas aromáticas calientes para un masaje profundamente relajante y desintoxicante.',
-   desc:'Las pindas son bolsitas de tela rellenas de hierbas medicinales que se calientan al vapor y se aplican en un masaje rítmico. El calor y los principios activos de las hierbas penetran en los tejidos, relajando músculos, aliviando dolores y equilibrando la energía.',
+   desc:'Es una técnica de spa que sirve para la relajación muscular mediante masajes con saquitos calientes rellenos de hierbas aromáticas. Calma dolores musculares, alivia el estrés y mejora la circulación. Ofrecen un efecto antiinflamatorio y analgésico.',
    benefits:['Relajación muscular profunda por acción del calor','Propiedades desintoxicantes de las hierbas','Alivia dolores articulares y musculares','Equilibra la energía y el bienestar general','Experiencia sensorial única'],
    keys:['pindas','pinda','hierbas']}
 ];
@@ -575,6 +575,40 @@ document.querySelectorAll('.svc-card[data-svc-idx]').forEach(card=>{
   card.addEventListener('click',()=>openModal(s));
   card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal(s)}});
 });
+
+// Load service prices & durations from Google Sheets "Datos" (GID 376926335)
+const SVC_GID='376926335';
+function parsePrice(v){return parseInt(String(v).replace(/[^0-9]/g,''),10)||0;}
+function normStr(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();}
+async function loadServicePrices(){
+  try{
+    const url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&gid='+SVC_GID;
+    const text=await(await fetch(url)).text();
+    const m=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/);
+    if(!m)return;
+    const rows=JSON.parse(m[1]).table.rows||[];
+    rows.forEach(r=>{
+      if(!r.c||!r.c[0])return;
+      const name=String(r.c[0].v||'').trim();
+      const pSede=parsePrice(r.c[1]?.v??r.c[1]?.f);
+      const pDom=parsePrice(r.c[2]?.v??r.c[2]?.f);
+      const rawDur=String(r.c[3]?.v||'').trim();
+      if(!name||!pSede)return;
+      const nn=normStr(name);
+      const idx=SERVICES.findIndex(s=>{const sn=normStr(s.name);return sn===nn||sn.startsWith(nn)||nn.startsWith(sn);});
+      if(idx<0)return;
+      SERVICES[idx].priceSede=pSede;
+      SERVICES[idx].priceDom=pDom;
+      if(rawDur)SERVICES[idx].duration=rawDur.replace(/\s*minutos?\s*/i,' min').trim();
+      const card=document.querySelector('.svc-card[data-svc-idx="'+idx+'"]');
+      if(card){
+        const meta=card.querySelector('.svc-meta');
+        if(meta)meta.innerHTML='<span>&#x23F1; '+SERVICES[idx].duration+'</span><span>Desde '+fmt(pSede)+'</span>';
+      }
+    });
+  }catch(e){/* mantiene precios por defecto */}
+}
+loadServicePrices();
 
 // Team from Google Sheets
 let teamData = [];
