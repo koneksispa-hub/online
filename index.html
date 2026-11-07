@@ -245,9 +245,10 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 .fab-wa:hover{transform:scale(1.1);box-shadow:0 6px 25px rgba(37,211,102,.6)}
 .fab-wa svg{width:28px;height:28px;fill:currentColor}
 
-/* REVEAL ANIMATION */
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .65s,transform .65s}
-.reveal.vis{opacity:1;transform:none}
+/* REVEAL ANIMATION - progressive enhancement */
+.reveal{transition:opacity .6s ease,transform .6s ease}
+.reveal.pend{opacity:0;transform:translateY(18px)}
+.reveal.vis{opacity:1!important;transform:none!important}
 
 </style>
 </head>
@@ -642,14 +643,36 @@ Servicio: '+svc:'')+'
   fmsg.textContent='¡Gracias! Se abrió tu cliente de correo con el mensaje listo para enviar.';
 });
 
-// Reveal on scroll
+// Reveal on scroll - progressive enhancement
 function observeReveal(){
+  if(!('IntersectionObserver' in window)){return;}
+  const vp=window.innerHeight||document.documentElement.clientHeight;
   const io=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');io.unobserve(e.target);}});
-  },{threshold:.12});
-  document.querySelectorAll('.reveal:not(.vis)').forEach(el=>io.observe(el));
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.remove('pend');
+        e.target.classList.add('vis');
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:0,rootMargin:'0px 0px -20px 0px'});
+  document.querySelectorAll('.reveal:not(.vis)').forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.top<vp){
+      el.classList.add('vis');
+    }else{
+      el.classList.add('pend');
+      io.observe(el);
+    }
+  });
 }
 observeReveal();
+setTimeout(()=>{
+  document.querySelectorAll('.reveal.pend:not(.vis)').forEach(el=>{
+    el.classList.remove('pend');
+    el.classList.add('vis');
+  });
+},1500);
 </script>
 
 </body>
