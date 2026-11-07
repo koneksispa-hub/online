@@ -136,14 +136,19 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 @media(max-width:768px){.nav-links{display:none}.nav-ham{display:flex}}
 
 /* HERO */
-.hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;overflow:hidden}
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden}
 .hero-bg{position:absolute;inset:0;background:var(--espresso)}
-.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center top;opacity:.6;mix-blend-mode:multiply}
-.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(45,26,16,.95) 0%,rgba(45,26,16,.45) 55%,rgba(45,26,16,.1) 100%)}
-.hero-content{position:relative;z-index:2;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));padding-bottom:5rem;padding-top:8rem;max-width:720px}
+.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center top;opacity:.45;mix-blend-mode:multiply}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(45,26,16,.92) 0%,rgba(45,26,16,.55) 50%,rgba(45,26,16,.35) 100%)}
+.hero-content{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:center;padding-top:calc(var(--nav-h) + 3rem);padding-bottom:4rem;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));max-width:1200px;margin:0 auto}
+.hero-text{max-width:560px}
+.hero-img-col{border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(45,26,16,.5);position:relative}
+.hero-img-col img{width:100%;height:clamp(380px,55vh,560px);object-fit:cover;object-position:center 25%;display:block}
+.hero-img-col::before{content:'';position:absolute;inset:0;border-radius:24px;border:1px solid rgba(191,155,111,.25);pointer-events:none;z-index:1}
+@media(max-width:900px){.hero-content{grid-template-columns:1fr;padding-top:calc(var(--nav-h) + 2rem)}.hero-img-col{display:none}}
 .hero-eyebrow{display:inline-block;margin-bottom:.75rem;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--caramel)}
-.hero-content h1{font-family:var(--fd);font-size:clamp(2.4rem,6vw,4.5rem);font-weight:500;line-height:1.1;color:#fff;text-wrap:balance;margin-bottom:1.25rem}
-.hero-content p{font-size:1.05rem;color:rgba(255,255,255,.8);margin-bottom:2rem;max-width:480px}
+.hero-text h1{font-family:var(--fd);font-size:clamp(2.2rem,5vw,3.8rem);font-weight:500;line-height:1.1;color:#fff;text-wrap:balance;margin-bottom:1.25rem}
+.hero-text p{font-size:1.05rem;color:rgba(255,255,255,.8);margin-bottom:2rem;max-width:460px}
 .hero-cta{display:flex;flex-wrap:wrap;gap:1rem}
 .btn-primary{display:inline-flex;align-items:center;justify-content:center;padding:.8rem 2rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.9rem;letter-spacing:.03em;font-weight:500;box-shadow:0 4px 15px rgba(191,155,111,.4);transition:background .2s,transform .15s,box-shadow .2s}
 .btn-primary:hover{background:var(--caramel-dk);transform:translateY(-2px);box-shadow:0 6px 20px rgba(191,155,111,.5)}
@@ -169,10 +174,6 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .svc-cta{margin-top:.75rem;font-size:.83rem;color:var(--caramel);font-weight:500;letter-spacing:.03em;display:flex;align-items:center;gap:.35rem}
 .svc-cta::after{content:'→';transition:transform .2s}
 .svc-card:hover .svc-cta::after{transform:translateX(4px)}
-
-/* TEAM BANNER */
-.team-banner{border-radius:20px;overflow:hidden;margin-bottom:3rem;box-shadow:var(--sh-md);max-height:420px}
-.team-banner img{width:100%;height:420px;object-fit:cover;object-position:center 30%;display:block}
 
 /* TEAM */
 .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem}
@@ -286,12 +287,17 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       <div class="hero-overlay"></div>
     </div>
     <div class="hero-content">
-      <span class="hero-eyebrow">Spa &amp; Bienestar &middot; Cali, Colombia</span>
-      <h1>Rituales de bienestar para tu cuerpo y tu alma</h1>
-      <p>Tratamientos de spa profesionales diseñados para restaurar tu equilibrio, con la calidez y dedicación que mereces.</p>
-      <div class="hero-cta">
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" class="btn-primary" target="_blank" rel="noopener">Reservar ahora</a>
-        <a href="#servicios" class="btn-outline">Ver servicios</a>
+      <div class="hero-text">
+        <span class="hero-eyebrow">Spa &amp; Bienestar &middot; Cali, Colombia</span>
+        <h1>Rituales de bienestar para tu cuerpo y tu alma</h1>
+        <p>Tratamientos de spa profesionales diseñados para restaurar tu equilibrio, con la calidez y dedicación que mereces.</p>
+        <div class="hero-cta">
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" class="btn-primary" target="_blank" rel="noopener">Reservar ahora</a>
+          <a href="#servicios" class="btn-outline">Ver servicios</a>
+        </div>
+      </div>
+      <div class="hero-img-col">
+        <img src="img/relax.jpg" alt="Masaje relajante en Koneksi Spa" loading="eager">
       </div>
     </div>
   </section>
@@ -303,7 +309,57 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <h2 id="svc-h">Nuestros servicios</h2>
         <p>Cada ritual está diseñado para liberar tensiones, nutrir tu piel y renovar tu energía.</p>
       </div>
-      <div class="services-grid" id="servicesGrid" aria-live="polite"></div>
+      <div class="services-grid" id="servicesGrid" aria-live="polite">
+        <article class="svc-card" data-svc-idx="0" role="button" tabindex="0" aria-label="Ver detalle de Masaje Relajante">
+          <div class="svc-icon" aria-hidden="true">💆</div>
+          <div class="svc-name">Masaje Relajante</div>
+          <div class="svc-meta"><span>&#x23F1; 60 min</span><span>Desde $90.000</span></div>
+          <p class="svc-desc">Libera el estrés y la tensión muscular con técnicas de masaje sueco.</p>
+          <div class="svc-cta">Ver detalles</div>
+        </article>
+        <article class="svc-card" data-svc-idx="1" role="button" tabindex="0" aria-label="Ver detalle de Chocoterapia">
+          <div class="svc-icon" aria-hidden="true">🍫</div>
+          <div class="svc-name">Chocoterapia</div>
+          <div class="svc-meta"><span>&#x23F1; 90 min</span><span>Desde $170.000</span></div>
+          <p class="svc-desc">El poder antioxidante del cacao para nutrir, rejuvenecer y tonificar la piel.</p>
+          <div class="svc-cta">Ver detalles</div>
+        </article>
+        <article class="svc-card" data-svc-idx="2" role="button" tabindex="0" aria-label="Ver detalle de Baño de Luna">
+          <div class="svc-icon" aria-hidden="true">🌙</div>
+          <div class="svc-name">Baño de Luna</div>
+          <div class="svc-meta"><span>&#x23F1; 90 min</span><span>Desde $210.000</span></div>
+          <p class="svc-desc">Ritual de luz y perlas para iluminar, suavizar y renovar profundamente tu piel.</p>
+          <div class="svc-cta">Ver detalles</div>
+        </article>
+        <article class="svc-card" data-svc-idx="3" role="button" tabindex="0" aria-label="Ver detalle de Frutoterapia">
+          <div class="svc-icon" aria-hidden="true">🍓</div>
+          <div class="svc-name">Frutoterapia</div>
+          <div class="svc-meta"><span>&#x23F1; 90 min</span><span>Desde $200.000</span></div>
+          <p class="svc-desc">Vitaminas y antioxidantes de frutas tropicales para renovar y vitalizar tu piel.</p>
+          <div class="svc-cta">Ver detalles</div>
+        </article>
+        <article class="svc-card" data-svc-idx="4" role="button" tabindex="0" aria-label="Ver detalle de Bambuterapia">
+          <div class="svc-icon" aria-hidden="true">🎍</div>
+          <div class="svc-name">Bambuterapia</div>
+          <div class="svc-meta"><span>&#x23F1; 90 min</span><span>Desde $150.000</span></div>
+          <p class="svc-desc">Masaje con cañas de bambú para liberar tensiones profundas y mejorar la circulación.</p>
+          <div class="svc-cta">Ver detalles</div>
+        </article>
+        <article class="svc-card" data-svc-idx="5" role="button" tabindex="0" aria-label="Ver detalle de Masaje Localizado">
+          <div class="svc-icon" aria-hidden="true">💪</div>
+          <div class="svc-name">Masaje Localizado</div>
+          <div class="svc-meta"><span>&#x23F1; 30 min</span><span>Desde $80.000</span></div>
+          <p class="svc-desc">Tratamiento focalizado en la zona de mayor tensión para alivio preciso y efectivo.</p>
+          <div class="svc-cta">Ver detalles</div>
+        </article>
+        <article class="svc-card" data-svc-idx="6" role="button" tabindex="0" aria-label="Ver detalle de Pindas">
+          <div class="svc-icon" aria-hidden="true">🌿</div>
+          <div class="svc-name">Pindas</div>
+          <div class="svc-meta"><span>&#x23F1; 90 min</span><span>Desde $150.000</span></div>
+          <p class="svc-desc">Bolsas de hierbas aromáticas calientes para un masaje profundamente relajante y desintoxicante.</p>
+          <div class="svc-cta">Ver detalles</div>
+        </article>
+      </div>
     </div>
   </section>
 
@@ -313,9 +369,6 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <span class="eyebrow">Nuestro equipo</span>
         <h2 id="team-h">Profesionales a tu servicio</h2>
         <p>Profesionales certificados con vocación por el bienestar y la excelencia.</p>
-      </div>
-      <div class="team-banner">
-        <img src="img/relax.jpg" alt="Ambiente de relajación Koneksi Spa" loading="lazy">
       </div>
       <div class="team-grid" id="teamGrid" aria-live="polite">
         <div class="team-loading">Cargando equipo&hellip;</div>
@@ -514,22 +567,13 @@ const SERVICES = [
 
 function fmt(n){return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(n)}
 
-// Build services grid
-const grid = document.getElementById('servicesGrid');
-SERVICES.forEach(s=>{
-  const c = document.createElement('article');
-  c.className='svc-card';
-  c.setAttribute('role','button');
-  c.setAttribute('tabindex','0');
-  c.setAttribute('aria-label','Ver detalle de '+s.name);
-  c.innerHTML = '<div class="svc-icon" aria-hidden="true">'+s.icon+'</div>'
-    +'<div class="svc-name">'+s.name+'</div>'
-    +'<div class="svc-meta"><span>&#x23F1; '+s.duration+'</span><span>Desde '+fmt(s.priceSede)+'</span></div>'
-    +'<p class="svc-desc">'+s.shortDesc+'</p>'
-    +'<div class="svc-cta">Ver detalles</div>';
-  c.addEventListener('click',()=>openModal(s));
-  c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal(s)}});
-  grid.appendChild(c);
+// Wire up static service cards via data-svc-idx
+document.querySelectorAll('.svc-card[data-svc-idx]').forEach(card=>{
+  const idx=parseInt(card.dataset.svcIdx,10);
+  const s=SERVICES[idx];
+  if(!s)return;
+  card.addEventListener('click',()=>openModal(s));
+  card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal(s)}});
 });
 
 // Team from Google Sheets
