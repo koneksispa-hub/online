@@ -729,11 +729,7 @@ document.getElementById('contactForm').addEventListener('submit',function(e){
     return;
   }
   const sub=encodeURIComponent('Consulta Koneksi Spa'+(svc?' - '+svc:''));
-  const body=encodeURIComponent('Nombre: '+name+'
-Correo: '+email+(svc?'
-Servicio: '+svc:'')+'
-
-'+msg);
+  const body=encodeURIComponent('Nombre: '+name+'\nCorreo: '+email+(svc?'\nServicio: '+svc:'')+'\n\n'+msg);
   window.location.href='mailto:koneksispa@gmail.com?subject='+sub+'&body='+body;
   fmsg.className='form-msg ok';
   fmsg.textContent='¡Gracias! Se abrió tu cliente de correo con el mensaje listo para enviar.';
