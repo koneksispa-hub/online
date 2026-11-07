@@ -170,6 +170,10 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .svc-cta::after{content:'→';transition:transform .2s}
 .svc-card:hover .svc-cta::after{transform:translateX(4px)}
 
+/* TEAM BANNER */
+.team-banner{border-radius:20px;overflow:hidden;margin-bottom:3rem;box-shadow:var(--sh-md);max-height:420px}
+.team-banner img{width:100%;height:420px;object-fit:cover;object-position:center 30%;display:block}
+
 /* TEAM */
 .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem}
 .team-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;display:flex;flex-direction:column;gap:.5rem}
@@ -308,7 +312,10 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       <div class="section-hdr reveal">
         <span class="eyebrow">Nuestro equipo</span>
         <h2 id="team-h">Profesionales a tu servicio</h2>
-        <p>Terapeutas certificadas con vocación por el bienestar y la excelencia.</p>
+        <p>Profesionales certificados con vocación por el bienestar y la excelencia.</p>
+      </div>
+      <div class="team-banner">
+        <img src="img/relax.jpg" alt="Ambiente de relajación Koneksi Spa" loading="lazy">
       </div>
       <div class="team-grid" id="teamGrid" aria-live="polite">
         <div class="team-loading">Cargando equipo&hellip;</div>
@@ -319,7 +326,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
   <section id="contacto" class="section" aria-labelledby="contact-h">
     <div class="container">
       <div class="contact-grid">
-        <div class="contact-info reveal">
+        <div class="contact-info">
           <h2 id="contact-h">Contáctanos</h2>
           <div class="contact-items">
             <div class="ci">
@@ -357,7 +364,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
           </a>
         </div>
 
-        <div class="contact-form reveal">
+        <div class="contact-form">
           <div class="form-wrap">
             <h3>Envíanos un mensaje</h3>
             <form id="contactForm" novalidate>
@@ -511,7 +518,7 @@ function fmt(n){return new Intl.NumberFormat('es-CO',{style:'currency',currency:
 const grid = document.getElementById('servicesGrid');
 SERVICES.forEach(s=>{
   const c = document.createElement('article');
-  c.className='svc-card reveal';
+  c.className='svc-card';
   c.setAttribute('role','button');
   c.setAttribute('tabindex','0');
   c.setAttribute('aria-label','Ver detalle de '+s.name);
@@ -547,7 +554,7 @@ async function loadTeam(){
     if(!teamData.length){teamGrid.innerHTML='<p class="team-loading">Equipo disponible próximamente.</p>';return;}
     teamData.forEach(t=>{
       const card=document.createElement('div');
-      card.className='team-card reveal';
+      card.className='team-card';
       let info='';
       if(t.sched)info+='<div class="team-sched">&#x23F0; '+t.sched+'</div>';
       if(t.days)info+='<div class="team-sched">&#x1F4C5; '+t.days+'</div>';
