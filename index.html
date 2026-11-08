@@ -783,8 +783,10 @@ mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
   ham.setAttribute('aria-expanded','false');
 }));
 
-// Contact form
-document.getElementById('contactForm').addEventListener('submit',function(e){
+// Contact form — sends via Google Apps Script Web App
+// Paste your GAS deployment URL below once deployed:
+const GAS_CONTACT='https://script.google.com/macros/s/AKfycbwl68UsztojR96PukR4DFQRv65x1nwFVjbmzapEVGOKvp2bgmVUzaKIFWyC9rU8acxk/exec';
+document.getElementById('contactForm').addEventListener('submit',async function(e){
   e.preventDefault();
   const name=this.nombre.value.trim();
   const email=this.email.value.trim();
@@ -796,11 +798,21 @@ document.getElementById('contactForm').addEventListener('submit',function(e){
     fmsg.textContent='Por favor completa tu nombre, correo y mensaje.';
     return;
   }
-  const sub=encodeURIComponent('Consulta Koneksi Spa'+(svc?' - '+svc:''));
-  const body=encodeURIComponent('Nombre: '+name+'\nCorreo: '+email+(svc?'\nServicio: '+svc:'')+'\n\n'+msg);
-  window.location.href='mailto:koneksispa@gmail.com?subject='+sub+'&body='+body;
-  fmsg.className='form-msg ok';
-  fmsg.textContent='¡Gracias! Se abrió tu cliente de correo con el mensaje listo para enviar.';
+  const btn=this.querySelector('button[type=submit]');
+  const orig=btn.textContent;
+  btn.disabled=true;btn.textContent='Enviando…';
+  fmsg.className='';fmsg.textContent='';
+  try{
+    await fetch(GAS_CONTACT,{method:'POST',mode:'no-cors',body:JSON.stringify({nombre:name,email:email,servicio:svc,mensaje:msg})});
+    fmsg.className='form-msg ok';
+    fmsg.textContent='¡Mensaje enviado! Te responderemos pronto.';
+    this.reset();
+  }catch(err){
+    fmsg.className='form-msg err';
+    fmsg.textContent='No se pudo enviar. Escríbenos por WhatsApp.';
+  }finally{
+    btn.disabled=false;btn.textContent=orig;
+  }
 });
 
 // Reveal on scroll - progressive enhancement
