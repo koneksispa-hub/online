@@ -651,7 +651,7 @@ loadServicePrices();
 
 // Team from Google Sheets
 const GID='49445065';
-const TEAM_PHOTO_MAP={'alexander':'%%PHOTO_ALEX%%','franco':'%%PHOTO_ALEX%%','jensy':'%%PHOTO_JENSY%%','vasquez':'%%PHOTO_JENSY%%','vásquez':'%%PHOTO_JENSY%%','francia':'%%PHOTO_FRANCIA%%','karol':'%%PHOTO_KAROL%%','sandra':'%%PHOTO_SANDRA%%'};
+const TEAM_PHOTO_MAP={'alexander':'img/alex.jpg','franco':'img/alex.jpg','jensy':'img/jensy.jpg','vasquez':'img/jensy.jpg','vásquez':'img/jensy.jpg','francia':'img/francia.jpg','karol':'img/karol.jpg','sandra':'img/sandra.jpg'};
 function getTeamPhoto(name){
   const n=name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   for(const[k,v]of Object.entries(TEAM_PHOTO_MAP)){if(n.includes(k))return v;}
