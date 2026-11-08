@@ -651,12 +651,9 @@ loadServicePrices();
 
 // Team from Google Sheets
 const GID='49445065';
-const TEAM_PHOTO_MAP={'alexander':'img/alex.jpg','franco':'img/alex.jpg','jensy':'img/jensy.jpg','vasquez':'img/jensy.jpg','vásquez':'img/jensy.jpg','francia':'img/francia.jpg','karol':'img/karol.jpg','sandra':'img/sandra.jpg'};
-function getTeamPhoto(name){
-  const n=name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-  for(const[k,v]of Object.entries(TEAM_PHOTO_MAP)){if(n.includes(k))return v;}
-  return null;
-}
+// Photos indexed by row position (row 0 = first collaborator in sheet, etc.)
+// Order must match the row order in the HORARIOS > Colaborador sheet
+const TEAM_PHOTOS=['img/alex.jpg','img/jensy.jpg','img/francia.jpg','img/sandra.jpg','img/karol.jpg'];
 async function loadTeam(){
   const teamGrid=document.getElementById('teamGrid');
   try{
@@ -675,8 +672,8 @@ async function loadTeam(){
     })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs);
     teamGrid.innerHTML='';
     if(!teamData.length){teamGrid.innerHTML='<p class="team-loading">Equipo disponible próximamente.</p>';return;}
-    teamData.forEach(t=>{
-      const ph=getTeamPhoto(t.name);
+    teamData.forEach((t,idx)=>{
+      const ph=TEAM_PHOTOS[idx]||null;
       const card=document.createElement('div');
       card.className='team-card reveal';
       let banner=ph?'<div class="team-card-banner"><img src="'+ph+'" alt="'+t.name+'" loading="lazy"></div>':'';
