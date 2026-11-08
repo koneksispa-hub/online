@@ -257,6 +257,10 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 .mti{background:var(--bg-alt);border-radius:8px;padding:.7rem 1rem}
 .mti-name{font-weight:500;color:var(--text);font-size:.88rem;margin-bottom:.15rem}
 .mti-info{color:var(--text-muted);font-size:.78rem}
+.modal-video{margin-bottom:1.4rem;text-align:center}
+.btn-video{display:inline-flex;align-items:center;gap:.55rem;padding:.7rem 1.5rem;border-radius:50px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;font-size:.88rem;font-weight:600;text-decoration:none;transition:opacity .2s,transform .15s;letter-spacing:.02em}
+.btn-video:hover{opacity:.88;transform:translateY(-1px)}
+.btn-video svg{flex-shrink:0}
 .modal-booking{display:flex;justify-content:center}
 .btn-booking{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 2rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.9rem;font-weight:500;box-shadow:0 4px 15px rgba(191,155,111,.4);transition:background .2s,transform .15s}
 .btn-booking:hover{background:var(--caramel-dk);transform:translateY(-2px)}
@@ -623,6 +627,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       <h3 class="modal-stitle">Profesionales disponibles</h3>
       <div class="modal-team-list" id="modalTeamList"></div>
     </div>
+    <div class="modal-video" id="modalVideoSection" hidden></div>
     <div class="modal-booking">
       <a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" class="btn-booking" target="_blank" rel="noopener">
         Reservar este servicio &#x2192;
@@ -789,6 +794,27 @@ async function loadServicePrices(){
 }
 loadServicePrices();
 
+// Videos por servicio desde hoja VIDEOS (GID 416562954)
+// Columna A: PROCEDIMIENTO, Columna B: ENLACE
+const VIDEO_GID='416562954';
+let serviceVideos={};
+async function loadServiceVideos(){
+  try{
+    const url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&gid='+VIDEO_GID;
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8000);
+    const text=await(await fetch(url,{signal:ctrl.signal})).text();clearTimeout(tid);
+    const m=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/);
+    if(!m)return;
+    const rows=JSON.parse(m[1]).table?.rows||[];
+    rows.forEach(r=>{
+      const proc=(r.c[0]?.v||'').trim();
+      const link=(r.c[1]?.v||'').trim();
+      if(proc&&link)serviceVideos[normStr(proc)]=link;
+    });
+  }catch(e){}
+}
+loadServiceVideos();
+
 // Team from Google Sheets
 const GID='49445065';
 const TEAM_PHOTOS=['img/alex.jpg','img/jensy.jpg','img/francia.jpg','img/sandra.jpg','img/karol.jpg'];
@@ -858,6 +884,17 @@ function openModal(s){
     teamSec.hidden=false;
   }else{
     teamSec.hidden=true;
+  }
+  // Video del procedimiento
+  const videoSec=document.getElementById('modalVideoSection');
+  const videoLink=serviceVideos[normStr(s.name)];
+  if(videoLink){
+    videoSec.hidden=false;
+    videoSec.innerHTML='<a href="'+videoLink+'" class="btn-video" target="_blank" rel="noopener">'
+      +'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2a2 2 0 0 0-2 2v16a2 2 0 0 0 3.08 1.68l11-8a2 2 0 0 0 0-3.36l-11-8A2 2 0 0 0 7 2z"/></svg>'
+      +'Ver video del procedimiento</a>';
+  }else{
+    videoSec.hidden=true;videoSec.innerHTML='';
   }
   modal.hidden=false;modal.style.display='flex';
   document.body.style.overflow='hidden';
