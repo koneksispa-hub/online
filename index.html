@@ -985,6 +985,15 @@ async function loadTeam(){
     if(!teamData.length){teamGrid.innerHTML='<p class="team-loading">Equipo disponible próximamente.</p>';return;}
     renderTeamCards();
     loadCiudades();
+    // Abrir modal de profesional si se llegó por link directo (?prof=Nombre)
+    if(window._profToOpen){
+      const pname=window._profToOpen.toLowerCase();
+      window._profToOpen=null;
+      const idx=teamData.findIndex(t=>t.name.toLowerCase().includes(pname));
+      if(idx>=0){
+        setTimeout(()=>openTeamModal(teamData[idx],TEAM_PHOTOS[idx]||null),450);
+      }
+    }
   }catch(e){
     teamGrid.innerHTML='<p class="team-error">Consulta nuestro equipo escribiéndonos por <a href="'+WA+'" target="_blank" rel="noopener" style="color:var(--caramel)">WhatsApp</a>.</p>';
   }
@@ -1469,18 +1478,13 @@ function bwStep5(c){
   }
 })();
 
-/* Detectar ?prof=<nombre> y abrir el wizard pre-seleccionando ese profesional */
+/* Detectar ?prof=<nombre> y mostrar el modal del profesional (con foto y bio) */
 (function(){
   const sp=new URLSearchParams(window.location.search);
   const prof=sp.get('prof');
   if(prof){
     history.replaceState(null,'',window.location.pathname+window.location.hash);
-    const open=()=>{ try{ openBookingWizard({profesional:decodeURIComponent(prof)}); }catch(e){} };
-    if(document.readyState==='loading'){
-      window.addEventListener('DOMContentLoaded',()=>setTimeout(open,500));
-    }else{
-      setTimeout(open,500);
-    }
+    window._profToOpen=decodeURIComponent(prof);
   }
 })();
 
