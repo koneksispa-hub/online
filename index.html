@@ -1004,23 +1004,7 @@ function openModal(s){
   document.getElementById('modalDesc').textContent=s.desc;
   const ul=document.getElementById('modalBenefits');
   ul.innerHTML=s.benefits.map(b=>'<li>'+b+'</li>').join('');
-  const teamSec=document.getElementById('modalTeamSection');
-  const tl=document.getElementById('modalTeamList');
-  const matched=teamData.filter(t=>{
-    const ts=t.svcs.toLowerCase();
-    return s.keys.some(k=>ts.includes(k));
-  });
-  if(matched.length){
-    tl.innerHTML=matched.map(t=>{
-      let info=[];
-      if(t.sched)info.push(t.sched);
-      if(t.days)info.push(t.days);
-      return '<div class="mti"><div class="mti-name">'+t.name+'</div>'+(info.length?'<div class="mti-info">'+info.join(' &middot; ')+'</div>':'')+'</div>';
-    }).join('');
-    teamSec.hidden=false;
-  }else{
-    teamSec.hidden=true;
-  }
+  document.getElementById('modalTeamSection').hidden=true;
   // Video del procedimiento
   const videoSec=document.getElementById('modalVideoSection');
   const videoLink=serviceVideos[normStr(s.name)];
@@ -1482,6 +1466,21 @@ function bwStep5(c){
         setTimeout(()=>{if(t.parentNode)t.parentNode.removeChild(t);},7000);
       },600);
     });
+  }
+})();
+
+/* Detectar ?prof=<nombre> y abrir el wizard pre-seleccionando ese profesional */
+(function(){
+  const sp=new URLSearchParams(window.location.search);
+  const prof=sp.get('prof');
+  if(prof){
+    history.replaceState(null,'',window.location.pathname+window.location.hash);
+    const open=()=>{ try{ openBookingWizard({profesional:decodeURIComponent(prof)}); }catch(e){} };
+    if(document.readyState==='loading'){
+      window.addEventListener('DOMContentLoaded',()=>setTimeout(open,500));
+    }else{
+      setTimeout(open,500);
+    }
   }
 })();
 
