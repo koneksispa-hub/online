@@ -188,6 +188,16 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .team-cta{margin-top:auto;padding-top:.6rem;font-size:.8rem;color:var(--caramel);font-weight:500;letter-spacing:.02em}
 .team-loading,.team-error{grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted)}
 
+/* PAYMENT STEP */
+.bw-pay-box{background:var(--bg-alt);border-radius:12px;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;margin-top:.5rem}
+.bw-pay-amount{display:flex;justify-content:space-between;align-items:center;padding:.85rem 0;border-bottom:1px solid var(--border)}
+.bw-pay-label{font-size:.88rem;color:var(--text-muted);font-weight:500}
+.bw-pay-value{font-size:1.6rem;font-weight:700;color:var(--caramel);font-family:var(--fd)}
+.bw-pay-policy{font-size:.83rem;color:var(--text-muted);line-height:1.65;display:flex;flex-direction:column;gap:.6rem;padding:.75rem;background:var(--surface);border-radius:8px;border-left:3px solid var(--caramel)}
+.bw-pay-policy p{margin:0}
+.bw-pay-toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--caramel);color:#fff;padding:.9rem 1.6rem;border-radius:14px;font-size:.9rem;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.22);max-width:calc(100vw - 2.5rem);text-align:center;animation:bw-toast-in .3s ease}
+@keyframes bw-toast-in{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
 /* CITY FILTER */
 .city-filter{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:0 0 1.75rem}
 .city-btn{padding:.42rem 1.1rem;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:.82rem;cursor:pointer;font-family:inherit;color:var(--text);transition:border-color .2s,background .2s,color .2s}
@@ -1150,7 +1160,7 @@ setTimeout(()=>{
    BOOKING WIZARD — lógica
 ====================================================== */
 const bwS={step:0,modalidad:null,servicio:null,profesional:null,slot:null,nombre:'',telefono:'',email:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profSvcs:null,_profFilter:null};
-const BW_STEPS=['Modalidad','Servicio','Horario','Datos','Confirmación'];
+const BW_STEPS=['Modalidad','Servicio','Horario','Datos','Pago','Confirmación'];
 const BW_ICONS={Sede:'🏢',Domicilio:'🚗'};
 
 function openBookingWizard(presel){
@@ -1177,6 +1187,7 @@ function bwRender(){
   else if(bwS.step===2) bwStep2(c);
   else if(bwS.step===3) bwStep3(c);
   else if(bwS.step===4) bwStep4(c);
+  else if(bwS.step===5) bwStep5(c);
 }
 function bwBack(){
   if(bwS.step===2){bwS._cachedSlots=null;bwS._slotPage=0;}
@@ -1357,7 +1368,7 @@ function bwFmtSlot(){
   return `${bwS.slot.fecha} · ${bwS.slot.hora}`;
 }
 
-/* PASO 4 — Confirmación */
+/* PASO 4 — Pago / PASO 3-submit — Confirmación */
 async function bwSubmit(e){
   e.preventDefault();
   bwS.nombre=document.getElementById('bwNombre').value.trim();
@@ -1387,7 +1398,7 @@ async function bwSubmit(e){
     });
     const r=await fetch(GAS_CONTACT+'?'+params.toString());
     const data=await r.json();
-    if(data.ok){bwS.step=4;bwRender();}
+    if(data.ok){bwS._bookedRow=bwS.slot.row;bwS.step=4;bwRender();}
     else{
       msg.innerHTML=`<div class="bw-msg err">${data.error||'Ocurrió un error. Intenta de nuevo.'}</div>`;
       btn.disabled=false;btn.textContent='Confirmar reserva';
@@ -1397,7 +1408,58 @@ async function bwSubmit(e){
     btn.disabled=false;btn.textContent='Confirmar reserva';
   }
 }
+/* PASO 4 — Pago del anticipo */
 function bwStep4(c){
+  // Calcular anticipo desde SERVICES (el valor de la hoja lo valida el GAS al firmar)
+  const svc = SERVICES.find(s=>(s.name||s.nombre||'')=== bwS.servicio);
+  const anticipo = svc
+    ? (bwS.modalidad==='Domicilio' ? Math.round((svc.priceDom||0)/2) : Math.round((svc.priceSede||0)/2))
+    : 0;
+  const anticipoFmt = anticipo ? '$'+anticipo.toLocaleString('es-CO') : '—';
+  c.innerHTML=`
+  <p class="bw-label">Pago del anticipo</p>
+  <div class="bw-pay-box">
+    <div class="bw-pay-amount">
+      <span class="bw-pay-label">Anticipo requerido (50&nbsp;%)</span>
+      <span class="bw-pay-value">${anticipoFmt}</span>
+    </div>
+    <div class="bw-pay-policy">
+      <p>Para consolidar tu reserva debes realizar el pago del <strong>50 % del valor total</strong> del servicio.</p>
+      <p>En caso de cancelación <strong>hasta 24 horas antes</strong>, comunícate al <strong>3202561705</strong>; podrás cambiar el horario o solicitar la devolución del dinero con un descuento del <strong>10 % del valor pagado</strong>.</p>
+      <p>Si la cancelación ocurre <strong>el mismo día</strong> de la reserva, <strong>no habrá devolución del dinero</strong>.</p>
+    </div>
+    <div id="bwPayMsg"></div>
+    <button class="bw-submit" id="bwPayBtn" onclick="bwPagar()">Pagar ahora →</button>
+  </div>`;
+}
+
+async function bwPagar(){
+  const btn=document.getElementById('bwPayBtn');
+  const msg=document.getElementById('bwPayMsg');
+  btn.disabled=true;btn.textContent='Generando enlace de pago…';
+  try{
+    const params=new URLSearchParams({
+      action:'getPaymentUrl',
+      row:bwS._bookedRow||bwS.slot.row||'',
+      procedimiento:bwS.servicio,
+      modalidad:bwS.modalidad
+    });
+    const r=await fetch(GAS_CONTACT+'?'+params.toString());
+    const data=await r.json();
+    if(data.ok){
+      window.location.href=data.url;
+    } else {
+      msg.innerHTML=`<div class="bw-msg err">${data.error||'Error al generar el enlace de pago. Intenta de nuevo.'}</div>`;
+      btn.disabled=false;btn.textContent='Pagar ahora →';
+    }
+  }catch(err){
+    msg.innerHTML=`<div class="bw-msg err">No se pudo conectar. Intenta de nuevo.</div>`;
+    btn.disabled=false;btn.textContent='Pagar ahora →';
+  }
+}
+
+/* PASO 5 — Confirmación */
+function bwStep5(c){
   c.innerHTML=`<div class="bw-ok">
     <div class="bw-ok-icon">✅</div>
     <h3>¡Reserva confirmada!</h3>
@@ -1405,6 +1467,23 @@ function bwStep4(c){
     <button class="bw-ok-close" onclick="closeBookingWizard()">Cerrar</button>
   </div>`;
 }
+
+/* Detectar regreso desde Wompi (?wompi=ok) y mostrar toast de confirmación */
+(function(){
+  const sp=new URLSearchParams(window.location.search);
+  if(sp.get('wompi')==='ok'){
+    history.replaceState(null,'',window.location.pathname+window.location.hash);
+    window.addEventListener('DOMContentLoaded',()=>{
+      setTimeout(()=>{
+        const t=document.createElement('div');
+        t.className='bw-pay-toast';
+        t.innerHTML='✅ <strong>¡Pago recibido!</strong> Tu reserva está confirmada. Pronto te contactaremos. 🌿';
+        document.body.appendChild(t);
+        setTimeout(()=>{if(t.parentNode)t.parentNode.removeChild(t);},7000);
+      },600);
+    });
+  }
+})();
 
 /* Wire svcBookBtn — abre wizard con el servicio del modal activo */
 document.addEventListener('DOMContentLoaded',()=>{
