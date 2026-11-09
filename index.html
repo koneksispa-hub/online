@@ -188,6 +188,13 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .team-cta{margin-top:auto;padding-top:.6rem;font-size:.8rem;color:var(--caramel);font-weight:500;letter-spacing:.02em}
 .team-loading,.team-error{grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted)}
 
+/* CITY FILTER */
+.city-filter{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:0 0 1.75rem}
+.city-btn{padding:.42rem 1.1rem;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:.82rem;cursor:pointer;font-family:inherit;color:var(--text);transition:border-color .2s,background .2s,color .2s}
+.city-btn:hover{border-color:var(--caramel);background:var(--bg-alt)}
+.city-btn.active{border-color:var(--caramel);background:var(--caramel);color:#fff}
+.city-btn.active:hover{background:var(--caramel)}
+
 /* TEAM MODAL */
 #teamModal .modal-box{max-width:540px}
 .tmod-top{display:flex;gap:1.4rem;align-items:flex-start;margin-bottom:1.4rem;padding-bottom:1.4rem;border-bottom:1px solid var(--border)}
@@ -543,6 +550,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <h2 id="team-h">Profesionales a tu servicio</h2>
         <p>Profesionales certificados con vocación por el bienestar y la excelencia.</p>
       </div>
+      <div id="cityFilter" class="city-filter" hidden aria-label="Filtrar por ciudad"></div>
       <div class="team-grid" id="teamGrid" aria-live="polite">
         <div class="team-loading">Cargando equipo&hellip;</div>
       </div>
@@ -886,7 +894,66 @@ loadServiceVideos();
 
 // Team from Google Sheets
 const GID='49445065';
+const CIUDAD_GID='280572099';
 const TEAM_PHOTOS=['img/alex.jpg','img/jensy.jpg','img/francia.jpg','img/sandra.jpg','img/karol.jpg'];
+let _selectedCity='Cali';
+let _allCiudades=[];
+function _ncity(s){return(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();}
+
+function renderTeamCards(){
+  const teamGrid=document.getElementById('teamGrid');
+  if(!teamGrid)return;
+  const filtered=teamData.filter(t=>_ncity(t.ciudad||'Cali')===_ncity(_selectedCity));
+  if(!filtered.length){
+    teamGrid.innerHTML='<p class="team-loading">Aún no contamos con profesionales en '+_selectedCity+'. ¡Próximamente!</p>';
+    return;
+  }
+  teamGrid.innerHTML='';
+  filtered.forEach(t=>{
+    const origIdx=teamData.indexOf(t);
+    const ph=TEAM_PHOTOS[origIdx]||null;
+    const card=document.createElement('div');
+    card.className='team-card reveal';
+    let banner=ph?'<div class="team-card-banner"><img src="'+ph+'" alt="'+t.name+'" loading="lazy"></div>':'';
+    let sched='';
+    if(t.sched)sched+='<div class="team-sched">&#x23F0; '+t.sched+'</div>';
+    if(t.days)sched+='<div class="team-sched">&#x1F4C5; '+t.days+'</div>';
+    card.innerHTML=banner+'<div class="team-card-body"><div class="team-name">'+t.name+'</div><div class="team-svcs">'+t.svcs+'</div>'+sched+'<div class="team-cta">Ver perfil &#x2192;</div></div>';
+    card.addEventListener('click',()=>openTeamModal(t,ph));
+    teamGrid.appendChild(card);
+  });
+  observeReveal();
+}
+
+function renderCityFilter(){
+  const cf=document.getElementById('cityFilter');
+  if(!cf)return;
+  const cities=_allCiudades.length?_allCiudades:[...(new Set(teamData.map(t=>t.ciudad||'Cali').filter(Boolean)))];
+  if(!cities.length){cf.hidden=true;return;}
+  cf.innerHTML=cities.map(c=>'<button class="city-btn'+(c===_selectedCity?' active':'')+'" onclick="filterTeamByCity(\''+c+'\')">'+c+'</button>').join('');
+  cf.hidden=false;
+}
+
+function filterTeamByCity(ciudad){
+  _selectedCity=ciudad;
+  renderCityFilter();
+  renderTeamCards();
+}
+
+async function loadCiudades(){
+  try{
+    const url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&gid='+CIUDAD_GID;
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),6000);
+    const text=await(await fetch(url,{signal:ctrl.signal})).text();clearTimeout(tid);
+    const m=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/);
+    if(!m)throw new Error('parse');
+    const rows=JSON.parse(m[1]).table?.rows||[];
+    const loaded=rows.map(r=>(r.c[0]?.v||'').toString().trim()).filter(v=>v&&_ncity(v)!=='ciudad'&&_ncity(v)!=='ciudades');
+    if(loaded.length)_allCiudades=loaded;
+  }catch(e){/* usa fallback de teamData */}
+  renderCityFilter();
+}
+
 async function loadTeam(){
   const teamGrid=document.getElementById('teamGrid');
   try{
@@ -901,23 +968,13 @@ async function loadTeam(){
       svcs:(r.c[5]?.v||'').trim(),
       sched:(r.c[6]?.v||'').trim(),
       days:(r.c[7]?.v||'').trim(),
-      bio:(r.c[8]?.v||'').trim()
+      bio:(r.c[8]?.v||'').trim(),
+      ciudad:(r.c[11]?.v||'').trim()
     })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs);
     teamGrid.innerHTML='';
     if(!teamData.length){teamGrid.innerHTML='<p class="team-loading">Equipo disponible próximamente.</p>';return;}
-    teamData.forEach((t,idx)=>{
-      const ph=TEAM_PHOTOS[idx]||null;
-      const card=document.createElement('div');
-      card.className='team-card reveal';
-      let banner=ph?'<div class="team-card-banner"><img src="'+ph+'" alt="'+t.name+'" loading="lazy"></div>':'';
-      let sched='';
-      if(t.sched)sched+='<div class="team-sched">&#x23F0; '+t.sched+'</div>';
-      if(t.days)sched+='<div class="team-sched">&#x1F4C5; '+t.days+'</div>';
-      card.innerHTML=banner+'<div class="team-card-body"><div class="team-name">'+t.name+'</div><div class="team-svcs">'+t.svcs+'</div>'+sched+'<div class="team-cta">Ver perfil &#x2192;</div></div>';
-      card.addEventListener('click',()=>openTeamModal(t,ph));
-      teamGrid.appendChild(card);
-    });
-    observeReveal();
+    renderTeamCards();
+    loadCiudades();
   }catch(e){
     teamGrid.innerHTML='<p class="team-error">Consulta nuestro equipo escribiéndonos por <a href="'+WA+'" target="_blank" rel="noopener" style="color:var(--caramel)">WhatsApp</a>.</p>';
   }
