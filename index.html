@@ -1309,7 +1309,7 @@ function bwRenderSlots(c,slots){
   pageDates.forEach(({fechaLabel,filtered})=>{
     html+=`<div class="bw-date-group"><div class="bw-date-label">${fechaLabel}</div><div class="bw-hours">`;
     filtered.forEach(h=>{
-      const slotData=JSON.stringify({fecha:fechaLabel,hora:h.hora,colaborador:h.colaborador||'',row:h.row});
+      const slotData=JSON.stringify({fecha:fechaLabel,hora:h.hora,colaborador:h.colaborador||'',row:h.row,ciudad:h.ciudad||''});
       html+=`<button class="bw-hour" onclick='bwPickSlot(${slotData})'>${h.hora}</button>`;
     });
     html+='</div></div>';
@@ -1377,6 +1377,7 @@ async function bwSubmit(e){
       modalidad:bwS.modalidad,
       procedimiento:bwS.servicio,
       colaborador:bwS.slot.colaborador||bwS.profesional||'',
+      ciudad:bwS.slot.ciudad||_selectedCity||'Cali',
       nombre:bwS.nombre,
       email:bwS.email||'',
       telefono:bwS.telefono,
