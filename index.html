@@ -1382,7 +1382,8 @@ async function bwSubmit(e){
       email:bwS.email||'',
       telefono:bwS.telefono,
       duracion:bwS._svcDur||60,
-      observacion:bwS.notas+(bwS.direccion?'\nDirección: '+bwS.direccion:'')
+      observacion:bwS.notas||'',
+      direccion:bwS.direccion||''
     });
     const r=await fetch(GAS_CONTACT+'?'+params.toString());
     const data=await r.json();
