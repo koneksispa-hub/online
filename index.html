@@ -264,8 +264,67 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 .modal-booking{display:flex;justify-content:center}
 .btn-booking{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 2rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.9rem;font-weight:500;box-shadow:0 4px 15px rgba(191,155,111,.4);transition:background .2s,transform .15s}
 .btn-booking:hover{background:var(--caramel-dk);transform:translateY(-2px)}
+/* BOOKING WIZARD */
+.bw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:900;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:600px){.bw-overlay{align-items:center}}
+.bw-panel{background:var(--surface);border-radius:1.25rem 1.25rem 0 0;width:100%;max-width:520px;max-height:92dvh;overflow-y:auto;padding:1.5rem 1.25rem 2rem;position:relative;overscroll-behavior:contain}
+@media(min-width:600px){.bw-panel{border-radius:1.25rem;max-height:88dvh}}
+.bw-close{position:absolute;top:.85rem;right:.85rem;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted);padding:.25rem .5rem;border-radius:.4rem}
+.bw-close:hover{background:var(--bg-alt);color:var(--text)}
+.bw-progress{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:1.5rem}
+.bw-dot{width:28px;height:28px;border-radius:50%;background:var(--bg-alt);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;color:var(--text-muted);transition:background .2s,border-color .2s,color .2s;flex-shrink:0}
+.bw-dot.active{background:var(--caramel);border-color:var(--caramel);color:#fff}
+.bw-dot.done{background:var(--caramel-lt);border-color:var(--caramel-lt);color:var(--caramel)}
+.bw-pline{flex:1;max-width:40px;height:2px;background:var(--border)}
+.bw-title{font-size:1.1rem;font-weight:600;color:var(--text);margin:0 0 1rem;padding-right:2rem}
+.bw-back{background:none;border:none;color:var(--caramel);font-size:.85rem;cursor:pointer;padding:0;margin-bottom:.75rem;display:inline-flex;align-items:center;gap:.35rem}
+.bw-back:hover{text-decoration:underline}
+.bw-modal-opts{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.bw-opt-card{background:var(--bg-alt);border:2px solid var(--border);border-radius:.85rem;padding:1.25rem .75rem;cursor:pointer;text-align:center;transition:border-color .2s,background .2s;display:flex;flex-direction:column;align-items:center;gap:.35rem}
+.bw-opt-card:hover,.bw-opt-card.selected{border-color:var(--caramel);background:color-mix(in srgb,var(--caramel) 8%,var(--bg-alt))}
+.bw-opt-icon{font-size:2rem}
+.bw-opt-name{font-weight:600;color:var(--text);font-size:.95rem}
+.bw-opt-sub{font-size:.78rem;color:var(--text-muted);line-height:1.4}
+.bw-svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem}
+.bw-svc-btn{background:var(--bg-alt);border:2px solid var(--border);border-radius:.75rem;padding:.75rem .6rem;cursor:pointer;text-align:center;transition:border-color .2s,background .2s;display:flex;flex-direction:column;align-items:center;gap:.25rem}
+.bw-svc-btn:hover,.bw-svc-btn.selected{border-color:var(--caramel);background:color-mix(in srgb,var(--caramel) 8%,var(--bg-alt))}
+.bw-svc-icon{font-size:1.5rem}
+.bw-svc-name{font-size:.82rem;font-weight:600;color:var(--text);line-height:1.3}
+.bw-svc-dur{font-size:.72rem;color:var(--text-muted)}
+.bw-prof-row{margin-bottom:.75rem}
+.bw-prof-label{font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:.4rem}
+.bw-opt-label{font-size:.8rem;color:var(--text-muted)}
+.bw-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.35rem}
+.bw-chip{background:var(--bg-alt);border:1.5px solid var(--border);border-radius:50px;padding:.3rem .8rem;font-size:.8rem;cursor:pointer;transition:border-color .2s,background .2s;color:var(--text)}
+.bw-chip.active{border-color:var(--caramel);background:color-mix(in srgb,var(--caramel) 10%,var(--bg-alt));color:var(--caramel);font-weight:600}
+.bw-loading{text-align:center;padding:2rem;color:var(--text-muted);font-size:.88rem}
+.bw-empty{text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.88rem;line-height:1.6}
+.bw-date-group{margin-bottom:1rem}
+.bw-date-label{font-size:.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
+.bw-hours{display:flex;flex-wrap:wrap;gap:.4rem}
+.bw-hour{background:var(--bg-alt);border:1.5px solid var(--border);border-radius:.5rem;padding:.45rem .8rem;font-size:.88rem;cursor:pointer;transition:border-color .2s,background .2s;display:flex;flex-direction:column;align-items:center;gap:.15rem}
+.bw-hour:hover,.bw-hour.selected{border-color:var(--caramel);background:color-mix(in srgb,var(--caramel) 10%,var(--bg-alt))}
+.bw-with{font-size:.7rem;color:var(--caramel)}
+.bw-summary{background:var(--bg-alt);border-radius:.65rem;padding:.85rem 1rem;margin-bottom:1rem}
+.bw-summary-item{display:flex;justify-content:space-between;align-items:baseline;padding:.25rem 0;font-size:.88rem;border-bottom:1px solid var(--border)}
+.bw-summary-item:last-child{border-bottom:none}
+.bw-summary-item span{color:var(--text-muted)}
+.bw-summary-item strong{color:var(--text);text-align:right;max-width:60%}
+.bw-field{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.6rem}
+.bw-field label{font-size:.8rem;color:var(--text-muted);font-weight:500}
+.bw-field input,.bw-field textarea{background:var(--bg-alt);border:1.5px solid var(--border);border-radius:.5rem;padding:.55rem .75rem;font-size:.9rem;color:var(--text);font-family:inherit;transition:border-color .2s;resize:none}
+.bw-field input:focus,.bw-field textarea:focus{outline:none;border-color:var(--caramel)}
+#bwForm .bw-submit{width:100%;justify-content:center;margin-top:.35rem;border:none;cursor:pointer}
+.bw-msg{font-size:.83rem;margin:.4rem 0 0;min-height:1.2em}
+.bw-msg.err{color:#c0392b}
+.bw-confirm{text-align:center;padding:1rem 0}
+.bw-confirm-icon{font-size:3rem;margin-bottom:.5rem}
+.bw-confirm-sub{color:var(--text-muted);font-size:.88rem;margin-top:.5rem}
+.bw-fallback{display:block;text-align:center;margin-top:1.25rem;font-size:.8rem;color:var(--text-muted);text-decoration:none}
+.bw-fallback:hover{color:var(--caramel)}
+@media(max-width:420px){.bw-modal-opts{grid-template-columns:1fr}.bw-svc-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
 
-/* FAB WhatsApp */
+/* FAB */
 .fab-wa{position:fixed;bottom:calc(1.75rem + env(safe-area-inset-bottom,0px));right:max(1.5rem,env(safe-area-inset-right,0px));z-index:150;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.5);transition:transform .2s,box-shadow .2s}
 .fab-wa:hover{transform:scale(1.1);box-shadow:0 6px 25px rgba(37,211,102,.6)}
 .fab-wa svg{width:28px;height:28px;fill:currentColor}
@@ -274,97 +333,6 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 .reveal{transition:opacity .6s ease,transform .6s ease}
 .reveal.pend{opacity:0;transform:translateY(18px)}
 .reveal.vis{opacity:1!important;transform:none!important}
-
-/* =====================================================
-   CHAT WIDGET — integrado
-   El botón queda encima del FAB de WhatsApp
-====================================================== */
-#ks-btn{
-  position:fixed;
-  /* Apila sobre el FAB de WA: 1.75rem base + 56px FAB + 14px gap */
-  bottom:calc(1.75rem + env(safe-area-inset-bottom,0px) + 70px);
-  right:max(1.5rem,env(safe-area-inset-right,0px));
-  width:56px;height:56px;border-radius:50%;
-  background:linear-gradient(135deg,var(--caramel),var(--caramel-dk));
-  border:none;cursor:pointer;
-  box-shadow:0 6px 24px rgba(191,155,111,.5);
-  z-index:149;display:flex;align-items:center;justify-content:center;
-  transition:transform .3s,box-shadow .3s;
-}
-#ks-btn:hover{transform:scale(1.08);box-shadow:0 10px 32px rgba(191,155,111,.65);}
-#ks-btn svg{pointer-events:none;}
-
-#ks-window{
-  position:fixed;
-  /* base + 56px WA + 14px gap + 56px botón chat + 10px gap */
-  bottom:calc(1.75rem + env(safe-area-inset-bottom,0px) + 136px);
-  right:max(1.5rem,env(safe-area-inset-right,0px));
-  width:360px;
-  height:min(500px,calc(100svh - 220px));
-  background:var(--espresso);border-radius:20px;
-  box-shadow:0 12px 40px rgba(45,26,16,.55);z-index:148;
-  display:flex;flex-direction:column;overflow:hidden;
-  border:1px solid rgba(191,155,111,.2);
-  transform:scale(.85) translateY(40px);
-  opacity:0;pointer-events:none;
-  transition:all .3s cubic-bezier(.34,1.56,.64,1);
-}
-#ks-window.ks-open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
-
-/* Header */
-.ks-header{
-  background:#1e1030;padding:13px 17px;
-  display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid rgba(191,155,111,.2);flex-shrink:0;
-}
-.ks-header-info{display:flex;align-items:center;gap:11px;}
-.ks-avatar{
-  width:40px;height:40px;border-radius:50%;
-  background:linear-gradient(135deg,var(--caramel),var(--caramel-dk));
-  display:flex;align-items:center;justify-content:center;
-  font:700 13px/1 var(--fb);color:var(--espresso);flex-shrink:0;
-}
-.ks-name{font:700 14px/1 var(--fb);color:#f0ece6;}
-.ks-status{font:400 11px/1 var(--fb);color:#7fff7f;display:flex;align-items:center;gap:4px;margin-top:3px;}
-.ks-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#7fff7f;animation:ks-pulse 2s infinite;}
-@keyframes ks-pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.ks-close{background:none;border:none;cursor:pointer;color:#f0ece6;opacity:.55;transition:opacity .2s;padding:4px;display:flex;}
-.ks-close:hover{opacity:1;}
-
-/* Mensajes */
-.ks-messages{flex:1;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;}
-.ks-messages::-webkit-scrollbar{width:3px;}
-.ks-messages::-webkit-scrollbar-thumb{background:rgba(191,155,111,.3);border-radius:2px;}
-.ks-msg{max-width:86%;padding:9px 13px;border-radius:14px;font:400 13.5px/1.5 var(--fb);word-break:break-word;}
-.ks-msg.bot{align-self:flex-start;background:#3a2318;color:#f0ece6;border-bottom-left-radius:4px;}
-.ks-msg.user{align-self:flex-end;background:var(--caramel);color:var(--espresso);border-bottom-right-radius:4px;font-weight:500;}
-.ks-msg.error{align-self:flex-start;background:rgba(255,80,80,.18);color:#ff9090;border:1px solid rgba(255,80,80,.3);font-size:13px;}
-.ks-msg.info{align-self:center;background:rgba(191,155,111,.12);color:var(--caramel);font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid rgba(191,155,111,.3);}
-
-/* Typing dots */
-.ks-typing{display:flex;gap:5px;align-items:center;padding:10px 14px;}
-.ks-typing span{width:7px;height:7px;border-radius:50%;background:var(--caramel);animation:ks-bounce 1.2s infinite;}
-.ks-typing span:nth-child(2){animation-delay:.18s}
-.ks-typing span:nth-child(3){animation-delay:.36s}
-@keyframes ks-bounce{0%,60%,100%{transform:translateY(0);opacity:.55}30%{transform:translateY(-7px);opacity:1}}
-
-/* Input */
-.ks-input-area{padding:10px 12px 12px;background:rgba(255,255,255,.04);border-top:1px solid rgba(191,155,111,.2);display:flex;align-items:flex-end;gap:8px;flex-shrink:0;}
-#ks-input{flex:1;background:rgba(255,255,255,.09);border:1px solid rgba(191,155,111,.3);border-radius:18px;padding:8px 13px;color:#f0ece6;font:400 13px/1.4 var(--fb);resize:none;outline:none;max-height:90px;transition:border-color .2s;}
-#ks-input:focus{border-color:var(--caramel);}
-#ks-input::placeholder{color:rgba(240,236,230,.35);}
-#ks-send{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--caramel),var(--caramel-dk));border:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .2s,opacity .2s;}
-#ks-send:hover:not(:disabled){transform:scale(1.1);}
-#ks-send:disabled{opacity:.4;cursor:not-allowed;}
-
-/* Móvil */
-@media(max-width:430px){
-  #ks-btn{right:16px;}
-  #ks-window{
-    width:calc(100vw - 24px);right:12px;
-    height:min(460px,calc(100svh - calc(1.75rem + env(safe-area-inset-bottom,0px) + 150px)));
-  }
-}
 
 </style>
 </head>
@@ -378,7 +346,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       <a href="#equipo">Equipo</a>
       <a href="#contacto">Contacto</a>
       <a href="politica-privacidad.html">Privacidad</a>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" class="btn-nav" target="_blank" rel="noopener">Reservar</a>
+      <button class="btn-nav" onclick="openBookingWizard()">Reservar</button>
     </div>
     <button class="nav-ham" id="navHam" aria-label="Abrir menú" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -389,7 +357,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
     <a href="#equipo" role="menuitem">Equipo</a>
     <a href="#contacto" role="menuitem">Contacto</a>
     <a href="politica-privacidad.html" role="menuitem">Política de Privacidad</a>
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" role="menuitem" target="_blank" rel="noopener" style="color:var(--caramel);font-weight:500">Reservar ahora</a>
+    <a href="#" role="menuitem" onclick="openBookingWizard();return false;" style="color:var(--caramel);font-weight:500">Reservar ahora</a>
   </div>
 </nav>
 
@@ -406,7 +374,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <p>Tratamientos de spa profesionales diseñados para restaurar tu equilibrio, con la calidez y dedicación que mereces.</p>
         <p>Koneksi Spa te conecta con los profesionales que te permitirán llegar al bienestar que necesitas para tu vida.</p>
         <div class="hero-cta">
-          <a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" class="btn-primary" target="_blank" rel="noopener">Reservar ahora</a>
+          <button class="btn-primary" onclick="openBookingWizard()">Reservar ahora</button>
           <a href="#servicios" class="btn-outline">Ver servicios</a>
         </div>
       </div>
@@ -600,7 +568,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
     <div class="footer-col">
       <h4>Reservas</h4>
       <ul>
-        <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" target="_blank" rel="noopener">Reservar cita</a></li>
+        <li><a href="#" onclick="openBookingWizard();return false;">Reservar cita</a></li>
         <li><a href="#servicios">Ver servicios</a></li>
         <li><a href="#equipo">Nuestro equipo</a></li>
         <li><a href="politica-privacidad.html">Política de Privacidad</a></li>
@@ -613,7 +581,75 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
   </div>
 </footer>
 
-<!-- ── Modales de servicios y equipo ── -->
+<!-- ── Booking Wizard ── -->
+<div id="bookingWizard" hidden>
+  <div class="bw-overlay">
+    <div class="bw-panel">
+      <button class="bw-close" id="bwClose">&#x2715;</button>
+      <div class="bw-progress">
+        <div class="bw-dot" data-step="1">1</div><div class="bw-pline"></div>
+        <div class="bw-dot" data-step="2">2</div><div class="bw-pline"></div>
+        <div class="bw-dot" data-step="3">3</div><div class="bw-pline"></div>
+        <div class="bw-dot" data-step="4">4</div>
+      </div>
+      <!-- Paso 1: Modalidad -->
+      <div id="bwS1">
+        <h3 class="bw-title">¿Dónde prefieres el servicio?</h3>
+        <div class="bw-modal-opts">
+          <button class="bw-opt-card" onclick="bwPickMod('Sede')">
+            <span class="bw-opt-icon">&#x1F3E2;</span>
+            <span class="bw-opt-name">En la sede</span>
+            <span class="bw-opt-sub">Calle 51 No. 15A 15<br>Chapinero, Cali</span>
+          </button>
+          <button class="bw-opt-card" onclick="bwPickMod('Domicilio')">
+            <span class="bw-opt-icon">&#x1F3E0;</span>
+            <span class="bw-opt-name">A domicilio</span>
+            <span class="bw-opt-sub">El profesional va<br>donde tú estás</span>
+          </button>
+        </div>
+      </div>
+      <!-- Paso 2: Servicio -->
+      <div id="bwS2" hidden>
+        <button class="bw-back" onclick="bwGo(1)">&#x2190; Atrás</button>
+        <h3 class="bw-title">¿Qué servicio deseas?</h3>
+        <div class="bw-svc-grid" id="bwSvcGrid"></div>
+      </div>
+      <!-- Paso 3: Horario -->
+      <div id="bwS3" hidden>
+        <button class="bw-back" onclick="bwGo(2)">&#x2190; Atrás</button>
+        <h3 class="bw-title">Elige tu horario</h3>
+        <div id="bwProfRow" class="bw-prof-row"></div>
+        <div id="bwSlots"><div class="bw-loading">Cargando horarios…</div></div>
+      </div>
+      <!-- Paso 4: Datos personales -->
+      <div id="bwS4" hidden>
+        <button class="bw-back" onclick="bwGo(3)">&#x2190; Atrás</button>
+        <h3 class="bw-title">Tus datos</h3>
+        <div class="bw-summary" id="bwSum"></div>
+        <form id="bwForm">
+          <div class="bw-field"><label>Nombre completo *</label><input type="text" name="nombre" required autocomplete="name"></div>
+          <div class="bw-field"><label>Correo electrónico</label><input type="email" name="email" autocomplete="email"></div>
+          <div class="bw-field"><label>Teléfono / WhatsApp *</label><input type="tel" name="telefono" required autocomplete="tel"></div>
+          <div class="bw-field"><label>Observaciones</label><textarea name="observacion" rows="2" placeholder="Alergias, condiciones especiales…"></textarea></div>
+          <button type="submit" class="btn-booking bw-submit">Confirmar reserva &#x2192;</button>
+          <p class="bw-msg" id="bwMsg"></p>
+        </form>
+      </div>
+      <!-- Paso 5: Confirmación -->
+      <div id="bwS5" hidden>
+        <div class="bw-confirm">
+          <div class="bw-confirm-icon">&#x2713;</div>
+          <h3 class="bw-title">¡Reserva confirmada!</h3>
+          <p id="bwOkMsg"></p>
+          <p class="bw-confirm-sub">Te enviaremos confirmación por correo y WhatsApp.</p>
+          <button class="btn-booking" onclick="closeBookingWizard()">Cerrar</button>
+        </div>
+      </div>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" target="_blank" rel="noopener" class="bw-fallback">¿Problemas? Reservar por formulario →</a>
+    </div>
+  </div>
+</div>
+
 <div id="svcModal" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modalName">
   <div class="modal-box">
     <button class="modal-close" id="modalClose" aria-label="Cerrar">&#x2715;</button>
@@ -629,9 +665,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
     </div>
     <div class="modal-video" id="modalVideoSection" hidden></div>
     <div class="modal-booking">
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" class="btn-booking" target="_blank" rel="noopener">
-        Reservar este servicio &#x2192;
-      </a>
+      <button class="btn-booking" id="svcBookBtn">Reservar este servicio &#x2192;</button>
     </div>
   </div>
 </div>
@@ -652,54 +686,6 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
   </div>
 </div>
 
-<!-- ── CHAT WIDGET — botón y ventana ── -->
-<button id="ks-btn" onclick="ksToggle()" aria-label="Abrir chat con asistente Koneksi Spa">
-  <svg id="ks-ico-open" width="26" height="26" viewBox="0 0 24 24"
-       fill="none" stroke="white" stroke-width="2.5"
-       stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-  <svg id="ks-ico-close" width="22" height="22" viewBox="0 0 24 24"
-       fill="none" stroke="white" stroke-width="2.8"
-       stroke-linecap="round" style="display:none">
-    <line x1="18" y1="6" x2="6" y2="18"/>
-    <line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>
-</button>
-
-<div id="ks-window" role="dialog" aria-label="Chat Koneksi Spa">
-  <div class="ks-header">
-    <div class="ks-header-info">
-      <div class="ks-avatar">KS</div>
-      <div>
-        <div class="ks-name">Koneksi Spa</div>
-        <div class="ks-status">En línea</div>
-      </div>
-    </div>
-    <button class="ks-close" onclick="ksToggle()" aria-label="Cerrar chat">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-  </div>
-  <div class="ks-messages" id="ks-messages"></div>
-  <div class="ks-input-area">
-    <textarea id="ks-input" rows="1"
-              placeholder="Escribe tu mensaje..."
-              aria-label="Mensaje"></textarea>
-    <button id="ks-send" onclick="ksSend()" aria-label="Enviar mensaje">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-           stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="22" y1="2" x2="11" y2="13"/>
-        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-      </svg>
-    </button>
-  </div>
-</div>
-
-<!-- ── FAB WhatsApp ── -->
 <a href="https://wa.me/573202561705" class="fab-wa" target="_blank" rel="noopener" aria-label="Contáctanos por WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
@@ -757,9 +743,10 @@ document.querySelectorAll('.svc-card[data-svc-idx]').forEach(card=>{
   card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal(s)}});
 });
 
-// Google Sheets config
+// Google Sheets config — must be declared before all fetch calls
 const SHEET_ID='1nnVinOmdSQK2ZF8YKM1aKtJi5PwFz_NwT4d9Wl84sTA';
 let teamData=[];
+// Load service prices & durations from Google Sheets "Datos" (GID 376926335)
 const SVC_GID='376926335';
 function parsePrice(v){return parseInt(String(v).replace(/[^0-9]/g,''),10)||0;}
 function normStr(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();}
@@ -817,6 +804,8 @@ loadServiceVideos();
 
 // Team from Google Sheets
 const GID='49445065';
+// Photos indexed by row position (row 0 = first collaborator in sheet, etc.)
+// Order must match the row order in the HORARIOS > Colaborador sheet
 const TEAM_PHOTOS=['img/alex.jpg','img/jensy.jpg','img/francia.jpg','img/sandra.jpg','img/karol.jpg'];
 async function loadTeam(){
   const teamGrid=document.getElementById('teamGrid');
@@ -855,7 +844,7 @@ async function loadTeam(){
 }
 loadTeam();
 
-// Modal servicios
+// Modal
 const modal=document.getElementById('svcModal');
 const modalClose=document.getElementById('modalClose');
 function openModal(s){
@@ -896,6 +885,7 @@ function openModal(s){
   }else{
     videoSec.hidden=true;videoSec.innerHTML='';
   }
+  document.getElementById('svcBookBtn').onclick=function(){closeModal();openBookingWizard({servicio:s.id});};
   modal.hidden=false;modal.style.display='flex';
   document.body.style.overflow='hidden';
   modal.querySelector('.modal-box').scrollTop=0;
@@ -906,7 +896,7 @@ modalClose.addEventListener('click',closeModal);
 modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeModal();});
 
-// Modal equipo
+// Team Member Modal
 const teamModal=document.getElementById('teamModal');
 const teamModalClose=document.getElementById('teamModalClose');
 function openTeamModal(t,ph){
@@ -921,7 +911,7 @@ function openTeamModal(t,ph){
   document.getElementById('tmodBio').textContent=t.bio||'';
   document.getElementById('tmodBio').hidden=!t.bio;
   const firstName=t.name.split(' ')[0];
-  document.getElementById('tmodBooking').innerHTML='<a href="'+BOOKING+'" class="btn-booking" target="_blank" rel="noopener">Reservar con '+firstName+' &#x2192;</a>';
+  document.getElementById('tmodBooking').innerHTML='<button class="btn-booking" onclick="closeTeamModal();openBookingWizard({profesional:''+t.name+''})">Reservar con '+firstName+' →</button>';
   teamModal.hidden=false;teamModal.style.display='flex';
   document.body.style.overflow='hidden';
   teamModal.querySelector('.modal-box').scrollTop=0;
@@ -932,12 +922,13 @@ teamModalClose.addEventListener('click',closeTeamModal);
 teamModal.addEventListener('click',e=>{if(e.target===teamModal)closeTeamModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!teamModal.hidden)closeTeamModal();});
 
-// Nav scroll
+// Nav scroll — check both on scroll AND on load (handles anchor-jump page loads)
 const navbar=document.getElementById('navbar');
 function updateNav(){navbar.classList.toggle('scrolled',window.scrollY>80);}
 updateNav();
 window.addEventListener('scroll',updateNav,{passive:true});
 window.addEventListener('load',updateNav);
+// IntersectionObserver for robust hero detection (handles direct-to-anchor navigation)
 (function(){
   if(!('IntersectionObserver' in window))return;
   const hero=document.getElementById('inicio');
@@ -957,7 +948,8 @@ mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
   ham.setAttribute('aria-expanded','false');
 }));
 
-// Contact form
+// Contact form — sends via Google Apps Script Web App
+// Paste your GAS deployment URL below once deployed:
 const GAS_CONTACT='https://script.google.com/macros/s/AKfycbwl68UsztojR96PukR4DFQRv65x1nwFVjbmzapEVGOKvp2bgmVUzaKIFWyC9rU8acxk/exec';
 document.getElementById('contactForm').addEventListener('submit',async function(e){
   e.preventDefault();
@@ -988,7 +980,207 @@ document.getElementById('contactForm').addEventListener('submit',async function(
   }
 });
 
-// Reveal on scroll
+/* =====================================================
+   BOOKING WIZARD
+====================================================== */
+let bwS={mod:'',svc:null,svcNombre:'',slot:null,prof:'',_allSlots:[]};
+
+function openBookingWizard(o){
+  o=o||{};
+  bwS={mod:o.modalidad||'',svc:o.servicio||null,svcNombre:'',slot:null,prof:o.profesional||'',_allSlots:[]};
+  document.getElementById('bookingWizard').hidden=false;
+  document.body.style.overflow='hidden';
+  if(bwS.mod){bwPickMod(bwS.mod);}else{bwGo(1);}
+}
+
+function closeBookingWizard(){
+  document.getElementById('bookingWizard').hidden=true;
+  document.body.style.overflow='';
+}
+
+document.getElementById('bwClose').addEventListener('click',closeBookingWizard);
+document.getElementById('bookingWizard').addEventListener('click',function(e){
+  if(e.target===this.querySelector('.bw-overlay'))closeBookingWizard();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&!document.getElementById('bookingWizard').hidden)closeBookingWizard();
+});
+
+function bwGo(n){
+  [1,2,3,4,5].forEach(function(i){
+    var s=document.getElementById('bwS'+i);
+    if(s)s.hidden=(i!==n);
+  });
+  document.querySelectorAll('.bw-dot').forEach(function(d){
+    var ds=parseInt(d.dataset.step);
+    d.classList.toggle('active',ds===n);
+    d.classList.toggle('done',ds<n);
+  });
+  var panel=document.querySelector('#bookingWizard .bw-panel');
+  if(panel)panel.scrollTop=0;
+}
+
+function bwPickMod(m){
+  bwS.mod=m;
+  bwRenderSvc();
+  bwGo(2);
+}
+
+function bwRenderSvc(){
+  var grid=document.getElementById('bwSvcGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+  SERVICES.forEach(function(s){
+    var btn=document.createElement('button');
+    btn.type='button';
+    btn.className='bw-svc-btn'+(bwS.svc===s.id?' selected':'');
+    btn.innerHTML='<span class="bw-svc-icon">'+s.icon+'</span>'
+      +'<span class="bw-svc-name">'+s.name+'</span>'
+      +(s.duration?'<span class="bw-svc-dur">'+s.duration+'</span>':'');
+    btn.addEventListener('click',function(){bwPickSvc(s.id,s.name);});
+    grid.appendChild(btn);
+  });
+  if(bwS.svc){
+    var match=SERVICES.find(function(s){return s.id===bwS.svc;});
+    if(match){bwPickSvc(match.id,match.name);}
+  }
+}
+
+function bwPickSvc(id,nombre){
+  bwS.svc=id;bwS.svcNombre=nombre;
+  document.querySelectorAll('.bw-svc-btn').forEach(function(b){
+    var nm=b.querySelector('.bw-svc-name');
+    b.classList.toggle('selected',nm&&nm.textContent===nombre);
+  });
+  setTimeout(function(){bwLoadSlots();bwGo(3);},150);
+}
+
+async function bwLoadSlots(){
+  var slots=document.getElementById('bwSlots');
+  var profRow=document.getElementById('bwProfRow');
+  if(!slots)return;
+  slots.innerHTML='<div class="bw-loading">Buscando horarios disponibles…</div>';
+  if(profRow)profRow.innerHTML='';
+  bwS._allSlots=[];
+  try{
+    var params=new URLSearchParams({action:'getSlots',modalidad:bwS.mod,servicio:bwS.svc||''});
+    if(bwS.prof)params.set('profesional',bwS.prof);
+    var ctrl=new AbortController();var tid=setTimeout(function(){ctrl.abort();},10000);
+    var r=await fetch(GAS_CONTACT+'?'+params,{signal:ctrl.signal});clearTimeout(tid);
+    var data=await r.json();
+    if(!data.ok)throw new Error(data.error||'Sin respuesta');
+    if(bwS.mod==='Sede'&&profRow&&data.profsParaServicio&&data.profsParaServicio.length>1){
+      var chips='<label class="bw-prof-label">Profesional (opcional):</label><div class="bw-chips">'
+        +'<button class="bw-chip'+(bwS.prof?'':' active')+'" onclick="bwProfFilter('')" type="button">Cualquiera</button>'
+        +data.profsParaServicio.map(function(p){return '<button class="bw-chip'+(bwS.prof===p?' active':'')+'" onclick="bwProfFilter(''+p.replace(/'/g,"\'")+'''+')" type="button">'+p+'</button>';}).join('')
+        +'</div>';
+      profRow.innerHTML=chips;
+    }
+    bwS._allSlots=data.slots||[];
+    bwRenderSlots(bwS._allSlots);
+  }catch(err){
+    slots.innerHTML='<div class="bw-empty">No hay horarios disponibles en este momento.<br><a href="'+BOOKING+'" target="_blank" rel="noopener">Reservar por formulario</a></div>';
+  }
+}
+
+function bwProfFilter(prof){
+  bwS.prof=prof;
+  document.querySelectorAll('#bwProfRow .bw-chip').forEach(function(c){
+    c.classList.toggle('active',c.textContent===(prof||'Cualquiera'));
+  });
+  var filtered=prof?bwS._allSlots.filter(function(s){return s.colaborador===prof;}):bwS._allSlots;
+  bwRenderSlots(filtered);
+}
+
+function bwRenderSlots(slots){
+  var container=document.getElementById('bwSlots');
+  if(!container)return;
+  if(!slots||!slots.length){
+    container.innerHTML='<div class="bw-empty">No hay horarios para esta selección.<br><a href="'+BOOKING+'" target="_blank" rel="noopener">Reservar por formulario</a></div>';
+    return;
+  }
+  var byDate={};
+  slots.forEach(function(s){if(!byDate[s.fecha])byDate[s.fecha]=[];byDate[s.fecha].push(s);});
+  container.innerHTML=Object.entries(byDate).map(function(e){
+    var fecha=e[0],horas=e[1];
+    return '<div class="bw-date-group">'
+      +'<div class="bw-date-label">'+fecha+'</div>'
+      +'<div class="bw-hours">'
+      +horas.map(function(s){
+        var colab=(s.colaborador||'').replace(/'/g,"\'");
+        var fesc=fecha.replace(/'/g,"\'");
+        return '<button class="bw-hour" data-row="'+s.row+'" type="button" onclick="bwPickSlot('+s.row+',''+fesc+'',''+s.hora+'',''+colab+'',this)">'
+          +s.hora
+          +(s.colaborador?'<span class="bw-with">con '+s.colaborador+'</span>':'')
+          +'</button>';
+      }).join('')
+      +'</div></div>';
+  }).join('');
+}
+
+function bwPickSlot(row,fecha,hora,colab,btn){
+  bwS.slot={row:row,fecha:fecha,hora:hora,colab:colab};
+  document.querySelectorAll('.bw-hour').forEach(function(b){b.classList.remove('selected');});
+  btn.classList.add('selected');
+  setTimeout(function(){bwRenderSum();bwGo(4);},150);
+}
+
+function bwRenderSum(){
+  var sum=document.getElementById('bwSum');
+  if(!sum||!bwS.slot)return;
+  var items=[
+    ['Modalidad',bwS.mod==='Sede'?'En la sede':'A domicilio'],
+    ['Servicio',bwS.svcNombre],
+    ['Fecha',bwS.slot.fecha],
+    ['Hora',bwS.slot.hora]
+  ];
+  if(bwS.slot.colab)items.push(['Profesional',bwS.slot.colab]);
+  sum.innerHTML=items.map(function(x){return '<div class="bw-summary-item"><span>'+x[0]+'</span><strong>'+x[1]+'</strong></div>';}).join('');
+}
+
+document.getElementById('bwForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  if(!bwS.slot)return;
+  var nombre=this.nombre.value.trim();
+  var email=this.email.value.trim();
+  var tel=this.telefono.value.trim();
+  var obs=this.observacion.value.trim();
+  var msg=document.getElementById('bwMsg');
+  if(!nombre||!tel){
+    msg.className='bw-msg err';
+    msg.textContent='Por favor completa tu nombre y teléfono.';
+    return;
+  }
+  var btn=this.querySelector('.bw-submit');
+  var orig=btn.textContent;
+  btn.disabled=true;btn.textContent='Reservando…';
+  msg.className='';msg.textContent='';
+  try{
+    var params=new URLSearchParams({
+      action:'book',row:bwS.slot.row,
+      nombre:nombre,email:email,telefono:tel,
+      procedimiento:bwS.svcNombre||bwS.svc||'',
+      colaborador:bwS.slot.colab||'',
+      modalidad:bwS.mod,observacion:obs
+    });
+    var ctrl=new AbortController();var tid=setTimeout(function(){ctrl.abort();},12000);
+    var r=await fetch(GAS_CONTACT+'?'+params,{signal:ctrl.signal});clearTimeout(tid);
+    var data=await r.json();
+    if(!data.ok)throw new Error(data.error||'Error al reservar');
+    var ok=document.getElementById('bwOkMsg');
+    if(ok)ok.textContent='Tu cita es el '+bwS.slot.fecha+' a las '+bwS.slot.hora
+      +(bwS.slot.colab?' con '+bwS.slot.colab:'')
+      +(email?'. Enviamos confirmación a '+email:'')
+      +'.';
+    bwGo(5);
+  }catch(err){
+    msg.className='bw-msg err';
+    msg.textContent=err.message||'No se pudo completar la reserva. Intenta de nuevo.';
+    btn.disabled=false;btn.textContent=orig;
+  }
+});
+
+// Reveal on scroll - progressive enhancement
 function observeReveal(){
   if(!('IntersectionObserver' in window)){return;}
   const vp=window.innerHeight||document.documentElement.clientHeight;
@@ -1018,120 +1210,6 @@ setTimeout(()=>{
     el.classList.add('vis');
   });
 },1500);
-
-/* =====================================================
-   CHAT WIDGET — lógica
-====================================================== */
-const KS_CONFIG = {
-  webhookUrl: 'https://n8n-n8n.8jwsm6.easypanel.host/webhook/chat-koneksi-web',
-  sessionStorageKey: 'ks_chat_session_v1',
-  welcomeMsg: '¡Hola! 👋 Bienvenido a *Koneksi Spa*. Soy tu asistente virtual.\n\n¿En qué podemos ayudarte hoy? 😊\n\n✨ Servicios de masajes\n💰 Precios\n⏰ Horarios de atención\n📍 Ubicación\n📅 Reservas\n🏷️ Promociones vigentes\n\nMás información en: https://koneksispa.com',
-  timeoutMs: 30000
-};
-
-// Sesión persistente
-let ksSession = null;
-try { ksSession = localStorage.getItem(KS_CONFIG.sessionStorageKey); } catch(e) {}
-if (!ksSession) {
-  ksSession = 'web_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
-  try { localStorage.setItem(KS_CONFIG.sessionStorageKey, ksSession); } catch(e) {}
-}
-
-let ksOpen = false, ksReady = false, ksBusy = false;
-
-function ksToggle() {
-  ksOpen = !ksOpen;
-  document.getElementById('ks-window').classList.toggle('ks-open', ksOpen);
-  document.getElementById('ks-ico-open').style.display  = ksOpen ? 'none'  : 'block';
-  document.getElementById('ks-ico-close').style.display = ksOpen ? 'block' : 'none';
-  if (ksOpen && !ksReady) {
-    ksReady = true;
-    ksAddMsg('bot', KS_CONFIG.welcomeMsg);
-    setTimeout(() => document.getElementById('ks-input').focus(), 350);
-  }
-}
-
-function ksAddMsg(role, text) {
-  const c = document.getElementById('ks-messages');
-  const d = document.createElement('div');
-  d.className = 'ks-msg ' + role;
-  d.innerHTML = ksFormat(text);
-  c.appendChild(d);
-  c.scrollTop = c.scrollHeight;
-  return d;
-}
-
-function ksFormat(raw) {
-  return String(raw)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*([^*\n]+)\*/g, '<strong>$1</strong>')
-    .replace(/(https?:\/\/[^\s<&]+)/g,
-      '<a href="$1" target="_blank" rel="noopener" style="color:var(--caramel);text-underline-offset:2px;">$1</a>')
-    .replace(/\n/g, '<br>');
-}
-
-function ksShowTyping() {
-  const c = document.getElementById('ks-messages');
-  const d = document.createElement('div');
-  d.className = 'ks-msg bot ks-typing';
-  d.id = 'ks-typing-dot';
-  d.innerHTML = '<span></span><span></span><span></span>';
-  c.appendChild(d); c.scrollTop = c.scrollHeight;
-}
-function ksHideTyping() { document.getElementById('ks-typing-dot')?.remove(); }
-
-async function ksSend() {
-  const input = document.getElementById('ks-input');
-  const text  = input.value.trim();
-  if (!text || ksBusy) return;
-  input.value = ''; input.style.height = 'auto';
-  ksBusy = true;
-  document.getElementById('ks-send').disabled = true;
-  ksAddMsg('user', text);
-  ksShowTyping();
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), KS_CONFIG.timeoutMs);
-  try {
-    const res = await fetch(KS_CONFIG.webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, session_id: ksSession }),
-      signal: controller.signal
-    });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    ksHideTyping();
-    if (data && data.response) {
-      ksAddMsg('bot', data.response);
-      if (data.modo === 'HUMANO') {
-        ksAddMsg('info', '👤 Un asesor continuará esta conversación');
-      }
-    } else {
-      ksAddMsg('error', '⚠️ No se recibió respuesta. Por favor intenta de nuevo.');
-    }
-  } catch(err) {
-    clearTimeout(timer);
-    ksHideTyping();
-    ksAddMsg('error', err.name === 'AbortError'
-      ? '⌛ La respuesta tardó demasiado. Intenta de nuevo.'
-      : '⚠️ Error de conexión. Verifica tu internet e intenta de nuevo.');
-    console.warn('[KoneksiChat]', err.message);
-  }
-  ksBusy = false;
-  document.getElementById('ks-send').disabled = false;
-  document.getElementById('ks-input').focus();
-}
-
-// Enter = enviar · Shift+Enter = nueva línea
-document.getElementById('ks-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ksSend(); }
-});
-// Auto-resize textarea
-document.getElementById('ks-input').addEventListener('input', function() {
-  this.style.height = 'auto';
-  this.style.height = Math.min(this.scrollHeight, 90) + 'px';
-});
 </script>
 
 </body>
