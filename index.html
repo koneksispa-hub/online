@@ -1137,15 +1137,18 @@ function bwPickMod(m){bwS.modalidad=m;bwS.step=1;bwRender();}
 
 /* PASO 1 — Servicio */
 function bwStep1(c){
-  if(!window.SERVICES||!SERVICES.length){
+  if(typeof SERVICES==='undefined'||!SERVICES||!SERVICES.length){
     c.innerHTML='<button class="bw-back" onclick="bwBack()">← Atrás</button><p class="bw-loading">Cargando servicios…</p>';
     return;
   }
   const rows=SERVICES.map((s,i)=>{
-    const dur=s.duracion?`${s.duracion} min · `:'';
-    const precio=s.precio?`$${Number(s.precio).toLocaleString('es-CO')}`:'';
-    return `<button class="bw-svc-btn${bwS.servicio===s.nombre?' active':''}" onclick="bwPickSvc(${i})">
-      <div class="bw-svc-btn-name">${s.nombre}</div>
+    const dur=s.duration?s.duration+' · ':'';
+    const precio=bwS.modalidad==='Sede'&&s.priceSede?`$${Number(s.priceSede).toLocaleString('es-CO')}`:
+                 bwS.modalidad==='Domicilio'&&s.priceDom?`$${Number(s.priceDom).toLocaleString('es-CO')}`:
+                 s.priceSede?`$${Number(s.priceSede).toLocaleString('es-CO')}`:'';
+    const nombre=s.name||s.nombre||'';
+    return `<button class="bw-svc-btn${bwS.servicio===nombre?' active':''}" onclick="bwPickSvc(${i})">
+      <div class="bw-svc-btn-name">${nombre}</div>
       <div class="bw-svc-btn-meta">${dur}${precio}</div>
     </button>`;
   }).join('');
@@ -1153,7 +1156,12 @@ function bwStep1(c){
   <p class="bw-label">Elige el servicio</p>
   <div class="bw-svc-list">${rows}</div>`;
 }
-function bwPickSvc(i){bwS.servicio=SERVICES[i].nombre;bwS._svcDur=SERVICES[i].duracion||60;bwS.step=2;bwRender();}
+function bwPickSvc(i){
+  const s=SERVICES[i];
+  bwS.servicio=s.name||s.nombre||'';
+  bwS._svcDur=parseInt(s.duration||s.duracion||'60')||60;
+  bwS.step=2;bwRender();
+}
 
 /* PASO 2 — Horario */
 function bwStep2(c){
@@ -1283,12 +1291,14 @@ function bwStep4(c){
   </div>`;
 }
 
-/* Wire svcBookBtn — se hace después de que carguen servicios */
+/* Wire svcBookBtn — abre wizard con el servicio del modal activo */
 document.addEventListener('DOMContentLoaded',()=>{
   const svcBtn=document.getElementById('svcBookBtn');
   if(svcBtn){
     svcBtn.addEventListener('click',()=>{
-      const nombre=document.getElementById('modalTitle')?document.getElementById('modalTitle').textContent:'';
+      // Intentar leer el nombre del servicio del modal activo
+      const titleEl=document.getElementById('modalName')||document.getElementById('modalTitle')||document.querySelector('#svcModal .modal-name');
+      const nombre=titleEl?titleEl.textContent.trim():'';
       openBookingWizard(nombre?{servicio:nombre}:{});
     });
   }
