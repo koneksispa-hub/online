@@ -334,6 +334,43 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 .reveal.pend{opacity:0;transform:translateY(18px)}
 .reveal.vis{opacity:1!important;transform:none!important}
 
+/* ── CHAT WIDGET ── */
+#ks-btn{position:fixed;bottom:calc(1.75rem + env(safe-area-inset-bottom,0px) + 70px);right:max(1.5rem,env(safe-area-inset-right,0px));width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--caramel),var(--caramel-dk));border:none;cursor:pointer;box-shadow:0 6px 24px rgba(191,155,111,.5);z-index:149;display:flex;align-items:center;justify-content:center;transition:transform .3s,box-shadow .3s;}
+#ks-btn:hover{transform:scale(1.08);box-shadow:0 10px 32px rgba(191,155,111,.65);}
+#ks-btn svg{pointer-events:none;}
+#ks-window{position:fixed;bottom:calc(1.75rem + env(safe-area-inset-bottom,0px) + 136px);right:max(1.5rem,env(safe-area-inset-right,0px));width:360px;height:min(500px,calc(100svh - 220px));background:var(--espresso);border-radius:20px;box-shadow:0 12px 40px rgba(45,26,16,.55);z-index:148;display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(191,155,111,.2);transform:scale(.85) translateY(40px);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+#ks-window.ks-open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
+.ks-header{background:#1e1030;padding:13px 17px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(191,155,111,.2);flex-shrink:0;}
+.ks-header-info{display:flex;align-items:center;gap:11px;}
+.ks-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--caramel),var(--caramel-dk));display:flex;align-items:center;justify-content:center;font:700 13px/1 var(--fb);color:var(--espresso);flex-shrink:0;}
+.ks-name{font:700 14px/1 var(--fb);color:#f0ece6;}
+.ks-status{font:400 11px/1 var(--fb);color:#7fff7f;display:flex;align-items:center;gap:4px;margin-top:3px;}
+.ks-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#7fff7f;animation:ks-pulse 2s infinite;}
+@keyframes ks-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.ks-close{background:none;border:none;cursor:pointer;color:#f0ece6;opacity:.55;transition:opacity .2s;padding:4px;display:flex;}
+.ks-close:hover{opacity:1;}
+.ks-messages{flex:1;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;}
+.ks-messages::-webkit-scrollbar{width:3px;}
+.ks-messages::-webkit-scrollbar-thumb{background:rgba(191,155,111,.3);border-radius:2px;}
+.ks-msg{max-width:86%;padding:9px 13px;border-radius:14px;font:400 13.5px/1.5 var(--fb);word-break:break-word;}
+.ks-msg.bot{align-self:flex-start;background:#3a2318;color:#f0ece6;border-bottom-left-radius:4px;}
+.ks-msg.user{align-self:flex-end;background:var(--caramel);color:var(--espresso);border-bottom-right-radius:4px;font-weight:500;}
+.ks-msg.error{align-self:flex-start;background:rgba(255,80,80,.18);color:#ff9090;border:1px solid rgba(255,80,80,.3);font-size:13px;}
+.ks-msg.info{align-self:center;background:rgba(191,155,111,.12);color:var(--caramel);font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid rgba(191,155,111,.3);}
+.ks-typing{display:flex;gap:5px;align-items:center;padding:10px 14px;}
+.ks-typing span{width:7px;height:7px;border-radius:50%;background:var(--caramel);animation:ks-bounce 1.2s infinite;}
+.ks-typing span:nth-child(2){animation-delay:.18s}
+.ks-typing span:nth-child(3){animation-delay:.36s}
+@keyframes ks-bounce{0%,60%,100%{transform:translateY(0);opacity:.55}30%{transform:translateY(-7px);opacity:1}}
+.ks-input-area{padding:10px 12px 12px;background:rgba(255,255,255,.04);border-top:1px solid rgba(191,155,111,.2);display:flex;align-items:flex-end;gap:8px;flex-shrink:0;}
+#ks-input{flex:1;background:rgba(255,255,255,.09);border:1px solid rgba(191,155,111,.3);border-radius:18px;padding:8px 13px;color:#f0ece6;font:400 13px/1.4 var(--fb);resize:none;outline:none;max-height:90px;transition:border-color .2s;}
+#ks-input:focus{border-color:var(--caramel);}
+#ks-input::placeholder{color:rgba(240,236,230,.35);}
+#ks-send{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--caramel),var(--caramel-dk));border:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .2s,opacity .2s;}
+#ks-send:hover:not(:disabled){transform:scale(1.1);}
+#ks-send:disabled{opacity:.4;cursor:not-allowed;}
+@media(max-width:430px){#ks-btn{right:16px;}#ks-window{width:calc(100vw - 24px);right:12px;height:min(460px,calc(100svh - calc(1.75rem + env(safe-area-inset-bottom,0px) + 150px)));}}
+
 </style>
 </head>
 <body>
@@ -689,6 +726,53 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 <a href="https://wa.me/573202561705" class="fab-wa" target="_blank" rel="noopener" aria-label="Contáctanos por WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
+
+<!-- ── CHAT WIDGET — botón y ventana ── -->
+<button id="ks-btn" onclick="ksToggle()" aria-label="Abrir chat con asistente Koneksi Spa">
+  <svg id="ks-ico-open" width="26" height="26" viewBox="0 0 24 24"
+       fill="none" stroke="white" stroke-width="2.5"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  <svg id="ks-ico-close" width="22" height="22" viewBox="0 0 24 24"
+       fill="none" stroke="white" stroke-width="2.8"
+       stroke-linecap="round" style="display:none">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+</button>
+
+<div id="ks-window" role="dialog" aria-label="Chat Koneksi Spa">
+  <div class="ks-header">
+    <div class="ks-header-info">
+      <div class="ks-avatar">KS</div>
+      <div>
+        <div class="ks-name">Koneksi Spa</div>
+        <div class="ks-status">En línea</div>
+      </div>
+    </div>
+    <button class="ks-close" onclick="ksToggle()" aria-label="Cerrar chat">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="ks-messages" id="ks-messages"></div>
+  <div class="ks-input-area">
+    <textarea id="ks-input" rows="1"
+              placeholder="Escribe tu mensaje..."
+              aria-label="Mensaje"></textarea>
+    <button id="ks-send" onclick="ksSend()" aria-label="Enviar mensaje">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>
 
 <script>
 const BOOKING = 'https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform';
@@ -1210,6 +1294,120 @@ setTimeout(()=>{
     el.classList.add('vis');
   });
 },1500);
+
+/* =====================================================
+   CHAT WIDGET — lógica
+====================================================== */
+const KS_CONFIG = {
+  webhookUrl: 'https://n8n-n8n.8jwsm6.easypanel.host/webhook/chat-koneksi-web',
+  sessionStorageKey: 'ks_chat_session_v1',
+  welcomeMsg: '¡Hola! 👋 Bienvenido a *Koneksi Spa*. Soy tu asistente virtual.\n\n¿En qué podemos ayudarte hoy? 😊\n\n✨ Servicios de masajes\n💰 Precios\n⏰ Horarios de atención\n📍 Ubicación\n📅 Reservas\n🏷️ Promociones vigentes\n\nMás información en: https://koneksispa.com',
+  timeoutMs: 30000
+};
+
+// Sesión persistente
+let ksSession = null;
+try { ksSession = localStorage.getItem(KS_CONFIG.sessionStorageKey); } catch(e) {}
+if (!ksSession) {
+  ksSession = 'web_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
+  try { localStorage.setItem(KS_CONFIG.sessionStorageKey, ksSession); } catch(e) {}
+}
+
+let ksOpen = false, ksReady = false, ksBusy = false;
+
+function ksToggle() {
+  ksOpen = !ksOpen;
+  document.getElementById('ks-window').classList.toggle('ks-open', ksOpen);
+  document.getElementById('ks-ico-open').style.display  = ksOpen ? 'none'  : 'block';
+  document.getElementById('ks-ico-close').style.display = ksOpen ? 'block' : 'none';
+  if (ksOpen && !ksReady) {
+    ksReady = true;
+    ksAddMsg('bot', KS_CONFIG.welcomeMsg);
+    setTimeout(() => document.getElementById('ks-input').focus(), 350);
+  }
+}
+
+function ksAddMsg(role, text) {
+  const c = document.getElementById('ks-messages');
+  const d = document.createElement('div');
+  d.className = 'ks-msg ' + role;
+  d.innerHTML = ksFormat(text);
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+  return d;
+}
+
+function ksFormat(raw) {
+  return String(raw)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*([^*\n]+)\*/g, '<strong>$1</strong>')
+    .replace(/(https?:\/\/[^\s<&]+)/g,
+      '<a href="$1" target="_blank" rel="noopener" style="color:var(--caramel);text-underline-offset:2px;">$1</a>')
+    .replace(/\n/g, '<br>');
+}
+
+function ksShowTyping() {
+  const c = document.getElementById('ks-messages');
+  const d = document.createElement('div');
+  d.className = 'ks-msg bot ks-typing';
+  d.id = 'ks-typing-dot';
+  d.innerHTML = '<span></span><span></span><span></span>';
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function ksHideTyping() { document.getElementById('ks-typing-dot')?.remove(); }
+
+async function ksSend() {
+  const input = document.getElementById('ks-input');
+  const text  = input.value.trim();
+  if (!text || ksBusy) return;
+  input.value = ''; input.style.height = 'auto';
+  ksBusy = true;
+  document.getElementById('ks-send').disabled = true;
+  ksAddMsg('user', text);
+  ksShowTyping();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), KS_CONFIG.timeoutMs);
+  try {
+    const res = await fetch(KS_CONFIG.webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, session_id: ksSession }),
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    ksHideTyping();
+    if (data && data.response) {
+      ksAddMsg('bot', data.response);
+      if (data.modo === 'HUMANO') {
+        ksAddMsg('info', '👤 Un asesor continuará esta conversación');
+      }
+    } else {
+      ksAddMsg('error', '⚠️ No se recibió respuesta. Por favor intenta de nuevo.');
+    }
+  } catch(err) {
+    clearTimeout(timer);
+    ksHideTyping();
+    ksAddMsg('error', err.name === 'AbortError'
+      ? '⌛ La respuesta tardó demasiado. Intenta de nuevo.'
+      : '⚠️ Error de conexión. Verifica tu internet e intenta de nuevo.');
+    console.warn('[KoneksiChat]', err.message);
+  }
+  ksBusy = false;
+  document.getElementById('ks-send').disabled = false;
+  document.getElementById('ks-input').focus();
+}
+
+// Enter = enviar · Shift+Enter = nueva línea
+document.getElementById('ks-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ksSend(); }
+});
+// Auto-resize textarea
+document.getElementById('ks-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 90) + 'px';
+});
 </script>
 
 </body>
