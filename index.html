@@ -1087,7 +1087,7 @@ setTimeout(()=>{
 /* =====================================================
    BOOKING WIZARD — lógica
 ====================================================== */
-const bwS={step:0,modalidad:null,servicio:null,profesional:null,slot:null,nombre:'',telefono:'',notas:''};
+const bwS={step:0,modalidad:null,servicio:null,profesional:null,slot:null,nombre:'',telefono:'',email:'',notas:''};
 const BW_STEPS=['Modalidad','Servicio','Horario','Datos','Confirmación'];
 const BW_ICONS={Sede:'🏢',Domicilio:'🚗'};
 
@@ -1168,7 +1168,7 @@ function bwStep2(c){
   c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button>
   <p class="bw-label">Cargando disponibilidad…</p>
   <div class="bw-loading">⏳</div>`;
-  const url=GAS_CONTACT+'?action=getSlots&modalidad='+encodeURIComponent(bwS.modalidad)+'&duracion='+(bwS._svcDur||60)+(bwS.profesional?'&profesional='+encodeURIComponent(bwS.profesional):'');
+  const url=GAS_CONTACT+'?action=getSlots&modalidad='+encodeURIComponent(bwS.modalidad)+'&duracion='+(bwS._svcDur||60);
   fetch(url).then(r=>r.json()).then(data=>{
     if(data.error){c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button><div class="bw-error">${data.error}</div>`;return;}
     bwRenderSlots(c,data.slots||[]);
@@ -1207,8 +1207,15 @@ function bwRenderSlots(c,slots){
   const fechasOrdenadas=Object.keys(byDate).sort((a,b)=>(byDate[a][0].ts||0)-(byDate[b][0].ts||0));
   fechasOrdenadas.slice(0,7).forEach(fechaLabel=>{
     const horas=byDate[fechaLabel];
+    // Comparación tolerante: busca por primer nombre para cubrir variaciones de escritura
     const filtered=activeProfFilter
-      ?horas.filter(h=>h.colaborador&&h.colaborador.toLowerCase().trim()===activeProfFilter.toLowerCase().trim())
+      ?horas.filter(h=>{
+          if(!h.colaborador)return false;
+          const hc=h.colaborador.toLowerCase().trim();
+          const ap=activeProfFilter.toLowerCase().trim();
+          return hc===ap||hc.includes(ap)||ap.includes(hc)||
+                 hc.split(' ')[0]===ap.split(' ')[0]; // coincidencia por primer nombre
+        })
       :horas;
     if(!filtered.length)return;
     html+=`<div class="bw-date-group"><div class="bw-date-label">${fechaLabel}</div><div class="bw-hours">`;
@@ -1237,6 +1244,7 @@ function bwStep3(c){
   <form class="bw-form" onsubmit="bwSubmit(event)">
     <div class="fg"><label>Nombre completo *</label><input id="bwNombre" class="inp" placeholder="Tu nombre" required value="${bwS.nombre}"></div>
     <div class="fg"><label>Teléfono / WhatsApp *</label><input id="bwTelefono" class="inp" type="tel" placeholder="Ej. 300 123 4567" required value="${bwS.telefono}"></div>
+    <div class="fg"><label>Correo electrónico</label><input id="bwEmail" class="inp" type="email" placeholder="tu@correo.com" value="${bwS.email}"></div>
     ${bwS.modalidad==='Domicilio'?`<div class="fg"><label>Dirección de servicio *</label><input id="bwDireccion" class="inp" placeholder="Calle, barrio, ciudad" required value="${bwS.direccion||''}"></div>`:''}
     <div class="fg"><label>Notas adicionales</label><textarea id="bwNotas" class="inp" rows="2" placeholder="Preferencias, alergias…">${bwS.notas}</textarea></div>
     <div id="bwFormMsg"></div>
@@ -1254,6 +1262,7 @@ async function bwSubmit(e){
   e.preventDefault();
   bwS.nombre=document.getElementById('bwNombre').value.trim();
   bwS.telefono=document.getElementById('bwTelefono').value.trim();
+  bwS.email=document.getElementById('bwEmail')?document.getElementById('bwEmail').value.trim():'';
   bwS.notas=document.getElementById('bwNotas')?document.getElementById('bwNotas').value.trim():'';
   if(bwS.modalidad==='Domicilio'){
     bwS.direccion=document.getElementById('bwDireccion')?document.getElementById('bwDireccion').value.trim():'';
@@ -1269,7 +1278,7 @@ async function bwSubmit(e){
       procedimiento:bwS.servicio,
       colaborador:bwS.slot.colaborador||bwS.profesional||'',
       nombre:bwS.nombre,
-      email:'',
+      email:bwS.email||'',
       telefono:bwS.telefono,
       observacion:bwS.notas+(bwS.direccion?'\nDirección: '+bwS.direccion:'')
     });
