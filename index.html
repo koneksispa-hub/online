@@ -1168,7 +1168,7 @@ function bwStep2(c){
   c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button>
   <p class="bw-label">Cargando disponibilidad…</p>
   <div class="bw-loading">⏳</div>`;
-  const url=GAS_CONTACT+'?action=getSlots&modalidad='+encodeURIComponent(bwS.modalidad)+'&duracion='+(bwS._svcDur||60);
+  const url=GAS_CONTACT+'?action=getSlots&modalidad='+encodeURIComponent(bwS.modalidad)+'&duracion='+(bwS._svcDur||60)+(bwS.profesional?'&profesional='+encodeURIComponent(bwS.profesional):'');
   fetch(url).then(r=>r.json()).then(data=>{
     if(data.error){c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button><div class="bw-error">${data.error}</div>`;return;}
     bwRenderSlots(c,data.slots||[]);
@@ -1183,41 +1183,45 @@ function bwRenderSlots(c,slots){
     <div class="bw-error">No hay horarios disponibles en este momento. <a href="${BOOKING}" target="_blank">Reservar por formulario</a></div>`;
     return;
   }
-  // Agrupar por fecha
+  // Agrupar por fecha — s.fecha ya viene formateado en español desde el GAS ("Lunes 30 de noviembre")
   const byDate={};
   slots.forEach(s=>{
-    const d=s.fecha||s.split('T')[0];
-    const h=(s.hora||s.split('T')[1]||s).replace(':00','');
-    if(!byDate[d])byDate[d]=[];
-    byDate[d].push({raw:s,hora:h,profesional:s.profesional||null});
+    const fKey=s.fecha;
+    if(!byDate[fKey])byDate[fKey]=[];
+    byDate[fKey].push({row:s.row,hora:s.hora,colaborador:s.colaborador||null,ts:s.ts||0});
   });
   let html='<button class="bw-back" onclick="bwBack()">← Atrás</button><p class="bw-label">Selecciona horario</p>';
   if(bwS.modalidad==='Sede'){
     // Chips de profesional opcionales
-    const profs=[...new Set(slots.map(s=>s.profesional).filter(Boolean))];
-    if(profs.length>1){
+    const profs=[...new Set(slots.map(s=>s.colaborador).filter(Boolean))];
+    if(profs.length>1&&!bwS.profesional){
       html+=`<p class="bw-label" style="margin-bottom:.5rem">Profesional (opcional)</p>
       <div class="bw-prof-row">
-        <button class="bw-prof-chip${!bwS.profesional?' active':''}" onclick="bwFilterProf(null)">Cualquiera</button>
-        ${profs.map(p=>`<button class="bw-prof-chip${bwS.profesional===p?' active':''}" onclick="bwFilterProf('${p}')">${p.split(' ')[0]}</button>`).join('')}
+        <button class="bw-prof-chip${!bwS._profFilter?' active':''}" onclick="bwFilterProf(null)">Cualquiera</button>
+        ${profs.map(p=>`<button class="bw-prof-chip${bwS._profFilter===p?' active':''}" onclick="bwFilterProf('${p}')">${p.split(' ')[0]}</button>`).join('')}
       </div>`;
     }
   }
-  Object.entries(byDate).slice(0,7).forEach(([fecha,horas])=>{
-    const d=new Date(fecha+'T12:00:00');
-    const label=d.toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
-    const filtered=bwS.profesional?horas.filter(h=>h.profesional===bwS.profesional):horas;
+  const activeProfFilter=bwS.profesional||bwS._profFilter||null;
+  // Ordenar fechas por ts del primer slot
+  const fechasOrdenadas=Object.keys(byDate).sort((a,b)=>(byDate[a][0].ts||0)-(byDate[b][0].ts||0));
+  fechasOrdenadas.slice(0,7).forEach(fechaLabel=>{
+    const horas=byDate[fechaLabel];
+    const filtered=activeProfFilter
+      ?horas.filter(h=>h.colaborador&&h.colaborador.toLowerCase().trim()===activeProfFilter.toLowerCase().trim())
+      :horas;
     if(!filtered.length)return;
-    html+=`<div class="bw-date-group"><div class="bw-date-label">${label}</div><div class="bw-hours">`;
+    html+=`<div class="bw-date-group"><div class="bw-date-label">${fechaLabel}</div><div class="bw-hours">`;
     filtered.forEach(h=>{
-      const key=JSON.stringify({fecha,hora:h.hora,profesional:h.profesional||null});
-      html+=`<button class="bw-hour" onclick='bwPickSlot(${key})'>${h.hora}</button>`;
+      // Incluir row para que bookSlot pueda identificar la fila exacta
+      const slotData=JSON.stringify({fecha:fechaLabel,hora:h.hora,colaborador:h.colaborador||'',row:h.row});
+      html+=`<button class="bw-hour" onclick='bwPickSlot(${slotData})'>${h.hora}</button>`;
     });
     html+='</div></div>';
   });
   c.innerHTML=html;
 }
-function bwFilterProf(p){bwS.profesional=p;bwRender();}
+function bwFilterProf(p){bwS._profFilter=p;bwRender();}
 function bwPickSlot(s){bwS.slot=s;bwS.step=3;bwRender();}
 
 /* PASO 3 — Datos personales */
@@ -1228,7 +1232,7 @@ function bwStep3(c){
     <div class="bw-summary-item"><b>Modalidad</b><span>${bwS.modalidad}</span></div>
     <div class="bw-summary-item"><b>Servicio</b><span>${bwS.servicio}</span></div>
     <div class="bw-summary-item"><b>Fecha</b><span>${bwFmtSlot()}</span></div>
-    ${bwS.slot&&bwS.slot.profesional?`<div class="bw-summary-item"><b>Profesional</b><span>${bwS.slot.profesional}</span></div>`:''}
+    ${bwS.slot&&bwS.slot.colaborador?`<div class="bw-summary-item"><b>Profesional</b><span>${bwS.slot.colaborador}</span></div>`:''}
   </div>
   <form class="bw-form" onsubmit="bwSubmit(event)">
     <div class="fg"><label>Nombre completo *</label><input id="bwNombre" class="inp" placeholder="Tu nombre" required value="${bwS.nombre}"></div>
@@ -1241,9 +1245,8 @@ function bwStep3(c){
 }
 function bwFmtSlot(){
   if(!bwS.slot)return '';
-  const d=new Date(bwS.slot.fecha+'T12:00:00');
-  const fDate=d.toLocaleDateString('es-CO',{weekday:'short',day:'numeric',month:'short'});
-  return `${fDate} · ${bwS.slot.hora}`;
+  // s.fecha ya viene como string español desde el GAS — usarlo directamente
+  return `${bwS.slot.fecha} · ${bwS.slot.hora}`;
 }
 
 /* PASO 4 — Confirmación */
@@ -1261,14 +1264,14 @@ async function bwSubmit(e){
   try{
     const params=new URLSearchParams({
       action:'book',
+      row:bwS.slot.row||'',
       modalidad:bwS.modalidad,
-      servicio:bwS.servicio,
-      fecha:bwS.slot.fecha,
-      hora:bwS.slot.hora,
-      profesional:bwS.slot.profesional||'',
+      procedimiento:bwS.servicio,
+      colaborador:bwS.slot.colaborador||bwS.profesional||'',
       nombre:bwS.nombre,
+      email:'',
       telefono:bwS.telefono,
-      notas:bwS.notas+(bwS.direccion?'\nDirección: '+bwS.direccion:'')
+      observacion:bwS.notas+(bwS.direccion?'\nDirección: '+bwS.direccion:'')
     });
     const r=await fetch(GAS_CONTACT+'?'+params.toString());
     const data=await r.json();
