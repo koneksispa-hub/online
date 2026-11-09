@@ -312,6 +312,10 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 .bw-hours{display:flex;flex-wrap:wrap;gap:.5rem}
 .bw-hour{padding:.5rem .9rem;border-radius:8px;border:1.5px solid var(--border-s);background:var(--surface-el);font-size:.83rem;cursor:pointer;transition:border-color .2s,background .2s;font-family:inherit;color:var(--text)}
 .bw-hour:hover{border-color:var(--caramel);background:var(--bg-alt)}
+.bw-pagination{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--border-s)}
+.bw-page-btn{padding:.45rem 1rem;border-radius:8px;border:1.5px solid var(--border-s);background:var(--surface-el);font-size:.82rem;cursor:pointer;font-family:inherit;color:var(--text);transition:border-color .2s,background .2s}
+.bw-page-btn:hover{border-color:var(--caramel);background:var(--bg-alt)}
+.bw-page-info{font-size:.78rem;color:var(--text-muted);text-align:center;flex:1}
 .bw-summary{display:flex;flex-direction:column;gap:.6rem;background:var(--bg-alt);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1.25rem}
 .bw-summary-item{display:flex;gap:.6rem;font-size:.85rem}
 .bw-summary-item b{color:var(--text-muted);min-width:90px;font-weight:500}
@@ -986,7 +990,8 @@ function openTeamModal(t,ph){
   document.getElementById('tmodBio').textContent=t.bio||'';
   document.getElementById('tmodBio').hidden=!t.bio;
   const firstName=t.name.split(' ')[0];
-  document.getElementById('tmodBooking').innerHTML='<button class="btn-booking" onclick="openBookingWizard({profesional:\''+t.name+'\'})">Reservar con '+firstName+' &#x2192;</button>';
+  window._bwPresel={profesional:t.name,svcs:t.svcs||''};
+  document.getElementById('tmodBooking').innerHTML='<button class="btn-booking" onclick="openBookingWizard(window._bwPresel)">Reservar con '+firstName+' &#x2192;</button>';
   teamModal.hidden=false;teamModal.style.display='flex';
   document.body.style.overflow='hidden';
   teamModal.querySelector('.modal-box').scrollTop=0;
@@ -1087,13 +1092,14 @@ setTimeout(()=>{
 /* =====================================================
    BOOKING WIZARD — lógica
 ====================================================== */
-const bwS={step:0,modalidad:null,servicio:null,profesional:null,slot:null,nombre:'',telefono:'',email:'',notas:''};
+const bwS={step:0,modalidad:null,servicio:null,profesional:null,slot:null,nombre:'',telefono:'',email:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profSvcs:null,_profFilter:null};
 const BW_STEPS=['Modalidad','Servicio','Horario','Datos','Confirmación'];
 const BW_ICONS={Sede:'🏢',Domicilio:'🚗'};
 
 function openBookingWizard(presel){
-  Object.assign(bwS,{step:0,modalidad:null,servicio:null,slot:null,nombre:'',telefono:'',notas:''});
+  Object.assign(bwS,{step:0,modalidad:null,servicio:null,slot:null,nombre:'',telefono:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profFilter:null});
   if(presel&&presel.profesional){bwS.profesional=presel.profesional;}else{bwS.profesional=null;}
+  if(presel&&presel.svcs!==undefined){bwS._profSvcs=presel.svcs||null;}else{bwS._profSvcs=null;}
   if(presel&&presel.servicio){bwS.servicio=presel.servicio;}
   document.getElementById('bookingWizard').hidden=false;
   document.body.style.overflow='hidden';
@@ -1115,7 +1121,10 @@ function bwRender(){
   else if(bwS.step===3) bwStep3(c);
   else if(bwS.step===4) bwStep4(c);
 }
-function bwBack(){bwS.step--;bwRender();}
+function bwBack(){
+  if(bwS.step===2){bwS._cachedSlots=null;bwS._slotPage=0;}
+  bwS.step--;bwRender();
+}
 
 /* PASO 0 — Modalidad */
 function bwStep0(c){
@@ -1141,12 +1150,17 @@ function bwStep1(c){
     c.innerHTML='<button class="bw-back" onclick="bwBack()">← Atrás</button><p class="bw-loading">Cargando servicios…</p>';
     return;
   }
+  // Si el colaborador tiene lista de servicios, filtrar solo los suyos
+  const _ns=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  const profSvcsNorm=bwS._profSvcs?_ns(bwS._profSvcs):null;
   const rows=SERVICES.map((s,i)=>{
+    const nombre=s.name||s.nombre||'';
+    // Ocultar si el colaborador no ofrece este servicio
+    if(profSvcsNorm&&!profSvcsNorm.includes(_ns(nombre)))return '';
     const dur=s.duration?s.duration+' · ':'';
     const precio=bwS.modalidad==='Sede'&&s.priceSede?`$${Number(s.priceSede).toLocaleString('es-CO')}`:
                  bwS.modalidad==='Domicilio'&&s.priceDom?`$${Number(s.priceDom).toLocaleString('es-CO')}`:
                  s.priceSede?`$${Number(s.priceSede).toLocaleString('es-CO')}`:'';
-    const nombre=s.name||s.nombre||'';
     return `<button class="bw-svc-btn${bwS.servicio===nombre?' active':''}" onclick="bwPickSvc(${i})">
       <div class="bw-svc-btn-name">${nombre}</div>
       <div class="bw-svc-btn-meta">${dur}${precio}</div>
@@ -1154,24 +1168,28 @@ function bwStep1(c){
   }).join('');
   c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button>
   <p class="bw-label">Elige el servicio</p>
-  <div class="bw-svc-list">${rows}</div>`;
+  <div class="bw-svc-list">${rows||'<p class="bw-loading">Sin servicios disponibles para este colaborador.</p>'}</div>`;
 }
 function bwPickSvc(i){
   const s=SERVICES[i];
   bwS.servicio=s.name||s.nombre||'';
   bwS._svcDur=parseInt(s.duration||s.duracion||'60')||60;
+  bwS._cachedSlots=null;bwS._slotPage=0;
   bwS.step=2;bwRender();
 }
 
 /* PASO 2 — Horario */
 function bwStep2(c){
+  // Usar caché si ya se cargaron los slots (paginación no re-fetcha)
+  if(bwS._cachedSlots!==null){bwRenderSlots(c,bwS._cachedSlots);return;}
   c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button>
   <p class="bw-label">Cargando disponibilidad…</p>
   <div class="bw-loading">⏳</div>`;
   const url=GAS_CONTACT+'?action=getSlots&modalidad='+encodeURIComponent(bwS.modalidad)+'&duracion='+(bwS._svcDur||60);
   fetch(url).then(r=>r.json()).then(data=>{
     if(data.error){c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button><div class="bw-error">${data.error}</div>`;return;}
-    bwRenderSlots(c,data.slots||[]);
+    bwS._cachedSlots=data.slots||[];
+    bwRenderSlots(c,bwS._cachedSlots);
   }).catch(()=>{
     c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button>
     <div class="bw-error">No se pudo cargar disponibilidad. <a href="${BOOKING}" target="_blank">Reservar por formulario</a></div>`;
@@ -1191,7 +1209,9 @@ function bwRenderSlots(c,slots){
     byDate[fKey].push({row:s.row,hora:s.hora,colaborador:s.colaborador||null,ts:s.ts||0});
   });
   let html='<button class="bw-back" onclick="bwBack()">← Atrás</button><p class="bw-label">Selecciona horario</p>';
-  if(bwS.modalidad==='Sede'){
+  // Fix: solo filtrar por profesional si los slots realmente tienen datos de colaborador
+  const hasColabData=slots.some(s=>s.colaborador&&s.colaborador.trim()!=='');
+  if(bwS.modalidad==='Sede'&&hasColabData){
     // Chips de profesional opcionales
     const profs=[...new Set(slots.map(s=>s.colaborador).filter(Boolean))];
     if(profs.length>1&&!bwS.profesional){
@@ -1202,33 +1222,56 @@ function bwRenderSlots(c,slots){
       </div>`;
     }
   }
-  const activeProfFilter=bwS.profesional||bwS._profFilter||null;
+  // Si no hay datos de colaborador en la hoja, desactivar filtro por profesional
+  const activeProfFilter=hasColabData?(bwS.profesional||bwS._profFilter||null):null;
   // Ordenar fechas por ts del primer slot
   const fechasOrdenadas=Object.keys(byDate).sort((a,b)=>(byDate[a][0].ts||0)-(byDate[b][0].ts||0));
-  fechasOrdenadas.slice(0,7).forEach(fechaLabel=>{
+  // Construir grupos de fechas con sus slots filtrados
+  const dateGroups=[];
+  fechasOrdenadas.forEach(fechaLabel=>{
     const horas=byDate[fechaLabel];
-    // Comparación tolerante: busca por primer nombre para cubrir variaciones de escritura
     const filtered=activeProfFilter
       ?horas.filter(h=>{
           if(!h.colaborador)return false;
           const hc=h.colaborador.toLowerCase().trim();
           const ap=activeProfFilter.toLowerCase().trim();
           return hc===ap||hc.includes(ap)||ap.includes(hc)||
-                 hc.split(' ')[0]===ap.split(' ')[0]; // coincidencia por primer nombre
+                 hc.split(' ')[0]===ap.split(' ')[0];
         })
       :horas;
-    if(!filtered.length)return;
+    if(filtered.length)dateGroups.push({fechaLabel,filtered});
+  });
+  if(!dateGroups.length){
+    html+='<div class="bw-error">No hay horarios disponibles para este profesional. Intenta con "Cualquiera".</div>';
+    c.innerHTML=html;return;
+  }
+  // Paginación — 7 fechas por página
+  const pageSize=7;
+  const pageStart=(bwS._slotPage||0)*pageSize;
+  const pageDates=dateGroups.slice(pageStart,pageStart+pageSize);
+  pageDates.forEach(({fechaLabel,filtered})=>{
     html+=`<div class="bw-date-group"><div class="bw-date-label">${fechaLabel}</div><div class="bw-hours">`;
     filtered.forEach(h=>{
-      // Incluir row para que bookSlot pueda identificar la fila exacta
       const slotData=JSON.stringify({fecha:fechaLabel,hora:h.hora,colaborador:h.colaborador||'',row:h.row});
       html+=`<button class="bw-hour" onclick='bwPickSlot(${slotData})'>${h.hora}</button>`;
     });
     html+='</div></div>';
   });
+  // Botones de paginación
+  if(dateGroups.length>pageSize){
+    const showing=Math.min(pageStart+pageSize,dateGroups.length);
+    html+=`<div class="bw-pagination">`;
+    if(pageStart>0)html+=`<button class="bw-page-btn" onclick="bwSlotPage(-1)">← Anteriores</button>`;
+    else html+=`<span></span>`;
+    html+=`<span class="bw-page-info">${pageStart+1}–${showing} de ${dateGroups.length} días</span>`;
+    if(pageStart+pageSize<dateGroups.length)html+=`<button class="bw-page-btn" onclick="bwSlotPage(1)">Siguientes →</button>`;
+    else html+=`<span></span>`;
+    html+=`</div>`;
+  }
   c.innerHTML=html;
 }
-function bwFilterProf(p){bwS._profFilter=p;bwRender();}
+function bwFilterProf(p){bwS._profFilter=p;bwS._slotPage=0;bwRender();}
+function bwSlotPage(dir){bwS._slotPage=(bwS._slotPage||0)+dir;bwRender();}
 function bwPickSlot(s){bwS.slot=s;bwS.step=3;bwRender();}
 
 /* PASO 3 — Datos personales */
@@ -1280,6 +1323,7 @@ async function bwSubmit(e){
       nombre:bwS.nombre,
       email:bwS.email||'',
       telefono:bwS.telefono,
+      duracion:bwS._svcDur||60,
       observacion:bwS.notas+(bwS.direccion?'\nDirección: '+bwS.direccion:'')
     });
     const r=await fetch(GAS_CONTACT+'?'+params.toString());
