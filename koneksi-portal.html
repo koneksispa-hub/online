@@ -1116,8 +1116,9 @@ function addEspecifico() {
   const fechaFmt  = d + '/' + m + '/' + y;
 
   const slots = [];
-  if (sede) slots.push({ fecha: fechaFmt, hora, modalidad: 'Sede' });
-  if (dom)  slots.push({ fecha: fechaFmt, hora, modalidad: 'Domicilio' });
+  const profCodigo = (SESSION && SESSION.codigo) ? SESSION.codigo : '';
+  if (sede) slots.push({ fecha: fechaFmt, hora, modalidad: 'Sede',      codigo: profCodigo });
+  if (dom)  slots.push({ fecha: fechaFmt, hora, modalidad: 'Domicilio', codigo: profCodigo });
 
   showLoading();
   runGAS('addSlots', [SESSION.correo, SESSION.clave, slots], function(r) {
@@ -1190,8 +1191,9 @@ function previewBulk() {
       const ap  = h24 < 12 ? 'AM' : 'PM';
       const hora = hh + ':' + mp + ' ' + ap;
 
-      if (sede) slots.push({ fecha: fechaFmt, hora, modalidad: 'Sede', diaStr });
-      if (dom)  slots.push({ fecha: fechaFmt, hora, modalidad: 'Domicilio', diaStr });
+      const bulkCodigo = (SESSION && SESSION.codigo) ? SESSION.codigo : '';
+      if (sede) slots.push({ fecha: fechaFmt, hora, modalidad: 'Sede',      diaStr, codigo: bulkCodigo });
+      if (dom)  slots.push({ fecha: fechaFmt, hora, modalidad: 'Domicilio', diaStr, codigo: bulkCodigo });
     }
   }
 
@@ -1323,7 +1325,7 @@ function doChangePass(e) {
 // ════════════════════════════════════════════════════════════
 
 function loadMedia() {
-  runGAS('listMedia', [SESSION.correo, SESSION.clave], function(r) {
+  runGAS('listMedia', [SESSION.correo, SESSION.clave, (SESSION.codigo||'')], function(r) {
     if (!r) return;
     MEDIA = r.files || [];
     if (r.folderUrl) {
@@ -1379,7 +1381,7 @@ function deleteMediaFile(id, name) {
     'Eliminar', 'btn-danger',
     function() {
       showLoading();
-      runGAS('deleteMedia', [SESSION.correo, SESSION.clave, id], function(r) {
+      runGAS('deleteMedia', [SESSION.correo, SESSION.clave, id, (SESSION.codigo||'')], function(r) {
         hideLoading();
         if (!r) return;
         toast('Archivo eliminado', 'ok');
@@ -1441,7 +1443,7 @@ function uploadSequential(files, idx) {
   reader.onload = function(ev) {
     const dataUrl  = ev.target.result;
     const base64   = dataUrl.split(',')[1];
-    runGAS('uploadMedia', [SESSION.correo, SESSION.clave, f.name, f.type, base64], function(r) {
+    runGAS('uploadMedia', [SESSION.correo, SESSION.clave, f.name, f.type, base64, (SESSION.codigo||'')], function(r) {
       if (!r) { uploadSequential(files, idx+1); return; }
       toast(f.name + ' subida', 'ok', 2000);
       uploadSequential(files, idx+1);
@@ -1537,7 +1539,7 @@ function saveService() {
       loadServices();
     });
   } else {
-    runGAS('addService', [SESSION.correo, SESSION.clave, nombre, precioSede, precioDom], function(r) {
+    runGAS('addService', [SESSION.correo, SESSION.clave, nombre, precioSede, precioDom, (SESSION.codigo||'')], function(r) {
       hideLoading();
       if (!r) return;
       toast(r.msg || 'Servicio agregado', 'ok');
