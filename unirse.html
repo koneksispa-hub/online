@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Únete a Koneksi Spa</title>
+<meta name="description" content="¿Eres terapeuta o profesional del bienestar? Únete a la red Koneksi Spa y amplía tu alcance en Cali. Envía tu solicitud de vinculación.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap">
+<style>
+[hidden]{display:none!important}
+:root{
+  --bg:#FAF4EC;--bg-alt:#EDE0CC;--surface:#FFFFFF;--surface-el:#FFF8F2;
+  --espresso:#2D1A10;--brown:#6B3D2E;--caramel:#BF9B6F;--caramel-dk:#A07845;--caramel-lt:#E8D5BB;
+  --text:#1A0F08;--text-mid:#5C3A2A;--text-muted:#9A7060;
+  --border:rgba(191,155,111,.2);--border-s:rgba(107,61,46,.3);
+  --sh-sm:0 2px 8px rgba(45,26,16,.07);--sh-md:0 4px 20px rgba(45,26,16,.11);--sh-lg:0 8px 40px rgba(45,26,16,.16);
+  --ok-bg:rgba(37,211,102,.1);--ok-cl:#1a7a40;--ok-bd:rgba(37,211,102,.25);
+  --err-bg:rgba(220,38,38,.07);--err-cl:#9b1c1c;--err-bd:rgba(220,38,38,.18);
+  --fd:'Cormorant Garant',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;
+  --nav-h:70px;color-scheme:light;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1A0F08;--bg-alt:#261710;--surface:#2D1A10;--surface-el:#3D2415;
+    --caramel-lt:#4D3020;--text:#F5EBE0;--text-mid:#C4A08A;--text-muted:#8A6355;
+    --border:rgba(191,155,111,.12);--border-s:rgba(191,155,111,.22);color-scheme:dark;
+    --ok-bg:rgba(37,211,102,.08);--ok-cl:#4ade80;--ok-bd:rgba(37,211,102,.2);
+    --err-bg:rgba(220,38,38,.08);--err-cl:#f87171;--err-bd:rgba(220,38,38,.2);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1A0F08;--bg-alt:#261710;--surface:#2D1A10;--surface-el:#3D2415;
+  --caramel-lt:#4D3020;--text:#F5EBE0;--text-mid:#C4A08A;--text-muted:#8A6355;
+  --border:rgba(191,155,111,.12);--border-s:rgba(191,155,111,.22);color-scheme:dark;
+  --ok-bg:rgba(37,211,102,.08);--ok-cl:#4ade80;--ok-bd:rgba(37,211,102,.2);
+  --err-bg:rgba(220,38,38,.08);--err-cl:#f87171;--err-bd:rgba(220,38,38,.2);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font-family:inherit}
+
+/* NAV */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:100;padding-top:env(safe-area-inset-top,0px);background:var(--surface);box-shadow:var(--sh-md)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h);padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.nav-logo{font-family:var(--fd);font-size:1.5rem;font-weight:600;color:var(--espresso);letter-spacing:.02em}
+.nav-logo span{color:var(--caramel)}
+.nav-back{display:inline-flex;align-items:center;gap:.5rem;font-size:.83rem;color:var(--text-muted);transition:color .2s}
+.nav-back:hover{color:var(--caramel)}
+.nav-back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* HERO BAND */
+.page-hero{margin-top:var(--nav-h);background:linear-gradient(135deg,var(--espresso) 0%,var(--brown) 100%);padding:4rem max(24px,env(safe-area-inset-left,0px));text-align:center;overflow:hidden;position:relative}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 50%,rgba(191,155,111,.18) 0%,transparent 65%);pointer-events:none}
+.page-hero-eyebrow{display:inline-block;margin-bottom:.75rem;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--caramel)}
+.page-hero h1{font-family:var(--fd);font-size:clamp(2rem,5vw,3.4rem);font-weight:500;color:#fff;line-height:1.1;text-wrap:balance;margin-bottom:1rem}
+.page-hero p{color:rgba(255,255,255,.75);font-size:1rem;max-width:520px;margin-inline:auto;line-height:1.65}
+
+/* STEPS INDICATOR */
+.steps-band{background:var(--bg-alt);border-bottom:1px solid var(--border);padding:.85rem max(20px,env(safe-area-inset-left,0px))}
+.steps-inner{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:0;overflow-x:auto}
+.step-item{display:flex;align-items:center;gap:.45rem;white-space:nowrap;flex-shrink:0}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--caramel-lt);color:var(--brown);font-size:.72rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-label{font-size:.78rem;color:var(--text-muted)}
+.step-sep{width:28px;height:1px;background:var(--border-s);margin:0 .35rem;flex-shrink:0}
+
+/* LAYOUT */
+.page-body{padding:3rem max(20px,env(safe-area-inset-left,0px)) 5rem;max-width:800px;margin:0 auto}
+
+/* SECTION BLOCKS */
+.form-section{margin-bottom:2.5rem}
+.form-section-hdr{display:flex;align-items:center;gap:.7rem;margin-bottom:1.5rem;padding-bottom:.7rem;border-bottom:1px solid var(--border)}
+.fs-icon{width:36px;height:36px;border-radius:10px;background:var(--caramel-lt);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.fs-title{font-family:var(--fd);font-size:1.2rem;font-weight:500;color:var(--text)}
+.fs-sub{font-size:.8rem;color:var(--text-muted);margin-top:.1rem}
+
+/* GRID */
+.fg-row{display:grid;gap:1rem;margin-bottom:0}
+.fg-row.cols-2{grid-template-columns:1fr 1fr}
+@media(max-width:560px){.fg-row.cols-2{grid-template-columns:1fr}}
+
+/* FIELD GROUP */
+.fg{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem}
+.fg:last-child{margin-bottom:0}
+.fg label{font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);font-weight:500}
+.fg label .req{color:var(--caramel);margin-left:.15rem}
+.fg input,.fg select,.fg textarea{width:100%;padding:.72rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.9rem;transition:border-color .2s,box-shadow .2s;line-height:1.5}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--caramel);box-shadow:0 0 0 3px rgba(191,155,111,.15)}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--text-muted);opacity:.7}
+.fg select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239A7060' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+.fg textarea{resize:vertical;min-height:110px}
+.fg-hint{font-size:.77rem;color:var(--text-muted);margin-top:.2rem;line-height:1.45}
+
+/* RADIO TOGGLE */
+.radio-group{display:flex;gap:.6rem;flex-wrap:wrap}
+.radio-opt{position:relative}
+.radio-opt input[type=radio]{position:absolute;opacity:0;width:0;height:0}
+.radio-opt label{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem 1.1rem;border-radius:50px;border:1.5px solid var(--border-s);background:var(--surface-el);font-size:.85rem;cursor:pointer;transition:border-color .2s,background .2s,color .2s;color:var(--text)}
+.radio-opt input:checked+label{border-color:var(--caramel);background:var(--caramel-lt);color:var(--brown);font-weight:500}
+.radio-opt label:hover{border-color:var(--caramel)}
+
+/* FILE UPLOAD */
+.file-drop{border:2px dashed var(--border-s);border-radius:12px;padding:1.75rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--bg)}
+.file-drop:hover,.file-drop.drag{border-color:var(--caramel);background:var(--surface-el)}
+.file-drop input[type=file]{position:absolute;opacity:0;width:0;height:0}
+.file-drop-icon{font-size:2.2rem;margin-bottom:.5rem}
+.file-drop-label{font-size:.88rem;color:var(--text-mid);margin-bottom:.25rem}
+.file-drop-hint{font-size:.77rem;color:var(--text-muted)}
+.file-drop-btn{margin-top:.85rem;display:inline-flex;align-items:center;gap:.45rem;padding:.5rem 1.25rem;border-radius:50px;border:1.5px solid var(--caramel);color:var(--caramel);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .2s,color .2s;font-family:inherit;background:none}
+.file-drop-btn:hover{background:var(--caramel);color:#fff}
+.file-list{display:flex;flex-direction:column;gap:.45rem;margin-top:1rem}
+.file-item{display:flex;align-items:center;gap:.7rem;background:var(--surface-el);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem}
+.file-item-icon{font-size:1.3rem;flex-shrink:0}
+.file-item-name{font-size:.83rem;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-item-size{font-size:.75rem;color:var(--text-muted);flex-shrink:0}
+.file-item-rm{width:22px;height:22px;border-radius:50%;border:1px solid var(--border-s);background:none;color:var(--text-muted);font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,color .2s;flex-shrink:0}
+.file-item-rm:hover{background:var(--err-bg);color:var(--err-cl);border-color:var(--err-bd)}
+
+/* SOCIAL ROW */
+.social-row{display:grid;grid-template-columns:120px 1fr;gap:.6rem;align-items:start}
+.social-row select{padding:.72rem .85rem}
+@media(max-width:420px){.social-row{grid-template-columns:1fr}}
+
+/* NOTICE BOX */
+.notice-box{background:var(--surface-el);border:1px solid var(--border);border-left:4px solid var(--caramel);border-radius:0 10px 10px 0;padding:1.1rem 1.25rem;margin-bottom:2rem;display:flex;gap:.85rem;align-items:flex-start}
+.notice-box-icon{font-size:1.3rem;flex-shrink:0;margin-top:.05rem}
+.notice-box-text{font-size:.87rem;color:var(--text-mid);line-height:1.6}
+.notice-box-text strong{color:var(--text)}
+
+/* SUBMIT */
+.submit-wrap{text-align:center;padding-top:.5rem}
+.btn-submit{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;padding:.9rem 2.75rem;border-radius:50px;background:linear-gradient(135deg,var(--espresso),var(--brown));color:var(--caramel-lt);font-size:.95rem;letter-spacing:.03em;font-weight:500;border:none;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(45,26,16,.25);transition:opacity .2s,transform .15s;min-width:220px}
+.btn-submit:hover:not(:disabled){opacity:.88;transform:translateY(-2px)}
+.btn-submit:disabled{opacity:.55;cursor:not-allowed}
+.btn-submit .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.form-msg{margin-top:1.1rem;padding:.85rem 1.1rem;border-radius:10px;font-size:.87rem;line-height:1.6;text-align:left}
+.form-msg.ok{background:var(--ok-bg);color:var(--ok-cl);border:1px solid var(--ok-bd)}
+.form-msg.err{background:var(--err-bg);color:var(--err-cl);border:1px solid var(--err-bd)}
+
+/* SUCCESS STATE */
+.success-panel{text-align:center;padding:3.5rem 1.5rem;display:none}
+.success-icon{font-size:4rem;margin-bottom:1.25rem;line-height:1}
+.success-panel h2{font-family:var(--fd);font-size:clamp(1.8rem,4vw,2.5rem);font-weight:500;color:var(--text);margin-bottom:.8rem}
+.success-panel p{color:var(--text-mid);max-width:420px;margin:0 auto 1.5rem;line-height:1.65}
+.success-panel .btn-home{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.75rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.88rem;font-weight:500;text-decoration:none;transition:background .2s,transform .15s}
+.success-panel .btn-home:hover{background:var(--caramel-dk);transform:translateY(-1px)}
+
+/* FOOTER */
+footer{background:var(--espresso);color:rgba(255,255,255,.55);padding-block:2rem;text-align:center;font-size:.8rem}
+footer a{color:var(--caramel);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* REQUIRED BADGE */
+.req-legend{font-size:.77rem;color:var(--text-muted);margin-bottom:2rem}
+.req-legend span{color:var(--caramel)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="https://koneksispa.github.io/" class="nav-logo">Koneksi<span> Spa</span></a>
+    <a href="https://koneksispa.github.io/" class="nav-back">
+      <svg viewBox="0 0 16 16"><polyline points="10 3 5 8 10 13"/></svg>
+      Volver al inicio
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <p class="page-hero-eyebrow">Vinculación de Profesionales</p>
+  <h1>Únete a nuestra red de bienestar</h1>
+  <p>¿Eres terapeuta, esteticista o profesional del bienestar? Haz parte del equipo Koneksi y conecta con más clientes. Completa el formulario y te responderemos en máximo 3 días hábiles.</p>
+</div>
+
+<!-- STEPS -->
+<div class="steps-band">
+  <div class="steps-inner">
+    <div class="step-item"><span class="step-num">1</span><span class="step-label">Datos personales</span></div>
+    <div class="step-sep"></div>
+    <div class="step-item"><span class="step-num">2</span><span class="step-label">Sede y negocio</span></div>
+    <div class="step-sep"></div>
+    <div class="step-item"><span class="step-num">3</span><span class="step-label">Perfil profesional</span></div>
+    <div class="step-sep"></div>
+    <div class="step-item"><span class="step-num">4</span><span class="step-label">Certificados</span></div>
+  </div>
+</div>
+
+<!-- BODY -->
+<main class="page-body">
+
+  <p class="req-legend">Los campos marcados con <span>*</span> son obligatorios.</p>
+
+  <!-- SUCCESS STATE (hidden until form submits) -->
+  <div class="success-panel" id="successPanel">
+    <div class="success-icon">🌿</div>
+    <h2>¡Solicitud enviada con éxito!</h2>
+    <p>Hemos recibido tu información. En un plazo de <strong>3 días hábiles</strong> nos comunicaremos contigo para continuar el proceso de vinculación.</p>
+    <a href="https://koneksispa.github.io/" class="btn-home">← Volver al inicio</a>
+  </div>
+
+  <form id="joinForm" novalidate>
+
+    <!-- ═══ SECCIÓN 1 — Datos personales ═══ -->
+    <div class="form-section">
+      <div class="form-section-hdr">
+        <div class="fs-icon">👤</div>
+        <div>
+          <div class="fs-title">Datos personales</div>
+          <div class="fs-sub">Información de contacto del profesional</div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label for="nombre">Nombres y apellidos completos <span class="req">*</span></label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ej: María Alejandra González Reyes" required autocomplete="name">
+      </div>
+
+      <div class="fg-row cols-2">
+        <div class="fg">
+          <label for="email">Correo electrónico <span class="req">*</span></label>
+          <input type="email" id="email" name="email" placeholder="tu@correo.com" required autocomplete="email">
+        </div>
+        <div class="fg">
+          <label for="telefono">Número de teléfono / WhatsApp <span class="req">*</span></label>
+          <input type="tel" id="telefono" name="telefono" placeholder="Ej: 300 123 4567" required autocomplete="tel">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label for="ciudad">Ciudad donde atiende <span class="req">*</span></label>
+        <input type="text" id="ciudad" name="ciudad" placeholder="Ej: Cali, Palmira, Jamundí..." required autocomplete="address-level2">
+      </div>
+    </div>
+
+    <!-- ═══ SECCIÓN 2 — Sede y negocio ═══ -->
+    <div class="form-section">
+      <div class="form-section-hdr">
+        <div class="fs-icon">🏠</div>
+        <div>
+          <div class="fs-title">Sede y negocio</div>
+          <div class="fs-sub">Información sobre tu espacio de trabajo</div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>¿Tienes sede propia? <span class="req">*</span></label>
+        <div class="radio-group">
+          <div class="radio-opt">
+            <input type="radio" id="sedeNo" name="tieneSede" value="no" checked>
+            <label for="sedeNo">No, trabajo a domicilio</label>
+          </div>
+          <div class="radio-opt">
+            <input type="radio" id="sedeSi" name="tieneSede" value="si">
+            <label for="sedeSi">Sí, tengo sede propia</label>
+          </div>
+          <div class="radio-opt">
+            <input type="radio" id="sedeAmbas" name="tieneSede" value="ambas">
+            <label for="sedeAmbas">Ambas modalidades</label>
+          </div>
+        </div>
+      </div>
+
+      <div id="sedeFields" hidden>
+        <div class="fg">
+          <label for="dirSede">Dirección de la sede <span class="req" id="dirSedeReq">*</span></label>
+          <input type="text" id="dirSede" name="dirSede" placeholder="Ej: Calle 15 # 25-30, Barrio Centenario, Cali" autocomplete="street-address">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label for="nombreNegocio">Nombre del negocio <span style="color:var(--text-muted);font-weight:400;text-transform:none">(si lo tiene)</span></label>
+        <input type="text" id="nombreNegocio" name="nombreNegocio" placeholder="Ej: Espacio Vital Wellness">
+      </div>
+
+      <div class="fg-row cols-2">
+        <div class="fg">
+          <label for="telefonoNegocio">Teléfono del negocio</label>
+          <input type="tel" id="telefonoNegocio" name="telefonoNegocio" placeholder="Ej: 602 123 4567">
+        </div>
+        <div class="fg">
+          <label for="dirNegocio">Dirección del negocio</label>
+          <input type="text" id="dirNegocio" name="dirNegocio" placeholder="Si es diferente a la sede">
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SECCIÓN 3 — Perfil profesional ═══ -->
+    <div class="form-section">
+      <div class="form-section-hdr">
+        <div class="fs-icon">💆</div>
+        <div>
+          <div class="fs-title">Perfil profesional</div>
+          <div class="fs-sub">Cuéntanos sobre tu experiencia y servicios</div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label for="procedimientos">Procedimientos / servicios que realizas <span class="req">*</span></label>
+        <textarea id="procedimientos" name="procedimientos" placeholder="Ej: Masaje relajante sueco, chocoterapia, reflexología podal, masaje descontracturante, piedras calientes..." required rows="4"></textarea>
+        <span class="fg-hint">Lista todos los procedimientos que ofreces, separados por coma.</span>
+      </div>
+
+      <!-- REDES SOCIALES -->
+      <div class="fg">
+        <label>Redes sociales <span style="color:var(--text-muted);font-weight:400;text-transform:none">(agrega las que uses)</span></label>
+        <div id="socialList"></div>
+        <button type="button" id="addSocialBtn" class="file-drop-btn" style="margin-top:.6rem">
+          <span>+</span> Agregar red social
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ SECCIÓN 4 — Certificados ═══ -->
+    <div class="form-section">
+      <div class="form-section-hdr">
+        <div class="fs-icon">📄</div>
+        <div>
+          <div class="fs-title">Certificados de estudio</div>
+          <div class="fs-sub">Adjunta tus títulos o diplomas relacionados con la profesión</div>
+        </div>
+      </div>
+
+      <div class="file-drop" id="fileDrop" role="button" tabindex="0" aria-label="Cargar certificados en PDF">
+        <input type="file" id="certInput" accept=".pdf,application/pdf" multiple aria-hidden="true">
+        <div class="file-drop-icon">📋</div>
+        <div class="file-drop-label">Arrastra los archivos PDF aquí</div>
+        <div class="file-drop-hint">Máximo 5 archivos · PDF únicamente · 5 MB por archivo</div>
+        <button type="button" class="file-drop-btn" onclick="document.getElementById('certInput').click()">
+          Seleccionar archivos
+        </button>
+      </div>
+      <div class="file-list" id="fileList"></div>
+      <div class="fg-hint" style="margin-top:.6rem">Si no tienes certificados digitales, puedes describirlos en las observaciones.</div>
+    </div>
+
+    <!-- ═══ SECCIÓN 5 — Observaciones ═══ -->
+    <div class="form-section">
+      <div class="form-section-hdr">
+        <div class="fs-icon">💬</div>
+        <div>
+          <div class="fs-title">Observaciones</div>
+          <div class="fs-sub">Cualquier información adicional que quieras compartir</div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label for="observaciones">Observaciones</label>
+        <textarea id="observaciones" name="observaciones" placeholder="Cuéntanos algo más sobre ti, tu experiencia, disponibilidad horaria, o cualquier otra información que consideres relevante..." rows="5"></textarea>
+      </div>
+    </div>
+
+    <!-- NOTICE -->
+    <div class="notice-box">
+      <span class="notice-box-icon">📬</span>
+      <p class="notice-box-text"><strong>¿Qué pasa después?</strong><br>
+        Una vez recibida tu solicitud, el equipo de Koneksi la revisará. <strong>En un plazo máximo de 3 días hábiles</strong> te contactaremos al correo y/o WhatsApp que indicaste para informarte sobre los siguientes pasos del proceso de vinculación.</p>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-wrap">
+      <button type="submit" class="btn-submit" id="submitBtn">
+        Enviar solicitud de vinculación
+      </button>
+      <div class="form-msg" id="formMsg" role="alert"></div>
+    </div>
+
+  </form>
+</main>
+
+<footer>
+  <p>© 2025 Koneksi Spa · Cali, Valle del Cauca &nbsp;·&nbsp; <a href="https://koneksispa.github.io/">koneksispa.github.io</a></p>
+</footer>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwHOZmVPMlUmY97GaU7CMoDC9hejIJcLsPGTisk-fAfGxXBfIXoHt1rWd1IX_eWhUSJ/exec';
+
+/* ── SEDE TOGGLE ── */
+document.querySelectorAll('input[name=tieneSede]').forEach(r => {
+  r.addEventListener('change', () => {
+    const show = r.value === 'si' || r.value === 'ambas';
+    document.getElementById('sedeFields').hidden = !show;
+    document.getElementById('dirSede').required = show;
+  });
+});
+
+/* ── SOCIAL ROWS ── */
+const REDES = ['Instagram','Facebook','TikTok','YouTube','LinkedIn','Twitter / X','Otra'];
+let socialCount = 0;
+
+function addSocialRow(red = '', handle = '') {
+  if (socialCount >= 5) return;
+  socialCount++;
+  const list = document.getElementById('socialList');
+  const id   = 'sr_' + socialCount;
+  const wrap = document.createElement('div');
+  wrap.className = 'fg-row';
+  wrap.style.cssText = 'display:grid;grid-template-columns:140px 1fr 36px;gap:.5rem;align-items:start;margin-bottom:.5rem';
+  wrap.id = id;
+  wrap.innerHTML =
+    '<select name="socialRed_' + socialCount + '" aria-label="Red social" style="padding:.72rem .7rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.88rem;appearance:none">' +
+      REDES.map(r => '<option value="' + r + '"' + (r === red ? ' selected' : '') + '>' + r + '</option>').join('') +
+    '</select>' +
+    '<input type="text" name="socialHandle_' + socialCount + '" placeholder="@usuario o URL del perfil" value="' + handle + '" style="padding:.72rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.88rem" aria-label="Perfil o usuario">' +
+    '<button type="button" onclick="rmSocial(\'' + id + '\')" aria-label="Eliminar" style="height:38px;border-radius:8px;border:1px solid var(--border-s);background:none;color:var(--text-muted);cursor:pointer;font-size:.9rem;margin-top:.35rem">✕</button>';
+  list.appendChild(wrap);
+  if (socialCount >= 5) document.getElementById('addSocialBtn').disabled = true;
+}
+
+function rmSocial(id) {
+  const el = document.getElementById(id);
+  if (el) { el.remove(); socialCount--; document.getElementById('addSocialBtn').disabled = false; }
+}
+
+document.getElementById('addSocialBtn').addEventListener('click', () => addSocialRow());
+addSocialRow('Instagram'); // primera fila por defecto
+
+/* ── FILE UPLOAD ── */
+let files = [];
+
+function fmtSize(b) {
+  return b < 1024 * 1024 ? (b / 1024).toFixed(0) + ' KB' : (b / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function renderFiles() {
+  const list = document.getElementById('fileList');
+  list.innerHTML = '';
+  files.forEach((f, i) => {
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.innerHTML =
+      '<span class="file-item-icon">📄</span>' +
+      '<span class="file-item-name">' + f.name + '</span>' +
+      '<span class="file-item-size">' + fmtSize(f.size) + '</span>' +
+      '<button type="button" class="file-item-rm" onclick="removeFile(' + i + ')" aria-label="Quitar">✕</button>';
+    list.appendChild(item);
+  });
+}
+
+function addFiles(newFiles) {
+  const MAX = 5;
+  const MAX_MB = 5 * 1024 * 1024;
+  const existing = new Set(files.map(f => f.name + f.size));
+  for (const f of newFiles) {
+    if (files.length >= MAX) { showMsg('Máximo 5 archivos PDF.', 'err'); break; }
+    if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+      showMsg('Solo se aceptan archivos PDF.', 'err'); continue;
+    }
+    if (f.size > MAX_MB) { showMsg(f.name + ' supera el límite de 5 MB.', 'err'); continue; }
+    if (!existing.has(f.name + f.size)) { files.push(f); existing.add(f.name + f.size); }
+  }
+  renderFiles();
+}
+
+function removeFile(i) { files.splice(i, 1); renderFiles(); }
+
+const certInput = document.getElementById('certInput');
+certInput.addEventListener('change', () => { addFiles(Array.from(certInput.files)); certInput.value = ''; });
+
+const fileDrop = document.getElementById('fileDrop');
+fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('drag'); });
+fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('drag'));
+fileDrop.addEventListener('drop', e => {
+  e.preventDefault(); fileDrop.classList.remove('drag');
+  addFiles(Array.from(e.dataTransfer.files));
+});
+fileDrop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') certInput.click(); });
+
+/* ── HELPERS ── */
+function showMsg(msg, type) {
+  const el = document.getElementById('formMsg');
+  el.textContent = msg;
+  el.className = 'form-msg ' + type;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function readFileB64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res({ name: file.name, size: file.size, b64: r.result.split(',')[1] });
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ── SUBMIT ── */
+document.getElementById('joinForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+
+  /* Validación básica */
+  const nombre = document.getElementById('nombre').value.trim();
+  const email  = document.getElementById('email').value.trim();
+  const tel    = document.getElementById('telefono').value.trim();
+  const ciudad = document.getElementById('ciudad').value.trim();
+  const proced = document.getElementById('procedimientos').value.trim();
+  const tieneSede = document.querySelector('input[name=tieneSede]:checked').value;
+
+  if (!nombre || !email || !tel || !ciudad || !proced) {
+    showMsg('Por favor completa todos los campos obligatorios (*).', 'err');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showMsg('El correo electrónico no es válido.', 'err');
+    return;
+  }
+  const dirSede = document.getElementById('dirSede').value.trim();
+  if ((tieneSede === 'si' || tieneSede === 'ambas') && !dirSede) {
+    showMsg('Por favor ingresa la dirección de tu sede.', 'err');
+    return;
+  }
+
+  /* Leer redes sociales */
+  const sociales = [];
+  document.querySelectorAll('[name^="socialRed_"]').forEach(sel => {
+    const num = sel.name.split('_')[1];
+    const handle = document.querySelector('[name="socialHandle_' + num + '"]').value.trim();
+    if (handle) sociales.push({ red: sel.value, handle });
+  });
+
+  /* Leer archivos como base64 */
+  let certs = [];
+  try {
+    certs = await Promise.all(files.map(readFileB64));
+  } catch (err) {
+    showMsg('Error al leer uno de los archivos. Intenta de nuevo.', 'err');
+    return;
+  }
+
+  /* Total aprox de datos */
+  const totalB64KB = certs.reduce((acc, c) => acc + c.b64.length * .75 / 1024, 0);
+  if (totalB64KB > 15000) {
+    showMsg('El tamaño total de los certificados es muy grande. Intenta con archivos más pequeños.', 'err');
+    return;
+  }
+
+  const payload = {
+    action: 'solicitudProfesional',
+    nombre,
+    email,
+    telefono:         tel,
+    ciudad,
+    tieneSede,
+    dirSede:          dirSede || '',
+    nombreNegocio:    document.getElementById('nombreNegocio').value.trim(),
+    telefonoNegocio:  document.getElementById('telefonoNegocio').value.trim(),
+    dirNegocio:       document.getElementById('dirNegocio').value.trim(),
+    procedimientos:   proced,
+    sociales,
+    observaciones:    document.getElementById('observaciones').value.trim(),
+    certificados:     certs,
+    fechaEnvio:       new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })
+  };
+
+  /* Envío */
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando…';
+
+  try {
+    await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+    /* no-cors no devuelve status — asumimos éxito si no hubo excepción */
+    document.getElementById('joinForm').hidden = true;
+    document.getElementById('successPanel').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    showMsg('No se pudo enviar la solicitud. Verifica tu conexión y vuelve a intentarlo.', 'err');
+    btn.disabled = false;
+    btn.textContent = 'Enviar solicitud de vinculación';
+  }
+});
+</script>
+</body>
+</html>
