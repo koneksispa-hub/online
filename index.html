@@ -304,6 +304,28 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 .btn-booking{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 2rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.9rem;font-weight:500;box-shadow:0 4px 15px rgba(191,155,111,.4);transition:background .2s,transform .15s;border:none;cursor:pointer;font-family:inherit;text-decoration:none}
 .btn-booking:hover{background:var(--caramel-dk);transform:translateY(-2px)}
 
+/* ÚNETE SECTION */
+.join-section{background:linear-gradient(135deg,var(--espresso) 0%,var(--brown) 100%);position:relative;overflow:hidden;padding-block:5rem}
+.join-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(191,155,111,.2) 0%,transparent 60%);pointer-events:none}
+.join-section::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 15% 80%,rgba(191,155,111,.12) 0%,transparent 55%);pointer-events:none}
+.join-inner{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+@media(max-width:768px){.join-inner{grid-template-columns:1fr;gap:2.5rem;text-align:center}}
+.join-text .eyebrow{color:var(--caramel)}
+.join-text h2{font-family:var(--fd);font-size:clamp(2rem,4.5vw,3.2rem);font-weight:500;color:#fff;line-height:1.1;text-wrap:balance;margin-bottom:1.1rem}
+.join-text p{color:rgba(255,255,255,.75);font-size:1rem;line-height:1.7;margin-bottom:1.75rem;max-width:460px}
+@media(max-width:768px){.join-text p{margin-inline:auto}}
+.join-cta{display:flex;flex-wrap:wrap;gap:.85rem;align-items:center}
+@media(max-width:768px){.join-cta{justify-content:center}}
+.btn-join{display:inline-flex;align-items:center;gap:.55rem;padding:.85rem 2.1rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.9rem;font-weight:500;letter-spacing:.02em;border:none;cursor:pointer;font-family:inherit;text-decoration:none;box-shadow:0 4px 20px rgba(191,155,111,.4);transition:background .2s,transform .15s}
+.btn-join:hover{background:var(--caramel-dk);transform:translateY(-2px)}
+.btn-join-ghost{display:inline-flex;align-items:center;gap:.55rem;padding:.85rem 2rem;border-radius:50px;border:1.5px solid rgba(255,255,255,.4);color:rgba(255,255,255,.85);font-size:.9rem;font-weight:400;text-decoration:none;transition:border-color .2s,color .2s,background .2s}
+.btn-join-ghost:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.08)}
+.join-cards{display:flex;flex-direction:column;gap:1rem}
+.join-card{background:rgba(255,255,255,.07);border:1px solid rgba(191,155,111,.22);border-radius:14px;padding:1.1rem 1.3rem;display:flex;align-items:flex-start;gap:.9rem;backdrop-filter:blur(4px)}
+.join-card-icon{font-size:1.6rem;flex-shrink:0;margin-top:.05rem}
+.join-card-title{font-size:.9rem;font-weight:600;color:#fff;margin-bottom:.2rem}
+.join-card-desc{font-size:.82rem;color:rgba(255,255,255,.65);line-height:1.5}
+
 /* FAB WhatsApp */
 .fab-wa{position:fixed;bottom:calc(1.75rem + env(safe-area-inset-bottom,0px));right:max(1.5rem,env(safe-area-inset-right,0px));z-index:150;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.5);transition:transform .2s,box-shadow .2s}
 .fab-wa:hover{transform:scale(1.1);box-shadow:0 6px 25px rgba(37,211,102,.6)}
@@ -478,6 +500,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       <a href="#equipo">Equipo</a>
       <a href="#contacto">Contacto</a>
       <a href="politica-privacidad.html">Privacidad</a>
+      <a href="https://koneksispa.com/unirse" style="font-size:.88rem;letter-spacing:.05em">Únete al equipo</a>
       <a href="https://koneksispa.com/koneksi-portal" target="_blank" rel="noopener" style="font-size:.88rem;letter-spacing:.05em">Portal Profesionales</a>
       <button class="btn-nav" onclick="openBookingWizard()">Reservar</button>
     </div>
@@ -490,6 +513,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
     <a href="#equipo" role="menuitem">Equipo</a>
     <a href="#contacto" role="menuitem">Contacto</a>
     <a href="politica-privacidad.html" role="menuitem">Política de Privacidad</a>
+    <a href="https://koneksispa.com/unirse" role="menuitem" style="color:var(--caramel);font-weight:500">Únete al equipo</a>
     <a href="https://koneksispa.com/koneksi-portal" role="menuitem" target="_blank" rel="noopener" style="color:var(--caramel);font-weight:500">Portal Profesionales</a>
     <button role="menuitem" onclick="openBookingWizard();document.getElementById('mobileMenu').hidden=true;" style="color:var(--caramel);font-weight:500;background:none;border:none;cursor:pointer;font-size:inherit;font-family:inherit;padding:0">Reservar ahora</button>
   </div>
@@ -672,6 +696,55 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       </div>
     </div>
   </section>
+  <!-- ÚNETE AL EQUIPO -->
+  <section id="unirse" class="join-section" aria-labelledby="join-h">
+    <div class="join-inner">
+      <div class="join-text reveal">
+        <span class="eyebrow">Profesionales del bienestar</span>
+        <h2 id="join-h">¿Haces parte del mundo del bienestar?</h2>
+        <p>Si eres terapeuta, esteticista o tienes experiencia en masajes y rituales de bienestar, Koneksi es tu plataforma para crecer. Llega a más clientes, trabaja con libertad y haz parte de una red que valora tu profesión.</p>
+        <div class="join-cta">
+          <a href="https://koneksispa.com/unirse" class="btn-join">
+            Quiero unirme →
+          </a>
+          <a href="https://wa.me/573202561705?text=Hola%2C+me+interesa+vincularme+como+profesional+a+Koneksi+Spa" target="_blank" rel="noopener" class="btn-join-ghost">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.533 5.854L.057 23.882a.5.5 0 0 0 .613.613l6.054-1.473A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.896 0-3.671-.525-5.188-1.437l-.368-.219-3.813.927.951-3.785-.24-.383A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+            Escribir por WhatsApp
+          </a>
+        </div>
+      </div>
+      <div class="join-cards reveal">
+        <div class="join-card">
+          <span class="join-card-icon">📅</span>
+          <div>
+            <div class="join-card-title">Agenda flexible</div>
+            <div class="join-card-desc">Tú decides cuándo y dónde atiendes. Trabaja en tu sede o a domicilio según tu disponibilidad.</div>
+          </div>
+        </div>
+        <div class="join-card">
+          <span class="join-card-icon">👥</span>
+          <div>
+            <div class="join-card-title">Más clientes, menos esfuerzo</div>
+            <div class="join-card-desc">Koneksi se encarga de la captación. Tú te enfocas en lo que sabes hacer: dar bienestar.</div>
+          </div>
+        </div>
+        <div class="join-card">
+          <span class="join-card-icon">🌿</span>
+          <div>
+            <div class="join-card-title">Red de profesionales</div>
+            <div class="join-card-desc">Haz parte de una comunidad de terapeutas comprometidos con la excelencia y el cuidado integral.</div>
+          </div>
+        </div>
+        <div class="join-card">
+          <span class="join-card-icon">📩</span>
+          <div>
+            <div class="join-card-title">Respuesta en 3 días hábiles</div>
+            <div class="join-card-desc">Envía tu solicitud con tus datos y certificados. Te contactamos pronto para continuar el proceso.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer role="contentinfo">
@@ -707,6 +780,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <li><a href="#servicios">Ver servicios</a></li>
         <li><a href="#equipo">Nuestro equipo</a></li>
         <li><a href="politica-privacidad.html">Política de Privacidad</a></li>
+        <li><a href="https://koneksispa.com/unirse" style="color:var(--caramel)">Únete al equipo</a></li>
       </ul>
     </div>
   </div>
