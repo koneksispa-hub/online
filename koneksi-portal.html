@@ -349,6 +349,32 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 }
 .drive-link:hover{background:var(--border)}
 
+/* ── SERVICIOS PROPIOS ── */
+.svc-row{
+  display:flex;align-items:center;gap:8px;padding:10px 12px;
+  background:var(--card);border-radius:8px;border:1px solid var(--border);
+  margin-bottom:6px;
+}
+.svc-name{font-weight:600;font-size:.9rem;color:var(--text);flex:1;min-width:0;word-break:break-word}
+.svc-prices{display:flex;gap:8px;flex-wrap:wrap;font-size:.75rem;color:var(--text2);flex-shrink:0}
+.svc-price{white-space:nowrap}
+.svc-actions{display:flex;gap:4px;flex-shrink:0}
+.svc-empty{text-align:center;padding:28px 16px;color:var(--text3);font-size:.88rem;line-height:1.6}
+
+/* ── SEDES ── */
+.sede-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.sede-row input{
+  flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;
+  font:inherit;font-size:.9rem;background:var(--bg);color:var(--text);
+  transition:border-color .2s;outline:none;
+}
+.sede-row input:focus{border-color:var(--rose)}
+.sede-remove{
+  background:none;border:none;color:var(--danger);cursor:pointer;
+  font-size:1.2rem;line-height:1;padding:6px 8px;border-radius:6px;transition:background .15s;flex-shrink:0;
+}
+.sede-remove:hover{background:var(--rose-lt)}
+
 /* ── SCROLL HELPERS ── */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -431,6 +457,7 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
   <!-- Tabs -->
   <nav class="app-tabs">
     <button class="app-tab active" onclick="showTab('agenda',this)">📅 Agenda</button>
+    <button class="app-tab" onclick="showTab('servicios',this)">🛠️ Servicios</button>
     <button class="app-tab" onclick="showTab('perfil',this)">👤 Perfil</button>
     <button class="app-tab" onclick="showTab('fotos',this)">📷 Fotos</button>
   </nav>
@@ -553,6 +580,63 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 
     </div><!-- /tabAgenda -->
 
+    <!-- ── SERVICIOS TAB ─────────────────────────────────── -->
+    <div class="tab-panel hidden" id="tabServicios">
+
+      <div class="sub-tab-bar">
+        <button class="sub-tab active" onclick="showServicesSubTab('misServicios',this)">🛠️ Mis Servicios</button>
+        <button class="sub-tab" onclick="showServicesSubTab('misSedes',this)">📍 Dirección Sede</button>
+      </div>
+
+      <!-- MIS SERVICIOS -->
+      <div id="misServicios">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 10px">
+          <p class="section-title" style="padding:0;margin:0">Servicios de tu negocio</p>
+          <button class="btn btn-primary btn-sm" onclick="showServiceForm(null)">➕ Agregar</button>
+        </div>
+        <div id="servicesTable"></div>
+
+        <!-- Formulario agregar / editar -->
+        <div id="serviceFormWrap" class="add-panel hidden" style="margin-top:8px">
+          <h4 style="font-size:.9rem;font-weight:700;color:var(--rose-dk);margin-bottom:14px" id="serviceFormTitle">Nuevo servicio</h4>
+          <div class="field">
+            <label>Nombre del servicio</label>
+            <input type="text" id="svcNombre" placeholder="Ej: Masaje relajante">
+          </div>
+          <div class="time-row">
+            <div class="field">
+              <label>Precio en sede</label>
+              <input type="number" id="svcPrecioSede" placeholder="Ej: 40000" min="0" step="1000">
+            </div>
+            <div class="field">
+              <label>Precio domicilio</label>
+              <input type="number" id="svcPrecioDom" placeholder="Ej: 60000" min="0" step="1000">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="saveService()">💾 Guardar</button>
+            <button class="btn btn-secondary" onclick="hideServiceForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MIS SEDES -->
+      <div id="misSedes" style="display:none">
+        <p class="section-title">Dirección(es) de sede</p>
+        <div class="perfil-section">
+          <p style="font-size:.82rem;color:var(--text2);margin-bottom:14px;line-height:1.5">
+            Registra una o varias direcciones donde ofreces tus servicios en sede. Puedes agregar cuantas necesites.
+          </p>
+          <div id="sedeInputs"></div>
+          <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="addSedeInput()">➕ Agregar dirección</button>
+            <button class="btn btn-primary btn-sm" onclick="saveSedes()">💾 Guardar sedes</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tabServicios -->
+
     <!-- ── PERFIL TAB ──────────────────────────────────────── -->
     <div class="tab-panel hidden" id="tabPerfil">
 
@@ -652,6 +736,9 @@ let SESSION  = null;   // { correo, clave, nombre, ...profile }
 let SLOTS    = [];     // array de slots cargados
 let MEDIA    = [];     // array de archivos Drive
 let BULK_PREV = [];    // slots en preview para agenda masiva
+let SERVICES = [];     // servicios propios del profesional
+let SEDES    = [];     // sedes del profesional
+let _editingSvcRow = null; // fila siendo editada en el form de servicios
 
 // ── UTILS ────────────────────────────────────────────────────
 
@@ -782,7 +869,7 @@ function enterDashboard() {
 }
 
 function logout() {
-  SESSION = null; SLOTS = []; MEDIA = [];
+  SESSION = null; SLOTS = []; MEDIA = []; SERVICES = []; SEDES = [];
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('dashboard').style.display   = 'none';
   document.getElementById('loginPass').value = '';
@@ -799,6 +886,7 @@ function showTab(tab, btn) {
     .classList.remove('hidden');
   if (btn) btn.classList.add('active');
   if (tab === 'fotos' && !MEDIA.length) loadMedia();
+  if (tab === 'servicios' && !SERVICES.length) loadServices();
 }
 
 function showSubTab(id, btn) {
@@ -1360,6 +1448,173 @@ function uploadSequential(files, idx) {
     });
   };
   reader.readAsDataURL(f);
+}
+
+// ════════════════════════════════════════════════════════════
+//  SERVICIOS PROPIOS
+// ════════════════════════════════════════════════════════════
+
+function showServicesSubTab(id, btn) {
+  ['misServicios','misSedes'].forEach(function(x) {
+    document.getElementById(x).style.display = (x === id ? '' : 'none');
+  });
+  document.querySelectorAll('#tabServicios .sub-tab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+}
+
+function loadServices() {
+  runGAS('getMyServices', [SESSION.correo, SESSION.clave], function(r) {
+    if (!r) return;
+    SERVICES = r.services || [];
+    renderServices();
+  });
+  loadSedes();
+}
+
+function renderServices() {
+  const wrap = document.getElementById('servicesTable');
+  if (!SERVICES.length) {
+    wrap.innerHTML = '<div class="svc-empty">Aún no tienes servicios registrados.<br>Usa el botón ➕ para agregar el primero.</div>';
+    return;
+  }
+  wrap.innerHTML = SERVICES.map(function(s) {
+    var sede = s.precioSede ? '🏢 $' + Number(s.precioSede).toLocaleString('es-CO') : '';
+    var dom  = s.precioDom  ? '🏠 $' + Number(s.precioDom).toLocaleString('es-CO')  : '';
+    return '<div class="svc-row">'
+      + '<div class="svc-name">' + esc(s.servicio) + '</div>'
+      + '<div class="svc-prices">'
+      + (sede ? '<span class="svc-price">' + sede + '</span>' : '')
+      + (dom  ? '<span class="svc-price">' + dom  + '</span>' : '')
+      + '</div>'
+      + '<div class="svc-actions">'
+      + '<button class="btn btn-secondary btn-sm btn-icon" title="Editar" onclick="showServiceForm(' + s.row + ')">✏️</button>'
+      + '<button class="btn btn-danger btn-sm btn-icon" title="Eliminar" onclick="confirmDeleteService(' + s.row + ',\'' + esc(s.servicio).replace(/'/g,'&#39;') + '\')">🗑️</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function showServiceForm(row) {
+  _editingSvcRow = row;
+  const title = document.getElementById('serviceFormTitle');
+  if (row) {
+    var s = null;
+    for (var i = 0; i < SERVICES.length; i++) { if (SERVICES[i].row === row) { s = SERVICES[i]; break; } }
+    if (s) {
+      document.getElementById('svcNombre').value     = s.servicio   || '';
+      document.getElementById('svcPrecioSede').value = s.precioSede || '';
+      document.getElementById('svcPrecioDom').value  = s.precioDom  || '';
+    }
+    title.textContent = 'Editar servicio';
+  } else {
+    document.getElementById('svcNombre').value     = '';
+    document.getElementById('svcPrecioSede').value = '';
+    document.getElementById('svcPrecioDom').value  = '';
+    title.textContent = 'Nuevo servicio';
+  }
+  document.getElementById('serviceFormWrap').classList.remove('hidden');
+  document.getElementById('svcNombre').focus();
+}
+
+function hideServiceForm() {
+  document.getElementById('serviceFormWrap').classList.add('hidden');
+  _editingSvcRow = null;
+}
+
+function saveService() {
+  const nombre     = document.getElementById('svcNombre').value.trim();
+  const precioSede = document.getElementById('svcPrecioSede').value.trim();
+  const precioDom  = document.getElementById('svcPrecioDom').value.trim();
+  if (!nombre) { toast('Ingresa el nombre del servicio', 'err'); return; }
+
+  showLoading();
+  if (_editingSvcRow) {
+    runGAS('updateService', [SESSION.correo, SESSION.clave, _editingSvcRow, nombre, precioSede, precioDom], function(r) {
+      hideLoading();
+      if (!r) return;
+      toast(r.msg || 'Servicio actualizado', 'ok');
+      hideServiceForm();
+      loadServices();
+    });
+  } else {
+    runGAS('addService', [SESSION.correo, SESSION.clave, nombre, precioSede, precioDom], function(r) {
+      hideLoading();
+      if (!r) return;
+      toast(r.msg || 'Servicio agregado', 'ok');
+      hideServiceForm();
+      loadServices();
+    });
+  }
+}
+
+function confirmDeleteService(row, name) {
+  confirmAction(
+    'Eliminar servicio',
+    '¿Deseas eliminar "' + name + '"? Esta acción no se puede deshacer.',
+    'Eliminar', 'btn-danger',
+    function() {
+      showLoading();
+      runGAS('deleteService', [SESSION.correo, SESSION.clave, row], function(r) {
+        hideLoading();
+        if (!r) return;
+        toast('Servicio eliminado', 'ok');
+        loadServices();
+      });
+    }
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  SEDES
+// ════════════════════════════════════════════════════════════
+
+function loadSedes() {
+  runGAS('getMySedes', [SESSION.correo, SESSION.clave], function(r) {
+    if (!r) return;
+    SEDES = r.sedes || [];
+    renderSedes();
+  });
+}
+
+function renderSedes() {
+  const container = document.getElementById('sedeInputs');
+  if (!container) return;
+  if (!SEDES.length) SEDES = [''];
+  container.innerHTML = SEDES.map(function(val, i) {
+    return '<div class="sede-row">'
+      + '<input type="text" placeholder="Ej: Cra 5 # 20-10, Barrio El Peñón, Cali" value="' + esc(val) + '" data-idx="' + i + '">'
+      + '<button class="sede-remove" onclick="removeSede(' + i + ')" title="Eliminar">×</button>'
+      + '</div>';
+  }).join('');
+}
+
+function addSedeInput() {
+  const inputs = document.querySelectorAll('#sedeInputs input');
+  SEDES = Array.from(inputs).map(function(inp) { return inp.value; });
+  SEDES.push('');
+  renderSedes();
+  const all = document.querySelectorAll('#sedeInputs input');
+  if (all.length) all[all.length - 1].focus();
+}
+
+function removeSede(i) {
+  const inputs = document.querySelectorAll('#sedeInputs input');
+  SEDES = Array.from(inputs).map(function(inp) { return inp.value; });
+  SEDES.splice(i, 1);
+  if (!SEDES.length) SEDES = [''];
+  renderSedes();
+}
+
+function saveSedes() {
+  const inputs = document.querySelectorAll('#sedeInputs input');
+  const values = Array.from(inputs).map(function(inp) { return inp.value.trim(); }).filter(function(v) { return v; });
+  showLoading();
+  runGAS('updateMySedes', [SESSION.correo, SESSION.clave, values], function(r) {
+    hideLoading();
+    if (!r) return;
+    SEDES = values;
+    toast(r.msg || 'Sedes actualizadas', 'ok');
+  });
 }
 
 // ════════════════════════════════════════════════════════════
