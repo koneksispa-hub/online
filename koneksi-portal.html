@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Portal Koneksi Spa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --rose:     #c8938c;
+  --rose-lt:  #f0e4e2;
+  --rose-dk:  #a16c65;
+  --sage:     #8bab9a;
+  --sage-lt:  #ddeee6;
+  --bg:       #faf7f5;
+  --bg2:      #f3ede9;
+  --card:     #ffffff;
+  --border:   #e8ddd9;
+  --text:     #2d2520;
+  --text2:    #7a6560;
+  --text3:    #aaa098;
+  --ok:       #4caf8a;
+  --warn:     #e09a4a;
+  --danger:   #d95b5b;
+  --shadow:   0 2px 12px rgba(45,37,32,.08);
+  --radius:   12px;
+  --max:      640px;
+  --header-h: 56px;
+  --tab-h:    52px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1614; --bg2:#231e1c; --card:#2a2320; --border:#3d3330;
+    --text:#f0e8e4; --text2:#a89890; --text3:#665e5a;
+    --rose-lt:#3d2a28; --sage-lt:#1e3028; --shadow:0 2px 12px rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
+}
+
+html{background:var(--bg);color:var(--text)}
+body{min-height:100vh;background:var(--bg);overflow-x:hidden}
+
+/* ── LOADING ── */
+#loading{
+  position:fixed;inset:0;background:var(--bg);display:flex;
+  align-items:center;justify-content:center;z-index:999;transition:opacity .3s;
+}
+#loading.hide{opacity:0;pointer-events:none}
+.spinner{
+  width:40px;height:40px;border:3px solid var(--border);
+  border-top-color:var(--rose);border-radius:50%;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOAST ── */
+#toastBox{
+  position:fixed;top:16px;right:16px;z-index:9999;
+  display:flex;flex-direction:column;gap:8px;max-width:320px;
+}
+.toast{
+  padding:12px 16px;border-radius:10px;font-size:.875rem;font-weight:500;
+  box-shadow:var(--shadow);animation:slideIn .25s ease;line-height:1.4;
+}
+.toast.ok{background:#e8f7f0;color:#1a5c3a;border-left:3px solid var(--ok)}
+.toast.err{background:#fce8e8;color:#7a1a1a;border-left:3px solid var(--danger)}
+.toast.info{background:var(--bg2);color:var(--text);border-left:3px solid var(--rose)}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+
+/* ── LOGIN ── */
+#loginScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:24px 16px;background:var(--bg);
+}
+.login-card{
+  background:var(--card);border-radius:var(--radius);padding:40px 32px;
+  width:100%;max-width:400px;box-shadow:var(--shadow);border:1px solid var(--border);
+}
+.brand{text-align:center;margin-bottom:32px}
+.brand-logo{
+  font-size:1.5rem;font-weight:700;color:var(--rose-dk);
+  letter-spacing:-.5px;line-height:1;
+}
+.brand-sub{font-size:.8rem;color:var(--text3);margin-top:4px;letter-spacing:.5px;text-transform:uppercase}
+.login-title{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:24px;text-align:center}
+
+/* ── FORMS ── */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.field input,.field textarea,.field select{
+  width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;
+  font:inherit;font-size:.9rem;background:var(--bg);color:var(--text);
+  transition:border-color .2s;outline:none;
+}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--rose)}
+.field textarea{resize:vertical;min-height:88px;line-height:1.5}
+.field small{display:block;font-size:.75rem;color:var(--text3);margin-top:4px}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 20px;border-radius:8px;font:inherit;font-size:.9rem;font-weight:600;
+  cursor:pointer;border:none;transition:all .2s;text-decoration:none;
+}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--rose);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--rose-dk)}
+.btn-secondary{background:var(--bg2);color:var(--text);border:1.5px solid var(--border)}
+.btn-secondary:hover:not(:disabled){background:var(--border)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover:not(:disabled){background:#b84848}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-ok:hover:not(:disabled){background:#3a9070}
+.btn-sm{padding:6px 12px;font-size:.8rem}
+.btn-full{width:100%}
+.btn-icon{padding:6px;border-radius:6px;min-width:0}
+
+/* ── DASHBOARD ── */
+#dashboard{display:flex;flex-direction:column;min-height:100vh}
+
+.app-header{
+  position:sticky;top:0;z-index:100;background:var(--card);border-bottom:1px solid var(--border);
+  height:var(--header-h);display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;box-shadow:var(--shadow);
+}
+.app-header .brand-logo{font-size:1.1rem}
+.header-user{display:flex;align-items:center;gap:10px}
+.header-name{font-size:.85rem;font-weight:600;color:var(--text2)}
+
+.app-tabs{
+  position:sticky;top:var(--header-h);z-index:90;background:var(--card);
+  border-bottom:1px solid var(--border);display:flex;height:var(--tab-h);
+}
+.app-tab{
+  flex:1;border:none;background:transparent;font:inherit;font-size:.85rem;font-weight:500;
+  color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .2s;padding:0 4px;
+}
+.app-tab.active{color:var(--rose-dk);border-bottom-color:var(--rose)}
+.app-tab:hover:not(.active){color:var(--text)}
+
+.app-main{flex:1;padding:0 0 80px;max-width:var(--max);width:100%;margin:0 auto}
+
+/* ── TAB CONTENT ── */
+.tab-panel{padding:0 16px}
+.tab-panel.hidden{display:none}
+
+.section-title{
+  font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--text3);padding:20px 0 8px;
+}
+
+/* ── AGENDA SUB-TABS ── */
+.sub-tab-bar{
+  display:flex;gap:8px;padding:16px 0 8px;
+}
+.sub-tab{
+  flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border);
+  background:transparent;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;
+  color:var(--text2);transition:all .2s;
+}
+.sub-tab.active{background:var(--rose-lt);border-color:var(--rose);color:var(--rose-dk)}
+
+/* ── AGENDA FILTERS ── */
+.agenda-toolbar{
+  display:flex;align-items:center;gap:10px;padding:8px 0 12px;flex-wrap:wrap;
+}
+.agenda-toolbar input[type=month]{
+  padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;
+  font:inherit;font-size:.85rem;background:var(--bg);color:var(--text);outline:none;
+}
+.agenda-toolbar input[type=month]:focus{border-color:var(--rose)}
+.toggle-label{
+  display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text2);
+  cursor:pointer;user-select:none;
+}
+.toggle-label input{accent-color:var(--rose)}
+
+/* ── AGENDA TABLE ── */
+.agenda-table{
+  border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
+  font-size:.85rem;
+}
+.agenda-row{
+  display:grid;grid-template-columns:1fr 72px 90px auto;gap:0;
+  align-items:center;padding:10px 12px;border-bottom:1px solid var(--border);
+  background:var(--card);transition:background .15s;
+}
+.agenda-row:last-child{border-bottom:none}
+.agenda-row.booked{background:var(--bg)}
+.agenda-row.cancelled{opacity:.45}
+.agenda-day{font-weight:600;color:var(--text);font-size:.8rem}
+.agenda-date{font-size:.75rem;color:var(--text2)}
+.agenda-hora{font-weight:500}
+.agenda-mod{
+  font-size:.7rem;font-weight:600;padding:2px 7px;border-radius:12px;
+  background:var(--rose-lt);color:var(--rose-dk);
+}
+.agenda-mod.dom{background:var(--sage-lt);color:#3a6855}
+.agenda-status{
+  font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:12px;
+}
+.agenda-status.avail{background:#e6f7ee;color:#1a7a46}
+.agenda-status.booked{background:#fff3e0;color:#8a5a0a}
+.agenda-status.cancelled{background:var(--bg2);color:var(--text3)}
+.agenda-empty{
+  text-align:center;padding:40px 16px;color:var(--text3);
+  font-size:.9rem;
+}
+
+/* ── ADD SLOTS ── */
+.add-mode-bar{display:flex;gap:8px;margin:12px 0}
+.mode-btn{
+  flex:1;padding:10px 8px;border-radius:8px;border:1.5px solid var(--border);
+  font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;
+  background:transparent;color:var(--text2);transition:all .2s;
+}
+.mode-btn.active{background:var(--rose-lt);border-color:var(--rose);color:var(--rose-dk)}
+
+.add-panel{background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);margin-bottom:16px}
+.add-panel.hidden{display:none}
+
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:4px 0}
+.day-chip{
+  padding:6px 2px;border-radius:6px;border:1.5px solid var(--border);
+  font:inherit;font-size:.7rem;font-weight:600;cursor:pointer;background:transparent;
+  color:var(--text2);text-align:center;transition:all .2s;
+}
+.day-chip.active{background:var(--rose-lt);border-color:var(--rose);color:var(--rose-dk)}
+
+.modal-checks{display:flex;gap:16px;padding:4px 0}
+.modal-check{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;font-size:.85rem;font-weight:500}
+.modal-check input{accent-color:var(--rose);width:16px;height:16px}
+
+/* ── PREVIEW TABLE ── */
+.preview-wrap{margin:12px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:260px;overflow-y:auto}
+.preview-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;border-bottom:1px solid var(--border);font-size:.8rem;
+}
+.preview-row:last-child{border-bottom:none}
+.preview-info{display:flex;gap:10px;align-items:center}
+.preview-remove{
+  background:none;border:none;cursor:pointer;color:var(--danger);
+  font-size:1rem;line-height:1;padding:2px 6px;border-radius:4px;
+  transition:background .15s;
+}
+.preview-remove:hover{background:var(--rose-lt)}
+.preview-count{font-size:.8rem;color:var(--text2);margin:8px 0 4px}
+
+/* ── PERFIL ── */
+.perfil-section{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);margin-bottom:16px}
+.perfil-section h3{font-size:.9rem;font-weight:700;color:var(--rose-dk);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.perfil-info{background:var(--bg2);border-radius:8px;padding:12px;margin-bottom:16px;font-size:.85rem}
+.perfil-info strong{color:var(--text2)}
+
+/* ── FOTOS ── */
+.upload-zone{
+  border:2px dashed var(--border);border-radius:var(--radius);padding:32px 16px;
+  text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px;background:var(--card);
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--rose);background:var(--rose-lt)}
+.upload-icon{font-size:2.5rem;margin-bottom:8px}
+.upload-hint{font-size:.85rem;color:var(--text2)}
+.upload-hint strong{color:var(--rose-dk)}
+.upload-hint small{display:block;font-size:.75rem;color:var(--text3);margin-top:4px}
+
+.upload-progress{margin-bottom:16px}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:6px 0}
+.progress-fill{height:100%;background:var(--rose);border-radius:3px;transition:width .3s}
+.progress-text{font-size:.8rem;color:var(--text2)}
+
+.media-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+}
+@media(min-width:400px){.media-grid{grid-template-columns:repeat(3,1fr)}}
+
+.media-card{
+  position:relative;border-radius:10px;overflow:hidden;
+  background:var(--bg2);aspect-ratio:1;border:1px solid var(--border);
+}
+.media-thumb{width:100%;height:100%;object-fit:cover;display:block}
+.media-video-icon{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:2rem;background:rgba(0,0,0,.35);
+}
+.media-overlay{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:6px 8px;background:linear-gradient(transparent,rgba(0,0,0,.7));
+  display:flex;align-items:center;justify-content:space-between;
+}
+.media-name{font-size:.65rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;margin-right:4px}
+.media-del{
+  background:rgba(217,91,91,.8);border:none;color:#fff;border-radius:4px;
+  font-size:.7rem;padding:2px 6px;cursor:pointer;flex-shrink:0;
+}
+.media-del:hover{background:var(--danger)}
+.media-link{color:#fff;font-size:.75rem;text-decoration:none;opacity:.8}
+.media-link:hover{opacity:1}
+.media-empty{text-align:center;padding:40px 16px;color:var(--text3);font-size:.9rem;grid-column:1/-1}
+
+/* ── MODAL ── */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.modal-box{
+  background:var(--card);border-radius:var(--radius);padding:24px;width:100%;max-width:360px;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);border:1px solid var(--border);
+}
+.modal-box h4{font-size:1rem;font-weight:700;margin-bottom:8px}
+.modal-box p{font-size:.9rem;color:var(--text2);margin-bottom:20px;line-height:1.5}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.modal-backdrop.hidden{display:none}
+
+/* ── DRIVE LINK ── */
+.drive-link{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  background:var(--bg2);border-radius:8px;font-size:.8rem;color:var(--text2);
+  border:1px solid var(--border);text-decoration:none;margin-bottom:16px;
+  transition:background .15s;
+}
+.drive-link:hover{background:var(--border)}
+
+/* ── SCROLL HELPERS ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading"><div class="spinner"></div></div>
+
+<!-- Toasts -->
+<div id="toastBox"></div>
+
+<!-- Confirm modal -->
+<div class="modal-backdrop hidden" id="confirmModal">
+  <div class="modal-box">
+    <h4 id="confirmTitle">Confirmar</h4>
+    <p id="confirmMsg"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="confirmClose()">Cancelar</button>
+      <button class="btn btn-danger" id="confirmOk">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-logo">🌿 Koneksi Spa</div>
+      <div class="brand-sub">Portal Profesionales</div>
+    </div>
+    <div class="login-title">Inicia sesión en tu portal</div>
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="tu@correo.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="loginPass" placeholder="••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Ingresar</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ═════════════════════════════════════════════════ -->
+<div id="dashboard" style="display:none">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand-logo">🌿 Koneksi Spa</div>
+    <div class="header-user">
+      <span class="header-name" id="headerName"></span>
+      <button class="btn btn-secondary btn-sm" onclick="logout()">Salir</button>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="app-tabs">
+    <button class="app-tab active" onclick="showTab('agenda',this)">📅 Agenda</button>
+    <button class="app-tab" onclick="showTab('perfil',this)">👤 Perfil</button>
+    <button class="app-tab" onclick="showTab('fotos',this)">📷 Fotos</button>
+  </nav>
+
+  <main class="app-main">
+
+    <!-- ── AGENDA TAB ─────────────────────────────────────── -->
+    <div class="tab-panel" id="tabAgenda">
+
+      <div class="sub-tab-bar">
+        <button class="sub-tab active" onclick="showSubTab('verAgenda',this)">📋 Mi Agenda</button>
+        <button class="sub-tab" onclick="showSubTab('addAgenda',this)">➕ Agregar Horarios</button>
+      </div>
+
+      <!-- Ver Agenda -->
+      <div id="verAgenda">
+        <div class="agenda-toolbar">
+          <input type="month" id="filterMonth" oninput="renderAgenda()">
+          <label class="toggle-label">
+            <input type="checkbox" id="showAll" onchange="renderAgenda()">
+            Ver también cancelados/reservados
+          </label>
+        </div>
+        <div id="agendaList"></div>
+      </div>
+
+      <!-- Agregar Horarios -->
+      <div id="addAgenda" style="display:none">
+        <div class="add-mode-bar">
+          <button class="mode-btn active" onclick="showAddMode('especifico',this)">📌 Específico</button>
+          <button class="mode-btn" onclick="showAddMode('masivo',this)">📆 Agenda masiva</button>
+        </div>
+
+        <!-- Específico -->
+        <div id="addEspecifico" class="add-panel">
+          <div class="time-row">
+            <div class="field">
+              <label>Fecha</label>
+              <input type="date" id="espFecha">
+            </div>
+            <div class="field">
+              <label>Hora</label>
+              <select id="espHora"></select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Modalidad</label>
+            <div class="modal-checks">
+              <label class="modal-check"><input type="checkbox" id="espSede" checked> Sede</label>
+              <label class="modal-check"><input type="checkbox" id="espDom"> Domicilio</label>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addEspecifico()">Agregar horario</button>
+        </div>
+
+        <!-- Masivo -->
+        <div id="addMasivo" class="add-panel hidden">
+          <div class="time-row">
+            <div class="field">
+              <label>Fecha inicio</label>
+              <input type="date" id="bulkIni" oninput="clearBulkPreview()">
+            </div>
+            <div class="field">
+              <label>Fecha fin</label>
+              <input type="date" id="bulkFin" oninput="clearBulkPreview()">
+            </div>
+          </div>
+          <div class="field">
+            <label>Días de la semana</label>
+            <div class="days-grid" id="daysGrid"></div>
+          </div>
+          <div class="time-row">
+            <div class="field">
+              <label>Hora inicio</label>
+              <select id="bulkHoraIni"></select>
+            </div>
+            <div class="field">
+              <label>Hora fin</label>
+              <select id="bulkHoraFin"></select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Intervalo</label>
+            <select id="bulkIntervalo">
+              <option value="30">30 minutos</option>
+              <option value="60" selected>1 hora</option>
+              <option value="90">1.5 horas</option>
+              <option value="120">2 horas</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Modalidad</label>
+            <div class="modal-checks">
+              <label class="modal-check"><input type="checkbox" id="bulkSede" checked> Sede</label>
+              <label class="modal-check"><input type="checkbox" id="bulkDom"> Domicilio</label>
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="previewBulk()">👁 Previsualizar</button>
+          <div id="bulkPreviewArea" style="display:none">
+            <div class="preview-count" id="bulkCount"></div>
+            <div class="preview-wrap" id="bulkPreviewList"></div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn btn-primary" onclick="confirmBulk()">✅ Guardar <span id="bulkSaveCount"></span> horarios</button>
+              <button class="btn btn-secondary" onclick="clearBulkPreview()">Limpiar</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /addAgenda -->
+
+    </div><!-- /tabAgenda -->
+
+    <!-- ── PERFIL TAB ──────────────────────────────────────── -->
+    <div class="tab-panel hidden" id="tabPerfil">
+
+      <p class="section-title">Información pública del perfil</p>
+      <div class="perfil-section">
+        <div class="perfil-info" id="perfilInfo"></div>
+        <form id="perfilForm" onsubmit="saveProfile(event)">
+          <div class="field">
+            <label>Servicios</label>
+            <textarea id="pfServicios" placeholder="Masaje relajante, Chocoterapia, Baño de luna…"></textarea>
+            <small>Uno por línea o separados por coma. Se muestra en la página web.</small>
+          </div>
+          <div class="time-row">
+            <div class="field">
+              <label>Horarios</label>
+              <input type="text" id="pfHorarios" placeholder="Ej: 2 pm a 8 pm">
+            </div>
+            <div class="field">
+              <label>Días</label>
+              <input type="text" id="pfDias" placeholder="Ej: Lunes a Viernes">
+            </div>
+          </div>
+          <div class="field">
+            <label>Descripción / Presentación</label>
+            <textarea id="pfDesc" placeholder="Cuéntale a tus clientes sobre ti…"></textarea>
+          </div>
+          <div class="field">
+            <label>Ciudad</label>
+            <input type="text" id="pfCiudad" placeholder="Cali">
+          </div>
+          <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
+        </form>
+      </div>
+
+      <p class="section-title">Cambiar contraseña</p>
+      <div class="perfil-section">
+        <form id="cpForm" onsubmit="doChangePass(event)">
+          <div class="field">
+            <label>Contraseña actual</label>
+            <input type="password" id="cpCurrent" placeholder="••••••" required autocomplete="current-password">
+          </div>
+          <div class="field">
+            <label>Nueva contraseña</label>
+            <input type="password" id="cpNew" placeholder="Mínimo 4 caracteres" required minlength="4" autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label>Confirmar nueva contraseña</label>
+            <input type="password" id="cpConfirm" placeholder="Repite la contraseña" required autocomplete="new-password">
+          </div>
+          <button type="submit" class="btn btn-secondary">🔑 Cambiar contraseña</button>
+        </form>
+      </div>
+
+    </div><!-- /tabPerfil -->
+
+    <!-- ── FOTOS TAB ───────────────────────────────────────── -->
+    <div class="tab-panel hidden" id="tabFotos">
+
+      <p class="section-title">Fotos y videos</p>
+
+      <a id="driveFolderLink" href="#" target="_blank" class="drive-link" style="display:none">
+        📁 Abrir mi carpeta en Google Drive
+      </a>
+
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">📷</div>
+        <div class="upload-hint">
+          <strong>Toca para seleccionar archivos</strong>
+          <span> o arrastra aquí</span>
+          <small>JPG, PNG, MP4 · Máximo 5 MB por archivo</small>
+        </div>
+        <input type="file" id="fileInput" accept="image/*,video/mp4,video/quicktime" multiple hidden>
+      </div>
+
+      <div class="upload-progress" id="uploadProgress" style="display:none">
+        <div class="progress-text" id="progressText">Subiendo…</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+
+      <div class="media-grid" id="mediaGrid"></div>
+
+    </div><!-- /tabFotos -->
+
+  </main>
+</div><!-- /dashboard -->
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONFIGURACIÓN — reemplaza con la URL de tu despliegue GAS
+// ════════════════════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzTn4ZG-xqdhCMLcT7VtSPxNHqaRLYBoPDYKcgIPMSPlDuYFoqCl3V903I4o_8J2l12/exec';
+
+// ════════════════════════════════════════════════════════════
+//  ESTADO
+// ════════════════════════════════════════════════════════════
+let SESSION  = null;   // { correo, clave, nombre, ...profile }
+let SLOTS    = [];     // array de slots cargados
+let MEDIA    = [];     // array de archivos Drive
+let BULK_PREV = [];    // slots en preview para agenda masiva
+
+// ── UTILS ────────────────────────────────────────────────────
+
+function showLoading() { document.getElementById('loading').classList.remove('hide') }
+function hideLoading() { document.getElementById('loading').classList.add('hide') }
+
+let _toastTimer = {};
+function toast(msg, type='info', dur=3500) {
+  const box = document.getElementById('toastBox');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, dur);
+}
+
+function confirmAction(title, msg, okLabel, okClass, cb) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent   = msg;
+  const btn = document.getElementById('confirmOk');
+  btn.textContent  = okLabel || 'Confirmar';
+  btn.className    = 'btn ' + (okClass || 'btn-danger');
+  btn.onclick      = function() { confirmClose(); cb(); };
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+function confirmClose() {
+  document.getElementById('confirmModal').classList.add('hidden');
+}
+
+function runGAS(fn, args, cb) {
+  // POST con Content-Type: text/plain → no hay CORS preflight (simple request)
+  fetch(GAS_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body:    JSON.stringify({ action: fn, args: args || [] })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  })
+  .then(function(r) {
+    if (r && !r.ok) { toast(r.error || 'Error desconocido', 'err'); cb && cb(null); return; }
+    cb && cb(r);
+  })
+  .catch(function(e) {
+    toast('Error de servidor: ' + e.message, 'err');
+    cb && cb(null);
+  });
+}
+
+// ── TIMES ────────────────────────────────────────────────────
+
+function buildTimes() {
+  const opts = [];
+  for (let h = 6; h <= 21; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const hh = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+      const mm = m === 0 ? '00' : '30';
+      const ap = h < 12 ? 'AM' : 'PM';
+      opts.push(hh + ':' + mm + ' ' + ap);
+    }
+  }
+  return opts;
+}
+
+function populateTimeSelects() {
+  const times = buildTimes();
+  ['espHora','bulkHoraIni','bulkHoraFin'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '';
+    times.forEach(t => {
+      const o = document.createElement('option');
+      o.value = o.textContent = t;
+      if ((id === 'bulkHoraFin' && t === '8:00 PM') ||
+          (id !== 'bulkHoraFin' && t === '10:00 AM')) o.selected = true;
+      sel.appendChild(o);
+    });
+  });
+}
+
+function buildDaysGrid() {
+  const grid = document.getElementById('daysGrid');
+  const days = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  grid.innerHTML = '';
+  days.forEach((d, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'day-chip' + (i > 0 && i < 6 ? ' active' : '');
+    btn.textContent = d;
+    btn.dataset.day = i;
+    btn.onclick = function() {
+      btn.classList.toggle('active');
+      clearBulkPreview();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════════════════
+
+function handleLogin(e) {
+  e.preventDefault();
+  const correo = document.getElementById('loginEmail').value.trim();
+  const clave  = document.getElementById('loginPass').value.trim();
+  if (!correo || !clave) return;
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Verificando…';
+  showLoading();
+
+  runGAS('login', [correo, clave], function(r) {
+    btn.disabled = false; btn.textContent = 'Ingresar';
+    hideLoading();
+    if (!r) return;
+    SESSION = { correo, clave, ...r };
+    enterDashboard();
+  });
+}
+
+function enterDashboard() {
+  document.getElementById('loginScreen').style.display   = 'none';
+  document.getElementById('dashboard').style.display = 'flex';
+  document.getElementById('headerName').textContent = SESSION.nombre;
+  fillProfile();
+  loadAgenda();
+  // month filter defaults to current month
+  const now = new Date();
+  document.getElementById('filterMonth').value =
+    now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+}
+
+function logout() {
+  SESSION = null; SLOTS = []; MEDIA = [];
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashboard').style.display   = 'none';
+  document.getElementById('loginPass').value = '';
+}
+
+// ════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════════
+
+function showTab(tab, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.app-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1))
+    .classList.remove('hidden');
+  if (btn) btn.classList.add('active');
+  if (tab === 'fotos' && !MEDIA.length) loadMedia();
+}
+
+function showSubTab(id, btn) {
+  ['verAgenda','addAgenda'].forEach(x =>
+    document.getElementById(x).style.display = (x === id ? '' : 'none'));
+  document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function showAddMode(mode, btn) {
+  document.getElementById('addEspecifico').classList.toggle('hidden', mode !== 'especifico');
+  document.getElementById('addMasivo').classList.toggle('hidden', mode !== 'masivo');
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════
+//  AGENDA — VER
+// ════════════════════════════════════════════════════════════
+
+function loadAgenda() {
+  runGAS('getMySlots', [SESSION.correo, SESSION.clave, true], function(r) {
+    if (!r) return;
+    SLOTS = r.slots || [];
+    renderAgenda();
+  });
+}
+
+function renderAgenda() {
+  const monthVal = document.getElementById('filterMonth').value; // "YYYY-MM"
+  const showAll  = document.getElementById('showAll').checked;
+  const list     = document.getElementById('agendaList');
+
+  let filtered = SLOTS;
+  if (monthVal) {
+    const [yr, mo] = monthVal.split('-').map(Number);
+    filtered = SLOTS.filter(s => {
+      const [d, m, y] = s.fecha.split('/').map(Number);
+      return y === yr && m === mo;
+    });
+  }
+  if (!showAll) filtered = filtered.filter(s => s.disponible === 'Sí');
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="agenda-table"><div class="agenda-empty">No hay horarios para este mes.</div></div>';
+    return;
+  }
+
+  const rows = filtered.map(s => {
+    const isCancelled = s.disponible !== 'Sí';
+    const isBooked    = isCancelled && s.cliente;
+    let statusHtml;
+    if (s.disponible === 'Sí') {
+      statusHtml = '<span class="agenda-status avail">Disponible</span>';
+    } else if (s.cliente) {
+      statusHtml = '<span class="agenda-status booked" title="' + esc(s.cliente) + '">Reservado</span>';
+    } else {
+      statusHtml = '<span class="agenda-status cancelled">Cancelado</span>';
+    }
+    const modClass = s.modalidad.toLowerCase() === 'domicilio' ? 'dom' : '';
+    const canCancel = s.disponible === 'Sí';
+
+    return `<div class="agenda-row${isCancelled&&!isBooked?' cancelled':''}{isBooked?' booked':''}">
+      <div>
+        <div class="agenda-day">${esc(s.dia)}</div>
+        <div class="agenda-date">${esc(s.fecha)}</div>
+      </div>
+      <div class="agenda-hora">${esc(s.hora)}</div>
+      <div>
+        <div><span class="agenda-mod ${modClass}">${esc(s.modalidad)}</span></div>
+        <div style="margin-top:3px">${statusHtml}</div>
+      </div>
+      <div>
+        ${canCancel
+          ? `<button class="btn btn-danger btn-sm btn-icon" title="Cancelar" onclick="cancelSlot(${s.row},'${esc(s.fecha)} ${esc(s.hora)}')">✕</button>`
+          : ''}
+      </div>
+    </div>`;
+  });
+
+  list.innerHTML = '<div class="agenda-table">' + rows.join('') + '</div>';
+}
+
+function cancelSlot(row, label) {
+  confirmAction(
+    'Cancelar horario',
+    '¿Deseas cancelar el horario del ' + label + '? Esta acción marcará el espacio como no disponible.',
+    'Cancelar horario', 'btn-danger',
+    function() {
+      showLoading();
+      runGAS('cancelSlot', [SESSION.correo, SESSION.clave, row], function(r) {
+        hideLoading();
+        if (!r) return;
+        toast('Horario cancelado', 'ok');
+        loadAgenda();
+      });
+    }
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  AGENDA — AGREGAR ESPECÍFICO
+// ════════════════════════════════════════════════════════════
+
+function addEspecifico() {
+  const fecha = document.getElementById('espFecha').value;
+  const hora  = document.getElementById('espHora').value;
+  const sede  = document.getElementById('espSede').checked;
+  const dom   = document.getElementById('espDom').checked;
+
+  if (!fecha) { toast('Selecciona una fecha', 'err'); return; }
+  if (!sede && !dom) { toast('Selecciona al menos una modalidad (Sede o Domicilio)', 'err'); return; }
+
+  // Convert "YYYY-MM-DD" → "DD/MM/YYYY"
+  const [y, m, d] = fecha.split('-');
+  const fechaFmt  = d + '/' + m + '/' + y;
+
+  const slots = [];
+  if (sede) slots.push({ fecha: fechaFmt, hora, modalidad: 'Sede' });
+  if (dom)  slots.push({ fecha: fechaFmt, hora, modalidad: 'Domicilio' });
+
+  showLoading();
+  runGAS('addSlots', [SESSION.correo, SESSION.clave, slots], function(r) {
+    hideLoading();
+    if (!r) return;
+    toast(r.msg || 'Horario(s) agregado(s)', 'ok');
+    loadAgenda();
+    // Reset
+    document.getElementById('espFecha').value = '';
+    document.getElementById('espSede').checked = true;
+    document.getElementById('espDom').checked  = false;
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  AGENDA — MASIVA
+// ════════════════════════════════════════════════════════════
+
+function previewBulk() {
+  const iniVal = document.getElementById('bulkIni').value;
+  const finVal = document.getElementById('bulkFin').value;
+  if (!iniVal || !finVal) { toast('Selecciona fecha de inicio y fin', 'err'); return; }
+
+  const ini = new Date(iniVal + 'T00:00:00');
+  const fin = new Date(finVal + 'T00:00:00');
+  if (fin < ini) { toast('La fecha fin debe ser igual o posterior al inicio', 'err'); return; }
+
+  const activeDays = Array.from(document.querySelectorAll('#daysGrid .day-chip.active'))
+    .map(b => parseInt(b.dataset.day));
+  if (!activeDays.length) { toast('Selecciona al menos un día de la semana', 'err'); return; }
+
+  const sede = document.getElementById('bulkSede').checked;
+  const dom  = document.getElementById('bulkDom').checked;
+  if (!sede && !dom) { toast('Selecciona Sede y/o Domicilio', 'err'); return; }
+
+  const horaIni  = document.getElementById('bulkHoraIni').value;
+  const horaFin  = document.getElementById('bulkHoraFin').value;
+  const interval = parseInt(document.getElementById('bulkIntervalo').value);
+
+  // Parse hour to minutes
+  function hmToMin(str) {
+    const m = str.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!m) return 0;
+    let h = parseInt(m[1]), mm = parseInt(m[2]);
+    const ap = m[3].toUpperCase();
+    if (ap === 'PM' && h < 12) h += 12;
+    if (ap === 'AM' && h === 12) h = 0;
+    return h * 60 + mm;
+  }
+
+  const times = buildTimes();
+  const startMin = hmToMin(horaIni);
+  const endMin   = hmToMin(horaFin);
+
+  if (endMin <= startMin) { toast('La hora fin debe ser posterior a la hora inicio', 'err'); return; }
+
+  const slots = [];
+  for (let d = new Date(ini); d <= fin; d.setDate(d.getDate() + 1)) {
+    if (!activeDays.includes(d.getDay())) continue;
+    const dd  = String(d.getDate()).padStart(2,'0');
+    const mm  = String(d.getMonth()+1).padStart(2,'0');
+    const yy  = d.getFullYear();
+    const fechaFmt = dd + '/' + mm + '/' + yy;
+    const diaStr = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()];
+
+    for (let min = startMin; min <= endMin; min += interval) {
+      const h24 = Math.floor(min / 60), m0 = min % 60;
+      const hh  = h24 > 12 ? h24 - 12 : (h24 === 0 ? 12 : h24);
+      const mp  = m0 === 0 ? '00' : '30';
+      const ap  = h24 < 12 ? 'AM' : 'PM';
+      const hora = hh + ':' + mp + ' ' + ap;
+
+      if (sede) slots.push({ fecha: fechaFmt, hora, modalidad: 'Sede', diaStr });
+      if (dom)  slots.push({ fecha: fechaFmt, hora, modalidad: 'Domicilio', diaStr });
+    }
+  }
+
+  if (!slots.length) {
+    toast('No se generaron horarios con los criterios seleccionados', 'err');
+    return;
+  }
+
+  if (slots.length > 500) {
+    toast('Demasiados horarios (' + slots.length + '). Reduce el rango de fechas o aumenta el intervalo.', 'err');
+    return;
+  }
+
+  BULK_PREV = slots;
+  renderBulkPreview();
+}
+
+function renderBulkPreview() {
+  const area  = document.getElementById('bulkPreviewArea');
+  const list  = document.getElementById('bulkPreviewList');
+  const count = document.getElementById('bulkCount');
+  const save  = document.getElementById('bulkSaveCount');
+
+  area.style.display = '';
+  count.textContent = BULK_PREV.length + ' horarios a agregar:';
+  save.textContent  = '(' + BULK_PREV.length + ')';
+
+  list.innerHTML = BULK_PREV.map((s, i) => {
+    const modBadge = `<span class="agenda-mod ${s.modalidad==='Domicilio'?'dom':''}">${s.modalidad}</span>`;
+    return `<div class="preview-row">
+      <div class="preview-info">
+        <span>${s.diaStr||''}</span>
+        <span style="color:var(--text2)">${s.fecha}</span>
+        <span>${s.hora}</span>
+        ${modBadge}
+      </div>
+      <button class="preview-remove" onclick="removeBulk(${i})" title="Quitar">×</button>
+    </div>`;
+  }).join('');
+}
+
+function removeBulk(i) {
+  BULK_PREV.splice(i, 1);
+  if (!BULK_PREV.length) { clearBulkPreview(); return; }
+  renderBulkPreview();
+}
+
+function clearBulkPreview() {
+  BULK_PREV = [];
+  document.getElementById('bulkPreviewArea').style.display = 'none';
+}
+
+function confirmBulk() {
+  if (!BULK_PREV.length) return;
+  confirmAction(
+    'Guardar agenda masiva',
+    '¿Confirmas guardar ' + BULK_PREV.length + ' horarios en la hoja de cálculo?',
+    'Guardar', 'btn-ok',
+    function() {
+      showLoading();
+      runGAS('addSlots', [SESSION.correo, SESSION.clave, BULK_PREV], function(r) {
+        hideLoading();
+        if (!r) return;
+        toast(r.msg || 'Horarios guardados', 'ok');
+        clearBulkPreview();
+        loadAgenda();
+      });
+    }
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  PERFIL
+// ════════════════════════════════════════════════════════════
+
+function fillProfile() {
+  if (!SESSION) return;
+  document.getElementById('pfServicios').value = SESSION.servicios || '';
+  document.getElementById('pfHorarios').value  = SESSION.horarios  || '';
+  document.getElementById('pfDias').value      = SESSION.dias      || '';
+  document.getElementById('pfDesc').value      = SESSION.descripcion|| '';
+  document.getElementById('pfCiudad').value    = SESSION.ciudad    || '';
+
+  document.getElementById('perfilInfo').innerHTML =
+    '<strong>Nombre:</strong> ' + esc(SESSION.nombre) +
+    ' &nbsp;·&nbsp; <strong>Correo:</strong> ' + esc(SESSION.correo) +
+    (SESSION.telefono ? ' &nbsp;·&nbsp; <strong>Tel:</strong> ' + esc(SESSION.telefono) : '');
+}
+
+function saveProfile(e) {
+  e.preventDefault();
+  const datos = {
+    servicios:   document.getElementById('pfServicios').value.trim(),
+    horarios:    document.getElementById('pfHorarios').value.trim(),
+    dias:        document.getElementById('pfDias').value.trim(),
+    descripcion: document.getElementById('pfDesc').value.trim(),
+    ciudad:      document.getElementById('pfCiudad').value.trim()
+  };
+  showLoading();
+  runGAS('updateProfile', [SESSION.correo, SESSION.clave, datos], function(r) {
+    hideLoading();
+    if (!r) return;
+    Object.assign(SESSION, datos);
+    toast('Perfil actualizado correctamente', 'ok');
+  });
+}
+
+function doChangePass(e) {
+  e.preventDefault();
+  const current = document.getElementById('cpCurrent').value.trim();
+  const nw      = document.getElementById('cpNew').value.trim();
+  const conf    = document.getElementById('cpConfirm').value.trim();
+
+  if (nw !== conf) { toast('Las contraseñas nuevas no coinciden', 'err'); return; }
+  if (nw.length < 4) { toast('La nueva contraseña debe tener al menos 4 caracteres', 'err'); return; }
+
+  showLoading();
+  runGAS('changePassword', [SESSION.correo, current, nw], function(r) {
+    hideLoading();
+    if (!r) return;
+    SESSION.clave = nw;
+    toast(r.msg || 'Contraseña actualizada', 'ok');
+    document.getElementById('cpForm').reset();
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  FOTOS / MEDIA
+// ════════════════════════════════════════════════════════════
+
+function loadMedia() {
+  runGAS('listMedia', [SESSION.correo, SESSION.clave], function(r) {
+    if (!r) return;
+    MEDIA = r.files || [];
+    if (r.folderUrl) {
+      const lnk = document.getElementById('driveFolderLink');
+      lnk.href  = r.folderUrl;
+      lnk.style.display = 'flex';
+    }
+    renderMedia();
+  });
+}
+
+function renderMedia() {
+  const grid = document.getElementById('mediaGrid');
+  if (!MEDIA.length) {
+    grid.innerHTML = '<div class="media-empty">Aún no has subido ninguna foto o video.</div>';
+    return;
+  }
+  grid.innerHTML = MEDIA.map(f => {
+    if (f.isImage) {
+      return `<div class="media-card">
+        <img class="media-thumb" src="${esc(f.thumbUrl)}" alt="${esc(f.name)}"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect fill=\'%23e8ddd9\'/><text x=\'50%25\' y=\'55%25\' text-anchor=\'middle\' fill=\'%23aaa098\' font-size=\'28\'>🖼</text></svg>'">
+        <div class="media-overlay">
+          <a class="media-link" href="${esc(f.viewUrl)}" target="_blank" title="Ver en Drive">↗</a>
+          <span class="media-name">${esc(f.name)}</span>
+          <button class="media-del" onclick="deleteMediaFile('${esc(f.id)}','${esc(f.name)}')" title="Eliminar">✕</button>
+        </div>
+      </div>`;
+    } else if (f.isVideo) {
+      return `<div class="media-card" style="cursor:pointer" onclick="window.open('${esc(f.viewUrl)}','_blank')">
+        <div class="media-video-icon">▶</div>
+        <div class="media-overlay">
+          <span class="media-name">${esc(f.name)}</span>
+          <button class="media-del" onclick="event.stopPropagation();deleteMediaFile('${esc(f.id)}','${esc(f.name)}')" title="Eliminar">✕</button>
+        </div>
+      </div>`;
+    } else {
+      return `<div class="media-card" style="cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:2rem" onclick="window.open('${esc(f.viewUrl)}','_blank')">
+        📄
+        <div class="media-overlay">
+          <span class="media-name">${esc(f.name)}</span>
+          <button class="media-del" onclick="event.stopPropagation();deleteMediaFile('${esc(f.id)}','${esc(f.name)}')" title="Eliminar">✕</button>
+        </div>
+      </div>`;
+    }
+  }).join('');
+}
+
+function deleteMediaFile(id, name) {
+  confirmAction(
+    'Eliminar archivo',
+    '¿Deseas eliminar "' + name + '"? Esta acción no se puede deshacer.',
+    'Eliminar', 'btn-danger',
+    function() {
+      showLoading();
+      runGAS('deleteMedia', [SESSION.correo, SESSION.clave, id], function(r) {
+        hideLoading();
+        if (!r) return;
+        toast('Archivo eliminado', 'ok');
+        MEDIA = MEDIA.filter(f => f.id !== id);
+        renderMedia();
+      });
+    }
+  );
+}
+
+// File upload
+const uploadZone = document.getElementById('uploadZone');
+const fileInput  = document.getElementById('fileInput');
+
+uploadZone.onclick = function() { fileInput.click(); };
+fileInput.onchange  = function() { handleFiles(this.files); };
+
+uploadZone.addEventListener('dragover', function(e) {
+  e.preventDefault(); uploadZone.classList.add('drag');
+});
+uploadZone.addEventListener('dragleave', function() {
+  uploadZone.classList.remove('drag');
+});
+uploadZone.addEventListener('drop', function(e) {
+  e.preventDefault(); uploadZone.classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+});
+
+function handleFiles(files) {
+  const arr = Array.from(files);
+  if (!arr.length) return;
+  const tooBig = arr.filter(f => f.size > 5 * 1024 * 1024);
+  if (tooBig.length) {
+    toast(tooBig.map(f=>f.name).join(', ') + ': supera los 5 MB', 'err', 5000);
+  }
+  const valid = arr.filter(f => f.size <= 5 * 1024 * 1024);
+  if (!valid.length) return;
+  uploadSequential(valid, 0);
+}
+
+function uploadSequential(files, idx) {
+  if (idx >= files.length) {
+    document.getElementById('uploadProgress').style.display = 'none';
+    document.getElementById('progressFill').style.width = '0%';
+    fileInput.value = '';
+    loadMedia();
+    return;
+  }
+  const f = files[idx];
+  const prog = document.getElementById('uploadProgress');
+  const fill = document.getElementById('progressFill');
+  const text = document.getElementById('progressText');
+  prog.style.display = '';
+  const pct = Math.round((idx / files.length) * 100);
+  fill.style.width = pct + '%';
+  text.textContent  = 'Subiendo ' + (idx+1) + '/' + files.length + ': ' + f.name;
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const dataUrl  = ev.target.result;
+    const base64   = dataUrl.split(',')[1];
+    runGAS('uploadMedia', [SESSION.correo, SESSION.clave, f.name, f.type, base64], function(r) {
+      if (!r) { uploadSequential(files, idx+1); return; }
+      toast(f.name + ' subida', 'ok', 2000);
+      uploadSequential(files, idx+1);
+    });
+  };
+  reader.readAsDataURL(f);
+}
+
+// ════════════════════════════════════════════════════════════
+//  HTML ESCAPE
+// ════════════════════════════════════════════════════════════
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════
+populateTimeSelects();
+buildDaysGrid();
+
+// Set min date for date pickers to today
+(function() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('espFecha').min  = today;
+  document.getElementById('bulkIni').min   = today;
+  document.getElementById('bulkFin').min   = today;
+  document.getElementById('espFecha').value = today;
+})();
+
+hideLoading();
+</script>
+</body>
+</html>
