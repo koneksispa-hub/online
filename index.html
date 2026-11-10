@@ -1130,22 +1130,31 @@ async function _loadProfExtras(profName){
       let html='<p class="tmod-section-title">Galería</p><div class="tmod-media-grid">';
       d.files.forEach(f=>{
         const isVid=f.mimeType.startsWith('video/');
-        const thumb=GAS_CONTACT+'?action=getFile&id='+f.id;
+        // Thumbnail viene como base64 en la respuesta de getProfMedia (sin redirects de auth)
+        const thumb=f.thumbB64?'data:'+(f.thumbMime||'image/png')+';base64,'+f.thumbB64:'';
         const viewUrl='https://drive.google.com/file/d/'+f.id+'/view';
         if(isVid){
           html+=`<div class="tmod-media-thumb tmod-video" onclick="window.open('${viewUrl}','_blank')" title="${f.name}">
-            <img src="${thumb}" alt="${f.name}" loading="lazy" onerror="this.parentNode.style.display='none'">
+            <img src="${thumb}" alt="${f.name}" onerror="this.parentNode.style.display='none'">
           </div>`;
         }else{
-          const full=GAS_CONTACT+'?action=getFile&id='+f.id;
-          html+=`<div class="tmod-media-thumb" onclick="_tmodLightbox('${full}','${f.name}')" title="${f.name}">
-            <img src="${thumb}" alt="${f.name}" loading="lazy" onerror="this.parentNode.style.display='none'">
+          // Al dar clic carga la imagen completa vía fetch+base64 para evitar auth redirect
+          html+=`<div class="tmod-media-thumb" onclick="_tmodLightboxLoad('${f.id}','${f.name}')" title="${f.name}">
+            <img src="${thumb}" alt="${f.name}" onerror="this.parentNode.style.display='none'">
           </div>`;
         }
       });
       html+='</div>';
       el.innerHTML=html;
     }
+  }catch(e){}
+}
+async function _tmodLightboxLoad(fileId,name){
+  // Carga imagen completa vía JSON base64 (evita el redirect de auth de googleusercontent)
+  try{
+    const r=await fetch(GAS_CONTACT+'?action=getFile&id='+fileId);
+    const d=await r.json();
+    if(d.ok&&d.dataUrl) _tmodLightbox(d.dataUrl,name);
   }catch(e){}
 }
 function _tmodLightbox(src,alt){
