@@ -213,6 +213,9 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .tmod-name{font-family:var(--fd);font-size:1.65rem;font-weight:500;color:var(--text);margin-bottom:.35rem;line-height:1.1}
 .tmod-svcs{font-size:.82rem;color:var(--caramel);font-weight:500;line-height:1.6;margin-bottom:.5rem}
 .tmod-sched{font-size:.79rem;color:var(--text-muted);line-height:1.6}
+.tmod-koneksi-sede{font-size:.79rem;color:var(--caramel);line-height:1.6;margin-top:.35rem}
+.tmod-koneksi-sede a{color:var(--caramel);text-decoration:underline;text-decoration-style:dotted}
+.tmod-prof-sede{font-size:.8rem;color:var(--text-muted);margin-bottom:.6rem;padding:.45rem .6rem;background:var(--bg-alt);border-radius:8px;border-left:3px solid var(--caramel)}
 .tmod-bio{color:var(--text-mid);line-height:1.78;font-size:.9rem;margin-bottom:1rem}
 @media(max-width:460px){.tmod-top{flex-direction:column;align-items:center;text-align:center}.tmod-photo{width:150px;height:195px}}
 
@@ -355,6 +358,8 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 .bw-summary{display:flex;flex-direction:column;gap:.6rem;background:var(--bg-alt);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1.25rem}
 .bw-summary-item{display:flex;gap:.6rem;font-size:.85rem}
 .bw-summary-item b{color:var(--text-muted);min-width:90px;font-weight:500}
+.bw-sede-info{display:flex;align-items:center;gap:.45rem;font-size:.78rem;color:var(--caramel);margin-top:-.2rem;margin-bottom:.4rem;padding:.35rem .5rem;background:var(--bg-alt);border-radius:7px;border:1px solid var(--border)}
+.bw-sede-info a{color:var(--caramel);text-decoration:underline;text-decoration-style:dotted}
 .bw-summary-item span{color:var(--text)}
 .bw-form{display:flex;flex-direction:column;gap:.85rem}
 .bw-form .fg{margin:0}
@@ -741,6 +746,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <div class="tmod-name" id="tmodName"></div>
         <div class="tmod-svcs" id="tmodSvcs"></div>
         <div class="tmod-sched" id="tmodSched"></div>
+        <div class="tmod-koneksi-sede" id="tmodKoneksiSede" style="display:none"></div>
       </div>
     </div>
     <!-- Galería de fotos / videos desde Drive -->
@@ -1084,6 +1090,19 @@ function openTeamModal(t,ph){
   // Limpiar secciones dinámicas
   document.getElementById('tmodMedia').innerHTML='';
   document.getElementById('tmodExtraSvcs').innerHTML='<p class="tmod-loading-text">Cargando…</p>';
+  // Mostrar dirección de Koneksi en el encabezado del profesional
+  const tmodKsEl=document.getElementById('tmodKoneksiSede');
+  if(tmodKsEl){
+    tmodKsEl.style.display='none';tmodKsEl.innerHTML='';
+    _fetchKoneksiSede().then(sede=>{
+      if(sede&&sede.direccion){
+        tmodKsEl.innerHTML=sede.link
+          ?`📍 Koneksi: <a href="${sede.link}" target="_blank" rel="noopener">${sede.direccion}</a>`
+          :`📍 Koneksi: ${sede.direccion}`;
+        tmodKsEl.style.display='';
+      }
+    });
+  }
   const firstName=t.name.split(' ')[0];
   window._bwPresel={profesional:t.name,codigo:t.codigo||'',svcs:t.svcs||'',extraServices:null};
   document.getElementById('tmodBooking').innerHTML='<button class="btn-booking" onclick="openBookingWizard(window._bwPresel)">Reservar con '+firstName+' &#x2192;</button>';
@@ -1104,7 +1123,11 @@ async function _loadProfExtras(profName,codigo){
     if(el){
       if(d.ok&&d.services&&d.services.length){
         window._bwPresel.extraServices=d.services;
+        window._bwPresel.dirSede=d.dirSede||'';
         let html='<p class="tmod-section-title">Servicios propios</p>';
+        if(d.dirSede){
+          html+=`<div class="tmod-prof-sede">📍 Sede propia: ${d.dirSede}</div>`;
+        }
         d.services.forEach(s=>{
           const sede=s.precioSede?'Sede: $'+Number(s.precioSede).toLocaleString('es-CO'):'';
           const dom=s.precioDom?'Dom: $'+Number(s.precioDom).toLocaleString('es-CO'):'';
@@ -1201,6 +1224,17 @@ mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
 
 // Contact form
 const GAS_CONTACT='https://script.google.com/macros/s/AKfycbwHOZmVPMlUmY97GaU7CMoDC9hejIJcLsPGTisk-fAfGxXBfIXoHt1rWd1IX_eWhUSJ/exec';
+// Cache de dirección de Koneksi (cargada una vez)
+let _koneksiSedeCache=null;
+async function _fetchKoneksiSede(){
+  if(_koneksiSedeCache)return _koneksiSedeCache;
+  try{
+    const r=await fetch(GAS_CONTACT+'?action=getKoneksiSede');
+    const d=await r.json();
+    if(d.ok&&d.direccion){_koneksiSedeCache={direccion:d.direccion,link:d.linkUbicacion||''};}
+  }catch(e){}
+  return _koneksiSedeCache;
+}
 document.getElementById('contactForm').addEventListener('submit',async function(e){
   e.preventDefault();
   const name=this.nombre.value.trim();
@@ -1269,11 +1303,12 @@ const BW_STEPS=['Modalidad','Servicio','Horario','Datos','Pago','Confirmación']
 const BW_ICONS={Sede:'🏢',Domicilio:'🚗'};
 
 function openBookingWizard(presel){
-  Object.assign(bwS,{step:0,modalidad:null,servicio:null,slot:null,nombre:'',telefono:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profFilter:null,_isExtraSvc:false,_extraSvcPrice:null});
+  Object.assign(bwS,{step:0,modalidad:null,servicio:null,slot:null,nombre:'',telefono:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profFilter:null,_isExtraSvc:false,_extraSvcPrice:null,_profDirSede:''});
   if(presel&&presel.profesional){bwS.profesional=presel.profesional;}else{bwS.profesional=null;}
   if(presel&&presel.codigo!==undefined){bwS._profCodigo=presel.codigo||'';}else{bwS._profCodigo='';}
   if(presel&&presel.svcs!==undefined){bwS._profSvcs=presel.svcs||null;}else{bwS._profSvcs=null;}
   if(presel&&presel.extraServices){bwS._extraServices=presel.extraServices;}else{bwS._extraServices=null;}
+  if(presel&&presel.dirSede!==undefined){bwS._profDirSede=presel.dirSede||'';}else{bwS._profDirSede='';}
   if(presel&&presel.servicio){bwS.servicio=presel.servicio;}
   document.getElementById('bookingWizard').hidden=false;
   document.body.style.overflow='hidden';
@@ -1476,6 +1511,16 @@ function bwPickSlot(s){bwS.slot=s;bwS.step=3;bwRender();}
 
 /* PASO 3 — Datos personales */
 function bwStep3(c){
+  // Determinar dirección de sede para mostrar en el resumen
+  let _bwSedeHtml='';
+  if(bwS.modalidad==='Sede'){
+    if(bwS._isExtraSvc&&bwS._profDirSede){
+      _bwSedeHtml=`<div class="bw-sede-info">📍 Sede: ${bwS._profDirSede}</div>`;
+    }else if(!bwS._isExtraSvc&&_koneksiSedeCache&&_koneksiSedeCache.direccion){
+      const lnk=_koneksiSedeCache.link;
+      _bwSedeHtml=`<div class="bw-sede-info">📍 Sede Koneksi: ${lnk?`<a href="${lnk}" target="_blank" rel="noopener">${_koneksiSedeCache.direccion}</a>`:_koneksiSedeCache.direccion}</div>`;
+    }
+  }
   c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button>
   <p class="bw-label">Tus datos</p>
   <div class="bw-summary" style="margin-bottom:1rem">
@@ -1484,6 +1529,7 @@ function bwStep3(c){
     <div class="bw-summary-item"><b>Fecha</b><span>${bwFmtSlot()}</span></div>
     ${bwS.slot&&bwS.slot.colaborador?`<div class="bw-summary-item"><b>Profesional</b><span>${bwS.slot.colaborador}</span></div>`:''}
   </div>
+  ${_bwSedeHtml}
   <form class="bw-form" onsubmit="bwSubmit(event)">
     <div class="fg"><label>Nombre completo *</label><input id="bwNombre" class="inp" placeholder="Tu nombre" required value="${bwS.nombre}"></div>
     <div class="fg"><label>Teléfono / WhatsApp *</label><input id="bwTelefono" class="inp" type="tel" placeholder="Ej. 300 123 4567" required value="${bwS.telefono}"></div>
