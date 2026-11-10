@@ -1579,6 +1579,15 @@ async function bwSubmit(e){
   if(bwS.modalidad==='Domicilio'){
     bwS.direccion=document.getElementById('bwDireccion')?document.getElementById('bwDireccion').value.trim():'';
   }
+  // Calcular dirección de sede según tipo de servicio y flag trabajaEnKoneksi
+  let _dirSedeToBook='';
+  if(bwS.modalidad==='Sede'){
+    if((bwS._isExtraSvc||!bwS._trabajaEnKoneksi)&&bwS._profDirSede){
+      _dirSedeToBook=bwS._profDirSede;
+    }else if(bwS._trabajaEnKoneksi&&!bwS._isExtraSvc&&_koneksiSedeCache&&_koneksiSedeCache.direccion){
+      _dirSedeToBook=_koneksiSedeCache.direccion;
+    }
+  }
   const btn=document.getElementById('bwSubmitBtn');
   const msg=document.getElementById('bwFormMsg');
   btn.disabled=true;btn.textContent='Enviando…';
@@ -1596,7 +1605,8 @@ async function bwSubmit(e){
       telefono:bwS.telefono,
       duracion:bwS._svcDur||60,
       observacion:bwS.notas||'',
-      direccion:bwS.direccion||''
+      direccion:bwS.direccion||'',
+      dirSede:_dirSedeToBook
     });
     const r=await fetch(GAS_CONTACT+'?'+params.toString());
     const data=await r.json();
