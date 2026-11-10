@@ -213,8 +213,27 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .tmod-name{font-family:var(--fd);font-size:1.65rem;font-weight:500;color:var(--text);margin-bottom:.35rem;line-height:1.1}
 .tmod-svcs{font-size:.82rem;color:var(--caramel);font-weight:500;line-height:1.6;margin-bottom:.5rem}
 .tmod-sched{font-size:.79rem;color:var(--text-muted);line-height:1.6}
-.tmod-bio{color:var(--text-mid);line-height:1.78;font-size:.9rem;margin-bottom:1.5rem}
+.tmod-bio{color:var(--text-mid);line-height:1.78;font-size:.9rem;margin-bottom:1rem}
 @media(max-width:460px){.tmod-top{flex-direction:column;align-items:center;text-align:center}.tmod-photo{width:150px;height:195px}}
+
+/* Galería de media del profesional */
+.tmod-section-title{font-family:var(--fd);font-size:1rem;font-weight:600;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.7rem;padding-bottom:.35rem;border-bottom:1px solid var(--border)}
+.tmod-media-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem}
+.tmod-media-thumb{width:76px;height:76px;border-radius:9px;overflow:hidden;cursor:pointer;border:1.5px solid var(--border);position:relative;flex-shrink:0;background:var(--bg-alt)}
+.tmod-media-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s}
+.tmod-media-thumb:hover img{opacity:.82}
+.tmod-media-thumb.tmod-video::after{content:'▶';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.38);color:#fff;font-size:1.1rem;pointer-events:none}
+/* Servicios adicionales */
+.tmod-extra-svc{display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--border);gap:.5rem}
+.tmod-extra-svc:last-child{border-bottom:none}
+.tmod-extra-svc-name{font-size:.87rem;color:var(--text);font-weight:500}
+.tmod-extra-svc-prices{display:flex;flex-direction:column;align-items:flex-end;gap:.1rem;font-size:.76rem;color:var(--caramel);white-space:nowrap;flex-shrink:0}
+.tmod-loading-text{font-size:.82rem;color:var(--text-muted);text-align:center;padding:.5rem 0}
+/* Lightbox sencillo para media */
+#tmodLightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;cursor:pointer}
+#tmodLightbox img{max-width:94vw;max-height:92vh;border-radius:10px;object-fit:contain}
+#tmodLightbox .tmod-lb-close{position:absolute;top:1rem;right:1.25rem;color:#fff;font-size:1.8rem;font-weight:300;cursor:pointer;line-height:1;background:none;border:none;padding:.25rem;opacity:.8}
+#tmodLightbox .tmod-lb-close:hover{opacity:1}
 
 /* CONTACT */
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
@@ -454,6 +473,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       <a href="#equipo">Equipo</a>
       <a href="#contacto">Contacto</a>
       <a href="politica-privacidad.html">Privacidad</a>
+      <a href="https://koneksispa.com/koneksi-portal" target="_blank" rel="noopener" style="font-size:.88rem;letter-spacing:.05em">Portal Profesionales</a>
       <button class="btn-nav" onclick="openBookingWizard()">Reservar</button>
     </div>
     <button class="nav-ham" id="navHam" aria-label="Abrir menú" aria-expanded="false">
@@ -465,6 +485,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
     <a href="#equipo" role="menuitem">Equipo</a>
     <a href="#contacto" role="menuitem">Contacto</a>
     <a href="politica-privacidad.html" role="menuitem">Política de Privacidad</a>
+    <a href="https://koneksispa.com/koneksi-portal" role="menuitem" target="_blank" rel="noopener" style="color:var(--caramel);font-weight:500">Portal Profesionales</a>
     <button role="menuitem" onclick="openBookingWizard();document.getElementById('mobileMenu').hidden=true;" style="color:var(--caramel);font-weight:500;background:none;border:none;cursor:pointer;font-size:inherit;font-family:inherit;padding:0">Reservar ahora</button>
   </div>
 </nav>
@@ -722,9 +743,19 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <div class="tmod-sched" id="tmodSched"></div>
       </div>
     </div>
+    <!-- Galería de fotos / videos desde Drive -->
+    <div id="tmodMedia"></div>
+    <!-- Servicios adicionales del profesional (SERVICIOS COLA) -->
+    <div id="tmodExtraSvcs"></div>
     <p class="tmod-bio" id="tmodBio"></p>
     <div class="modal-booking" id="tmodBooking"></div>
   </div>
+</div>
+
+<!-- Lightbox reutilizable para fotos del profesional -->
+<div id="tmodLightbox" hidden onclick="this.hidden=true">
+  <button class="tmod-lb-close" aria-label="Cerrar">&#x2715;</button>
+  <img id="tmodLbImg" src="" alt="">
 </div>
 
 <!-- ── BOOKING WIZARD ── -->
@@ -1049,18 +1080,89 @@ function openTeamModal(t,ph){
   document.getElementById('tmodSched').innerHTML=sched;
   document.getElementById('tmodBio').textContent=t.bio||'';
   document.getElementById('tmodBio').hidden=!t.bio;
+  // Limpiar secciones dinámicas
+  document.getElementById('tmodMedia').innerHTML='';
+  document.getElementById('tmodExtraSvcs').innerHTML='<p class="tmod-loading-text">Cargando…</p>';
   const firstName=t.name.split(' ')[0];
-  window._bwPresel={profesional:t.name,svcs:t.svcs||''};
+  window._bwPresel={profesional:t.name,svcs:t.svcs||'',extraServices:null};
   document.getElementById('tmodBooking').innerHTML='<button class="btn-booking" onclick="openBookingWizard(window._bwPresel)">Reservar con '+firstName+' &#x2192;</button>';
   teamModal.hidden=false;teamModal.style.display='flex';
   document.body.style.overflow='hidden';
   teamModal.querySelector('.modal-box').scrollTop=0;
   teamModalClose.focus();
+  // Cargar servicios adicionales y media en paralelo
+  _loadProfExtras(t.name);
+}
+async function _loadProfExtras(profName){
+  const base=GAS_CONTACT+'?profesional='+encodeURIComponent(profName);
+  // Servicios adicionales
+  try{
+    const r=await fetch(base+'&action=getProfServices');
+    const d=await r.json();
+    const el=document.getElementById('tmodExtraSvcs');
+    if(el){
+      if(d.ok&&d.services&&d.services.length){
+        window._bwPresel.extraServices=d.services;
+        let html='<p class="tmod-section-title">Servicios propios</p>';
+        d.services.forEach(s=>{
+          const sede=s.precioSede?'Sede: $'+Number(s.precioSede).toLocaleString('es-CO'):'';
+          const dom=s.precioDom?'Dom: $'+Number(s.precioDom).toLocaleString('es-CO'):'';
+          html+=`<div class="tmod-extra-svc">
+            <span class="tmod-extra-svc-name">${s.servicio}</span>
+            <span class="tmod-extra-svc-prices">${sede?'<span>'+sede+'</span>':''}${dom?'<span>'+dom+'</span>':''}</span>
+          </div>`;
+        });
+        el.innerHTML=html;
+      }else{
+        el.innerHTML='';
+      }
+    }
+  }catch(e){
+    const el=document.getElementById('tmodExtraSvcs');
+    if(el)el.innerHTML='';
+  }
+  // Media de Drive
+  try{
+    const r=await fetch(base+'&action=getProfMedia');
+    const d=await r.json();
+    const el=document.getElementById('tmodMedia');
+    if(el&&d.ok&&d.files&&d.files.length){
+      let html='<p class="tmod-section-title">Galería</p><div class="tmod-media-grid">';
+      d.files.forEach(f=>{
+        const isVid=f.mimeType.startsWith('video/');
+        const thumb='https://drive.google.com/thumbnail?id='+f.id+'&sz=w400';
+        const viewUrl='https://drive.google.com/file/d/'+f.id+'/view';
+        if(isVid){
+          html+=`<div class="tmod-media-thumb tmod-video" onclick="window.open('${viewUrl}','_blank')" title="${f.name}">
+            <img src="${thumb}" alt="${f.name}" loading="lazy" onerror="this.parentNode.style.display='none'">
+          </div>`;
+        }else{
+          const full='https://drive.google.com/uc?export=view&id='+f.id;
+          html+=`<div class="tmod-media-thumb" onclick="_tmodLightbox('${full}','${f.name}')" title="${f.name}">
+            <img src="${thumb}" alt="${f.name}" loading="lazy" onerror="this.parentNode.style.display='none'">
+          </div>`;
+        }
+      });
+      html+='</div>';
+      el.innerHTML=html;
+    }
+  }catch(e){}
+}
+function _tmodLightbox(src,alt){
+  const lb=document.getElementById('tmodLightbox');
+  document.getElementById('tmodLbImg').src=src;
+  document.getElementById('tmodLbImg').alt=alt||'';
+  lb.hidden=false;
 }
 function closeTeamModal(){teamModal.hidden=true;teamModal.style.display='';document.body.style.overflow='';}
 teamModalClose.addEventListener('click',closeTeamModal);
 teamModal.addEventListener('click',e=>{if(e.target===teamModal)closeTeamModal();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!teamModal.hidden)closeTeamModal();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(!document.getElementById('tmodLightbox').hidden){document.getElementById('tmodLightbox').hidden=true;return;}
+    if(!teamModal.hidden)closeTeamModal();
+  }
+});
 
 // Nav scroll
 const navbar=document.getElementById('navbar');
@@ -1152,14 +1254,15 @@ setTimeout(()=>{
 /* =====================================================
    BOOKING WIZARD — lógica
 ====================================================== */
-const bwS={step:0,modalidad:null,servicio:null,profesional:null,slot:null,nombre:'',telefono:'',email:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profSvcs:null,_profFilter:null};
+const bwS={step:0,modalidad:null,servicio:null,profesional:null,slot:null,nombre:'',telefono:'',email:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profSvcs:null,_profFilter:null,_extraServices:null,_isExtraSvc:false,_extraSvcPrice:null};
 const BW_STEPS=['Modalidad','Servicio','Horario','Datos','Pago','Confirmación'];
 const BW_ICONS={Sede:'🏢',Domicilio:'🚗'};
 
 function openBookingWizard(presel){
-  Object.assign(bwS,{step:0,modalidad:null,servicio:null,slot:null,nombre:'',telefono:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profFilter:null});
+  Object.assign(bwS,{step:0,modalidad:null,servicio:null,slot:null,nombre:'',telefono:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profFilter:null,_isExtraSvc:false,_extraSvcPrice:null});
   if(presel&&presel.profesional){bwS.profesional=presel.profesional;}else{bwS.profesional=null;}
   if(presel&&presel.svcs!==undefined){bwS._profSvcs=presel.svcs||null;}else{bwS._profSvcs=null;}
+  if(presel&&presel.extraServices){bwS._extraServices=presel.extraServices;}else{bwS._extraServices=null;}
   if(presel&&presel.servicio){bwS.servicio=presel.servicio;}
   document.getElementById('bookingWizard').hidden=false;
   document.body.style.overflow='hidden';
@@ -1211,30 +1314,55 @@ function bwStep1(c){
     c.innerHTML='<button class="bw-back" onclick="bwBack()">← Atrás</button><p class="bw-loading">Cargando servicios…</p>';
     return;
   }
-  // Si el colaborador tiene lista de servicios, filtrar solo los suyos
+  // Si el colaborador tiene lista de servicios de Koneksi, filtrar solo los suyos
   const _ns=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
   const profSvcsNorm=bwS._profSvcs?_ns(bwS._profSvcs):null;
   const rows=SERVICES.map((s,i)=>{
     const nombre=s.name||s.nombre||'';
-    // Ocultar si el colaborador no ofrece este servicio
     if(profSvcsNorm&&!profSvcsNorm.includes(_ns(nombre)))return '';
     const dur=s.duration?s.duration+' · ':'';
     const precio=bwS.modalidad==='Sede'&&s.priceSede?`$${Number(s.priceSede).toLocaleString('es-CO')}`:
                  bwS.modalidad==='Domicilio'&&s.priceDom?`$${Number(s.priceDom).toLocaleString('es-CO')}`:
                  s.priceSede?`$${Number(s.priceSede).toLocaleString('es-CO')}`:'';
-    return `<button class="bw-svc-btn${bwS.servicio===nombre?' active':''}" onclick="bwPickSvc(${i})">
+    return `<button class="bw-svc-btn${bwS.servicio===nombre&&!bwS._isExtraSvc?' active':''}" onclick="bwPickSvc(${i})">
       <div class="bw-svc-btn-name">${nombre}</div>
       <div class="bw-svc-btn-meta">${dur}${precio}</div>
     </button>`;
   }).join('');
+  // Servicios adicionales del profesional (SERVICIOS COLA)
+  let extraRows='';
+  if(bwS._extraServices&&bwS._extraServices.length){
+    const extraTitle=bwS.profesional?`Otros servicios de ${bwS.profesional.split(' ')[0]}`:'Servicios adicionales';
+    extraRows=`<p class="bw-label" style="margin-top:1.1rem">${extraTitle}</p><div class="bw-svc-list">`;
+    bwS._extraServices.forEach((s,i)=>{
+      const precio=bwS.modalidad==='Domicilio'&&s.precioDom?`$${Number(s.precioDom).toLocaleString('es-CO')}`:
+                   s.precioSede?`$${Number(s.precioSede).toLocaleString('es-CO')}`:'';
+      extraRows+=`<button class="bw-svc-btn${bwS._isExtraSvc&&bwS.servicio===s.servicio?' active':''}" onclick="bwPickExtraSvc(${i})">
+        <div class="bw-svc-btn-name">${s.servicio}</div>
+        <div class="bw-svc-btn-meta">${precio}</div>
+      </button>`;
+    });
+    extraRows+='</div>';
+  }
   c.innerHTML=`<button class="bw-back" onclick="bwBack()">← Atrás</button>
   <p class="bw-label">Elige el servicio</p>
-  <div class="bw-svc-list">${rows||'<p class="bw-loading">Sin servicios disponibles para este colaborador.</p>'}</div>`;
+  <div class="bw-svc-list">${rows||'<p class="bw-loading">Sin servicios de Koneksi para este profesional.</p>'}</div>
+  ${extraRows}`;
 }
 function bwPickSvc(i){
   const s=SERVICES[i];
   bwS.servicio=s.name||s.nombre||'';
   bwS._svcDur=parseInt(s.duration||s.duracion||'60')||60;
+  bwS._isExtraSvc=false;bwS._extraSvcPrice=null;
+  bwS._cachedSlots=null;bwS._slotPage=0;
+  bwS.step=2;bwRender();
+}
+function bwPickExtraSvc(i){
+  const s=bwS._extraServices[i];
+  bwS.servicio=s.servicio;
+  bwS._svcDur=60;
+  bwS._isExtraSvc=true;
+  bwS._extraSvcPrice={sede:s.precioSede||0,dom:s.precioDom||0};
   bwS._cachedSlots=null;bwS._slotPage=0;
   bwS.step=2;bwRender();
 }
@@ -1403,11 +1531,15 @@ async function bwSubmit(e){
 }
 /* PASO 4 — Pago del anticipo */
 function bwStep4(c){
-  // Calcular anticipo desde SERVICES (el valor de la hoja lo valida el GAS al firmar)
-  const svc = SERVICES.find(s=>(s.name||s.nombre||'')=== bwS.servicio);
-  const anticipo = svc
-    ? (bwS.modalidad==='Domicilio' ? Math.round((svc.priceDom||0)/2) : Math.round((svc.priceSede||0)/2))
-    : 0;
+  // Calcular anticipo: servicio adicional (SERVICIOS COLA) o servicio de Koneksi
+  let anticipo=0;
+  if(bwS._isExtraSvc&&bwS._extraSvcPrice){
+    const precio=bwS.modalidad==='Domicilio'?bwS._extraSvcPrice.dom:bwS._extraSvcPrice.sede;
+    anticipo=Math.round((precio||0)/2);
+  }else{
+    const svc=SERVICES.find(s=>(s.name||s.nombre||'')=== bwS.servicio);
+    anticipo=svc?(bwS.modalidad==='Domicilio'?Math.round((svc.priceDom||0)/2):Math.round((svc.priceSede||0)/2)):0;
+  }
   const anticipoFmt = anticipo ? '$'+anticipo.toLocaleString('es-CO') : '—';
   c.innerHTML=`
   <p class="bw-label">Pago del anticipo</p>
@@ -1437,6 +1569,12 @@ async function bwPagar(){
       procedimiento:bwS.servicio,
       modalidad:bwS.modalidad
     });
+    // Servicio adicional: pasar el monto (anticipo = 50 % del precio) al GAS directamente
+    if(bwS._isExtraSvc&&bwS._extraSvcPrice){
+      const precio=bwS.modalidad==='Domicilio'?bwS._extraSvcPrice.dom:bwS._extraSvcPrice.sede;
+      const anticipo=Math.round((precio||0)/2);
+      if(anticipo>0)params.set('monto',anticipo.toString());
+    }
     const r=await fetch(GAS_CONTACT+'?'+params.toString());
     const data=await r.json();
     if(data.ok){
