@@ -1130,14 +1130,14 @@ async function _loadProfExtras(profName){
       let html='<p class="tmod-section-title">Galería</p><div class="tmod-media-grid">';
       d.files.forEach(f=>{
         const isVid=f.mimeType.startsWith('video/');
-        const thumb='https://drive.google.com/thumbnail?id='+f.id+'&sz=w400';
+        const thumb=GAS_CONTACT+'?action=getFile&id='+f.id;
         const viewUrl='https://drive.google.com/file/d/'+f.id+'/view';
         if(isVid){
           html+=`<div class="tmod-media-thumb tmod-video" onclick="window.open('${viewUrl}','_blank')" title="${f.name}">
             <img src="${thumb}" alt="${f.name}" loading="lazy" onerror="this.parentNode.style.display='none'">
           </div>`;
         }else{
-          const full='https://drive.google.com/uc?export=view&id='+f.id;
+          const full=GAS_CONTACT+'?action=getFile&id='+f.id;
           html+=`<div class="tmod-media-thumb" onclick="_tmodLightbox('${full}','${f.name}')" title="${f.name}">
             <img src="${thumb}" alt="${f.name}" loading="lazy" onerror="this.parentNode.style.display='none'">
           </div>`;
