@@ -1008,6 +1008,7 @@ async function loadTeam(){
       name:(r.c[1]?.v||'').trim(),
       svcs:(r.c[5]?.v||'').trim(),
       sched:(r.c[6]?.v||'').trim(),
+      codigo:(r.c[14]?.v||'').toString().trim().toLowerCase(),
       days:(r.c[7]?.v||'').trim(),
       bio:(r.c[8]?.v||'').trim(),
       ciudad:(r.c[11]?.v||'').trim()
@@ -1084,17 +1085,17 @@ function openTeamModal(t,ph){
   document.getElementById('tmodMedia').innerHTML='';
   document.getElementById('tmodExtraSvcs').innerHTML='<p class="tmod-loading-text">Cargando…</p>';
   const firstName=t.name.split(' ')[0];
-  window._bwPresel={profesional:t.name,svcs:t.svcs||'',extraServices:null};
+  window._bwPresel={profesional:t.name,codigo:t.codigo||'',svcs:t.svcs||'',extraServices:null};
   document.getElementById('tmodBooking').innerHTML='<button class="btn-booking" onclick="openBookingWizard(window._bwPresel)">Reservar con '+firstName+' &#x2192;</button>';
   teamModal.hidden=false;teamModal.style.display='flex';
   document.body.style.overflow='hidden';
   teamModal.querySelector('.modal-box').scrollTop=0;
   teamModalClose.focus();
   // Cargar servicios adicionales y media en paralelo
-  _loadProfExtras(t.name);
+  _loadProfExtras(t.name,t.codigo||'');
 }
-async function _loadProfExtras(profName){
-  const base=GAS_CONTACT+'?profesional='+encodeURIComponent(profName);
+async function _loadProfExtras(profName,codigo){
+  const base=GAS_CONTACT+'?profesional='+encodeURIComponent(profName)+(codigo?'&codigo='+encodeURIComponent(codigo):'');
   // Servicios adicionales
   try{
     const r=await fetch(base+'&action=getProfServices');
@@ -1270,6 +1271,7 @@ const BW_ICONS={Sede:'🏢',Domicilio:'🚗'};
 function openBookingWizard(presel){
   Object.assign(bwS,{step:0,modalidad:null,servicio:null,slot:null,nombre:'',telefono:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profFilter:null,_isExtraSvc:false,_extraSvcPrice:null});
   if(presel&&presel.profesional){bwS.profesional=presel.profesional;}else{bwS.profesional=null;}
+  if(presel&&presel.codigo!==undefined){bwS._profCodigo=presel.codigo||'';}else{bwS._profCodigo='';}
   if(presel&&presel.svcs!==undefined){bwS._profSvcs=presel.svcs||null;}else{bwS._profSvcs=null;}
   if(presel&&presel.extraServices){bwS._extraServices=presel.extraServices;}else{bwS._extraServices=null;}
   if(presel&&presel.servicio){bwS.servicio=presel.servicio;}
@@ -1518,6 +1520,7 @@ async function bwSubmit(e){
       modalidad:bwS.modalidad,
       procedimiento:bwS.servicio,
       colaborador:bwS.slot.colaborador||bwS.profesional||'',
+      codigo:bwS._profCodigo||'',
       ciudad:bwS.slot.ciudad||_selectedCity||'Cali',
       nombre:bwS.nombre,
       email:bwS.email||'',
