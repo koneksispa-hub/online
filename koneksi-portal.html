@@ -280,6 +280,17 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 .perfil-section h3{font-size:.9rem;font-weight:700;color:var(--rose-dk);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .perfil-info{background:var(--bg2);border-radius:8px;padding:12px;margin-bottom:16px;font-size:.85rem}
 .perfil-info strong{color:var(--text2)}
+/* ── MI LINK CARD ── */
+.mi-link-card{background:var(--card);border-radius:var(--radius);padding:20px;border:2px solid var(--rose);margin-bottom:16px;display:flex;flex-direction:column;gap:12px}
+.mi-link-card-header{display:flex;align-items:center;gap:8px}
+.mi-link-card-header .link-emoji{font-size:1.4rem}
+.mi-link-card-header h3{font-size:.9rem;font-weight:700;color:var(--rose-dk);margin:0}
+.mi-link-card-body{font-size:.8rem;color:var(--text2);line-height:1.4}
+.mi-link-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mi-link-url{flex:1;min-width:0;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:.82rem;color:var(--rose-dk);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text;user-select:all}
+.btn-copy-link{display:flex;align-items:center;gap:5px;background:var(--rose);color:#fff;border:none;border-radius:8px;padding:10px 14px;font-size:.82rem;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap;flex-shrink:0}
+.btn-copy-link:hover{background:var(--rose-dk)}
+.mi-link-hint{font-size:.77rem;color:var(--text2)}
 
 /* ── FOTOS ── */
 .upload-zone{
@@ -658,6 +669,24 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 
     <!-- ── PERFIL TAB ──────────────────────────────────────── -->
     <div class="tab-panel hidden" id="tabPerfil">
+
+      <!-- Mi link personalizado -->
+      <div class="mi-link-card" id="miLinkCard" style="display:none">
+        <div class="mi-link-card-header">
+          <span class="link-emoji">🔗</span>
+          <h3>Tu página personalizada en Koneksi</h3>
+        </div>
+        <div class="mi-link-card-body">
+          Comparte este link en tus redes sociales para que tus clientes vean tu perfil y agenden contigo directamente.
+        </div>
+        <div class="mi-link-row">
+          <div class="mi-link-url" id="miLinkUrl" title="Haz clic para seleccionar"></div>
+          <button class="btn-copy-link" onclick="copiarLink()" id="btnCopyLink">
+            📋 Copiar link
+          </button>
+        </div>
+        <div class="mi-link-hint" id="miLinkHint">Toca el link para seleccionarlo, o usa el botón Copiar.</div>
+      </div>
 
       <p class="section-title">Información pública del perfil</p>
       <div class="perfil-section">
@@ -1355,6 +1384,44 @@ function fillProfile() {
     '<strong>Nombre:</strong> ' + esc(SESSION.nombre) +
     ' &nbsp;·&nbsp; <strong>Correo:</strong> ' + esc(SESSION.correo) +
     (SESSION.telefono ? ' &nbsp;·&nbsp; <strong>Tel:</strong> ' + esc(SESSION.telefono) : '');
+
+  // Mostrar link personalizado
+  if (SESSION.link) {
+    document.getElementById('miLinkUrl').textContent = SESSION.link;
+    document.getElementById('miLinkCard').style.display = '';
+  }
+}
+
+function copiarLink() {
+  const link = SESSION && SESSION.link;
+  if (!link) return;
+  const btn  = document.getElementById('btnCopyLink');
+  const hint = document.getElementById('miLinkHint');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(function() {
+      btn.textContent  = '✅ ¡Copiado!';
+      hint.textContent = '¡Link copiado al portapapeles! Pégalo donde quieras.';
+      setTimeout(function() {
+        btn.innerHTML   = '📋 Copiar link';
+        hint.textContent = 'Toca el link para seleccionarlo, o usa el botón Copiar.';
+      }, 2500);
+    }).catch(function() {
+      _seleccionarLinkText();
+    });
+  } else {
+    _seleccionarLinkText();
+  }
+}
+
+function _seleccionarLinkText() {
+  const el = document.getElementById('miLinkUrl');
+  if (!el) return;
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  document.getElementById('miLinkHint').textContent = 'Texto seleccionado — cópialo con Ctrl+C / ⌘C.';
 }
 
 function saveProfile(e) {
