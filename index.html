@@ -1090,19 +1090,10 @@ function openTeamModal(t,ph){
   // Limpiar secciones dinámicas
   document.getElementById('tmodMedia').innerHTML='';
   document.getElementById('tmodExtraSvcs').innerHTML='<p class="tmod-loading-text">Cargando…</p>';
-  // Mostrar dirección de Koneksi en el encabezado del profesional
+  // La dirección de Koneksi se muestra condicionalmente desde _loadProfExtras
+  // según si el profesional trabaja en la sede de Koneksi (col P de Colaborador)
   const tmodKsEl=document.getElementById('tmodKoneksiSede');
-  if(tmodKsEl){
-    tmodKsEl.style.display='none';tmodKsEl.innerHTML='';
-    _fetchKoneksiSede().then(sede=>{
-      if(sede&&sede.direccion){
-        tmodKsEl.innerHTML=sede.link
-          ?`📍 Koneksi: <a href="${sede.link}" target="_blank" rel="noopener">${sede.direccion}</a>`
-          :`📍 Koneksi: ${sede.direccion}`;
-        tmodKsEl.style.display='';
-      }
-    });
-  }
+  if(tmodKsEl){tmodKsEl.style.display='none';tmodKsEl.innerHTML='';}
   const firstName=t.name.split(' ')[0];
   window._bwPresel={profesional:t.name,codigo:t.codigo||'',svcs:t.svcs||'',extraServices:null};
   document.getElementById('tmodBooking').innerHTML='<button class="btn-booking" onclick="openBookingWizard(window._bwPresel)">Reservar con '+firstName+' &#x2192;</button>';
@@ -1124,6 +1115,21 @@ async function _loadProfExtras(profName,codigo){
       if(d.ok&&d.services&&d.services.length){
         window._bwPresel.extraServices=d.services;
         window._bwPresel.dirSede=d.dirSede||'';
+        window._bwPresel.trabajaEnKoneksi=d.trabajaEnKoneksi!==false;
+        // Mostrar dirección de Koneksi en el encabezado solo si trabaja en Koneksi
+        if(d.trabajaEnKoneksi!==false){
+          const ksEl=document.getElementById('tmodKoneksiSede');
+          if(ksEl){
+            _fetchKoneksiSede().then(sede=>{
+              if(sede&&sede.direccion){
+                ksEl.innerHTML=sede.link
+                  ?`📍 Koneksi: <a href="${sede.link}" target="_blank" rel="noopener">${sede.direccion}</a>`
+                  :`📍 Koneksi: ${sede.direccion}`;
+                ksEl.style.display='';
+              }
+            });
+          }
+        }
         let html='<p class="tmod-section-title">Servicios propios</p>';
         if(d.dirSede){
           html+=`<div class="tmod-prof-sede">📍 Sede propia: ${d.dirSede}</div>`;
@@ -1139,6 +1145,21 @@ async function _loadProfExtras(profName,codigo){
         el.innerHTML=html;
       }else{
         el.innerHTML='';
+        // Sin servicios propios: mostrar dirección de Koneksi si trabaja ahí
+        if(d.ok&&d.trabajaEnKoneksi!==false){
+          window._bwPresel.trabajaEnKoneksi=true;
+          const ksEl=document.getElementById('tmodKoneksiSede');
+          if(ksEl){
+            _fetchKoneksiSede().then(sede=>{
+              if(sede&&sede.direccion){
+                ksEl.innerHTML=sede.link
+                  ?`📍 Koneksi: <a href="${sede.link}" target="_blank" rel="noopener">${sede.direccion}</a>`
+                  :`📍 Koneksi: ${sede.direccion}`;
+                ksEl.style.display='';
+              }
+            });
+          }
+        }
       }
     }
   }catch(e){
@@ -1303,12 +1324,13 @@ const BW_STEPS=['Modalidad','Servicio','Horario','Datos','Pago','Confirmación']
 const BW_ICONS={Sede:'🏢',Domicilio:'🚗'};
 
 function openBookingWizard(presel){
-  Object.assign(bwS,{step:0,modalidad:null,servicio:null,slot:null,nombre:'',telefono:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profFilter:null,_isExtraSvc:false,_extraSvcPrice:null,_profDirSede:''});
+  Object.assign(bwS,{step:0,modalidad:null,servicio:null,slot:null,nombre:'',telefono:'',notas:'',_svcDur:60,_slotPage:0,_cachedSlots:null,_profFilter:null,_isExtraSvc:false,_extraSvcPrice:null,_profDirSede:'',_trabajaEnKoneksi:true});
   if(presel&&presel.profesional){bwS.profesional=presel.profesional;}else{bwS.profesional=null;}
   if(presel&&presel.codigo!==undefined){bwS._profCodigo=presel.codigo||'';}else{bwS._profCodigo='';}
   if(presel&&presel.svcs!==undefined){bwS._profSvcs=presel.svcs||null;}else{bwS._profSvcs=null;}
   if(presel&&presel.extraServices){bwS._extraServices=presel.extraServices;}else{bwS._extraServices=null;}
   if(presel&&presel.dirSede!==undefined){bwS._profDirSede=presel.dirSede||'';}else{bwS._profDirSede='';}
+  bwS._trabajaEnKoneksi=presel&&presel.trabajaEnKoneksi!==undefined?presel.trabajaEnKoneksi!==false:true;
   if(presel&&presel.servicio){bwS.servicio=presel.servicio;}
   document.getElementById('bookingWizard').hidden=false;
   document.body.style.overflow='hidden';
@@ -1514,9 +1536,10 @@ function bwStep3(c){
   // Determinar dirección de sede para mostrar en el resumen
   let _bwSedeHtml='';
   if(bwS.modalidad==='Sede'){
-    if(bwS._isExtraSvc&&bwS._profDirSede){
+    // Profesional con sede propia (servicio extra o profesional independiente de Koneksi)
+    if((bwS._isExtraSvc||!bwS._trabajaEnKoneksi)&&bwS._profDirSede){
       _bwSedeHtml=`<div class="bw-sede-info">📍 Sede: ${bwS._profDirSede}</div>`;
-    }else if(!bwS._isExtraSvc&&_koneksiSedeCache&&_koneksiSedeCache.direccion){
+    }else if(bwS._trabajaEnKoneksi&&!bwS._isExtraSvc&&_koneksiSedeCache&&_koneksiSedeCache.direccion){
       const lnk=_koneksiSedeCache.link;
       _bwSedeHtml=`<div class="bw-sede-info">📍 Sede Koneksi: ${lnk?`<a href="${lnk}" target="_blank" rel="noopener">${_koneksiSedeCache.direccion}</a>`:_koneksiSedeCache.direccion}</div>`;
     }
