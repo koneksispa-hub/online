@@ -375,6 +375,24 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 }
 .sede-remove:hover{background:var(--rose-lt)}
 
+/* ── INFORME DE INGRESOS ── */
+.report-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0 16px}
+.report-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.report-card-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px}
+.report-card-value{font-size:1.4rem;font-weight:700;color:var(--rose-dk);line-height:1.2;word-break:break-word}
+.report-breakdown{margin-bottom:12px}
+.breakdown-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:4px;font-size:.85rem}
+.breakdown-label{font-weight:500;color:var(--text)}
+.breakdown-val{font-weight:700;color:var(--rose-dk);flex-shrink:0;margin-left:8px}
+.rpt-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;overflow-x:auto;margin-bottom:16px}
+.rpt-table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:420px}
+.rpt-table th{text-align:left;padding:8px 10px;background:var(--bg2);color:var(--text3);font-size:.68rem;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--border)}
+.rpt-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+.rpt-table tr:last-child td{border-bottom:none}
+.rpt-valor{font-weight:700;color:var(--ok);text-align:right!important;white-space:nowrap}
+.rpt-empty{text-align:center;padding:28px 16px;color:var(--text3);font-size:.88rem}
+.rpt-total-row td{font-weight:700;border-top:2px solid var(--border)!important;background:var(--bg2);color:var(--rose-dk)}
+
 /* ── SCROLL HELPERS ── */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -460,6 +478,7 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
     <button class="app-tab" onclick="showTab('servicios',this)">🛠️ Servicios</button>
     <button class="app-tab" onclick="showTab('perfil',this)">👤 Perfil</button>
     <button class="app-tab" onclick="showTab('fotos',this)">📷 Fotos</button>
+    <button class="app-tab" onclick="showTab('ingresos',this)">💰 Ingresos</button>
   </nav>
 
   <main class="app-main">
@@ -720,6 +739,60 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 
     </div><!-- /tabFotos -->
 
+    <!-- ── INGRESOS TAB ─────────────────────────────────────── -->
+    <div class="tab-panel hidden" id="tabIngresos">
+
+      <p class="section-title">Informe de ingresos</p>
+
+      <div class="perfil-section">
+        <p style="font-size:.82rem;color:var(--text2);margin-bottom:14px;line-height:1.5">
+          Consulta el total facturado en un período. Se suma la columna <strong>Valor Cita</strong>
+          de tu agenda personal.
+        </p>
+        <div class="time-row">
+          <div class="field">
+            <label>Fecha inicio</label>
+            <input type="date" id="rptIni">
+          </div>
+          <div class="field">
+            <label>Fecha fin</label>
+            <input type="date" id="rptFin">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="generarInforme()">📊 Generar informe</button>
+      </div>
+
+      <!-- Resultado del informe -->
+      <div id="ingresoResult" style="display:none">
+
+        <!-- Tarjetas resumen -->
+        <div class="report-summary-grid">
+          <div class="report-card">
+            <div class="report-card-label">Total ingresos</div>
+            <div class="report-card-value" id="rptTotal">$0</div>
+          </div>
+          <div class="report-card">
+            <div class="report-card-label">Citas registradas</div>
+            <div class="report-card-value" id="rptCitas">0</div>
+          </div>
+        </div>
+
+        <!-- Por modalidad -->
+        <p class="section-title">Por modalidad</p>
+        <div id="rptByModalidad"></div>
+
+        <!-- Por procedimiento -->
+        <p class="section-title">Por procedimiento</p>
+        <div id="rptByProc"></div>
+
+        <!-- Detalle -->
+        <p class="section-title">Detalle de citas</p>
+        <div id="rptDetail"></div>
+
+      </div><!-- /ingresoResult -->
+
+    </div><!-- /tabIngresos -->
+
   </main>
 </div><!-- /dashboard -->
 
@@ -887,6 +960,7 @@ function showTab(tab, btn) {
   if (btn) btn.classList.add('active');
   if (tab === 'fotos' && !MEDIA.length) loadMedia();
   if (tab === 'servicios' && !SERVICES.length) loadServices();
+  if (tab === 'ingresos') initIngresoTab();
 }
 
 function showSubTab(id, btn) {
@@ -1617,6 +1691,108 @@ function saveSedes() {
     SEDES = values;
     toast(r.msg || 'Sedes actualizadas', 'ok');
   });
+}
+
+// ════════════════════════════════════════════════════════════
+//  INFORME DE INGRESOS
+// ════════════════════════════════════════════════════════════
+
+function initIngresoTab() {
+  // Precarga: mes actual por defecto (solo la primera vez)
+  const ini = document.getElementById('rptIni');
+  if (!ini.value) {
+    const hoy  = new Date();
+    const y    = hoy.getFullYear();
+    const m    = String(hoy.getMonth() + 1).padStart(2, '0');
+    ini.value  = y + '-' + m + '-01';
+    document.getElementById('rptFin').value = hoy.toISOString().split('T')[0];
+  }
+}
+
+function generarInforme() {
+  const ini = document.getElementById('rptIni').value;
+  const fin = document.getElementById('rptFin').value;
+  if (!ini || !fin) { toast('Selecciona el rango de fechas', 'err'); return; }
+  if (fin < ini)    { toast('La fecha fin debe ser igual o posterior al inicio', 'err'); return; }
+
+  // Limpiar resultado anterior
+  document.getElementById('ingresoResult').style.display = 'none';
+  showLoading();
+
+  runGAS('getIngresoReport', [SESSION.correo, SESSION.clave, ini, fin], function(r) {
+    hideLoading();
+    if (!r) return;
+    renderIngresoReport(r);
+  });
+}
+
+function _fmt$$(n) {
+  return '$ ' + Number(n || 0).toLocaleString('es-CO');
+}
+
+function renderIngresoReport(r) {
+  document.getElementById('ingresoResult').style.display = '';
+
+  document.getElementById('rptTotal').textContent = _fmt$$(r.total);
+  document.getElementById('rptCitas').textContent = r.totalCitas || 0;
+
+  // ── Por modalidad ──
+  const modWrap     = document.getElementById('rptByModalidad');
+  const modEntries  = Object.entries(r.byModalidad || {}).sort(function(a,b){return b[1]-a[1];});
+  if (!modEntries.length) {
+    modWrap.innerHTML = '<div class="rpt-empty">Sin datos</div>';
+  } else {
+    modWrap.innerHTML = '<div class="report-breakdown">'
+      + modEntries.map(function(e) {
+          return '<div class="breakdown-row">'
+            + '<span class="breakdown-label">' + esc(e[0]) + '</span>'
+            + '<span class="breakdown-val">'   + _fmt$$(e[1]) + '</span>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
+  // ── Por procedimiento ──
+  const procWrap    = document.getElementById('rptByProc');
+  const procEntries = Object.entries(r.byProc || {}).sort(function(a,b){return b[1]-a[1];});
+  if (!procEntries.length) {
+    procWrap.innerHTML = '<div class="rpt-empty">Sin datos</div>';
+  } else {
+    procWrap.innerHTML = '<div class="report-breakdown">'
+      + procEntries.map(function(e) {
+          return '<div class="breakdown-row">'
+            + '<span class="breakdown-label">' + esc(e[0]) + '</span>'
+            + '<span class="breakdown-val">'   + _fmt$$(e[1]) + '</span>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
+  // ── Detalle ──
+  const detWrap = document.getElementById('rptDetail');
+  if (!r.rows || !r.rows.length) {
+    detWrap.innerHTML = '<div class="rpt-empty">No hay citas con valor registrado en este período.</div>';
+  } else {
+    detWrap.innerHTML =
+      '<div class="rpt-wrap"><table class="rpt-table">'
+      + '<thead><tr>'
+      + '<th>Fecha</th><th>Cliente</th><th>Procedimiento</th><th>Modalidad</th><th style="text-align:right">Valor</th>'
+      + '</tr></thead><tbody>'
+      + r.rows.map(function(row) {
+          return '<tr>'
+            + '<td style="white-space:nowrap">' + esc(row.fecha)         + '</td>'
+            + '<td>'                             + esc(row.cliente)       + '</td>'
+            + '<td>'                             + esc(row.procedimiento) + '</td>'
+            + '<td>'                             + esc(row.modalidad)     + '</td>'
+            + '<td class="rpt-valor">'           + _fmt$$(row.valor)      + '</td>'
+            + '</tr>';
+        }).join('')
+      + '<tr class="rpt-total-row">'
+      + '<td colspan="4" style="text-align:right">TOTAL</td>'
+      + '<td class="rpt-valor">' + _fmt$$(r.total) + '</td>'
+      + '</tr>'
+      + '</tbody></table></div>';
+  }
 }
 
 // ════════════════════════════════════════════════════════════
