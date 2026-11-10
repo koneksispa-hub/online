@@ -166,36 +166,13 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 .sub-tab.active{background:var(--rose-lt);border-color:var(--rose);color:var(--rose-dk)}
 
 /* ── AGENDA FILTERS ── */
-.agenda-toolbar{
-  display:flex;align-items:center;gap:10px;padding:8px 0 12px;flex-wrap:wrap;
-}
-.agenda-toolbar input[type=month]{
-  padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;
-  font:inherit;font-size:.85rem;background:var(--bg);color:var(--text);outline:none;
-}
-.agenda-toolbar input[type=month]:focus{border-color:var(--rose)}
 .toggle-label{
   display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text2);
   cursor:pointer;user-select:none;
 }
 .toggle-label input{accent-color:var(--rose)}
 
-/* ── AGENDA TABLE ── */
-.agenda-table{
-  border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
-  font-size:.85rem;
-}
-.agenda-row{
-  display:grid;grid-template-columns:1fr 72px 90px auto;gap:0;
-  align-items:center;padding:10px 12px;border-bottom:1px solid var(--border);
-  background:var(--card);transition:background .15s;
-}
-.agenda-row:last-child{border-bottom:none}
-.agenda-row.booked{background:var(--bg)}
-.agenda-row.cancelled{opacity:.45}
-.agenda-day{font-weight:600;color:var(--text);font-size:.8rem}
-.agenda-date{font-size:.75rem;color:var(--text2)}
-.agenda-hora{font-weight:500}
+
 .agenda-mod{
   font-size:.7rem;font-weight:600;padding:2px 7px;border-radius:12px;
   background:var(--rose-lt);color:var(--rose-dk);
@@ -207,10 +184,55 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 .agenda-status.avail{background:#e6f7ee;color:#1a7a46}
 .agenda-status.booked{background:#fff3e0;color:#8a5a0a}
 .agenda-status.cancelled{background:var(--bg2);color:var(--text3)}
-.agenda-empty{
-  text-align:center;padding:40px 16px;color:var(--text3);
-  font-size:.9rem;
+
+/* ── WEEK GRID ── */
+.week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0 8px}
+.week-nav-btn{
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;
+  width:36px;height:36px;font-size:1.3rem;cursor:pointer;color:var(--text);
+  display:flex;align-items:center;justify-content:center;transition:background .2s;
+  line-height:1;
 }
+.week-nav-btn:hover{background:var(--border)}
+.week-label{font-size:.85rem;font-weight:700;color:var(--text2);text-align:center;flex:1;padding:0 6px}
+.week-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:0 16px 4px}
+.week-grid{display:grid;grid-template-columns:repeat(7,minmax(72px,1fr));gap:5px;min-width:510px}
+.day-col{display:flex;flex-direction:column;gap:4px}
+.day-header{text-align:center;padding:6px 2px;border-radius:8px;background:var(--bg2)}
+.day-header.today{background:var(--rose-lt)}
+.day-name{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)}
+.day-num{font-size:.95rem;font-weight:700;color:var(--text);line-height:1.3}
+.day-header.today .day-num{color:var(--rose-dk)}
+.slot-pill{
+  border-radius:7px;padding:5px 3px;text-align:center;font-size:.68rem;font-weight:600;
+  line-height:1.3;cursor:pointer;border:none;background:none;font-family:inherit;
+  transition:opacity .15s,transform .1s;width:100%;
+}
+.slot-pill:hover{opacity:.8;transform:scale(.96)}
+.slot-pill:active{transform:scale(.92)}
+.slot-pill.avail{background:#e6f7ee;color:#1a6640}
+.slot-pill.booked{background:#fff3e0;color:#7a4d0a}
+.slot-pill.cancelled{background:var(--bg2);color:var(--text3);text-decoration:line-through;cursor:default}
+.slot-pill.cancelled:hover{opacity:1;transform:none}
+.pill-hora{font-size:.75rem;font-weight:700}
+.pill-mod{font-size:.59rem;opacity:.8;margin-top:1px}
+.pill-lock{font-size:.6rem;margin-top:1px}
+.day-empty{color:var(--text3);font-size:.7rem;text-align:center;padding:8px 2px;line-height:1.4}
+
+/* ── CLIENT MODAL ── */
+.client-field{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.client-field:last-child{border-bottom:none}
+.client-field-icon{font-size:1rem;width:22px;text-align:center;flex-shrink:0;padding-top:2px}
+.client-field-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3)}
+.client-field-val{font-size:.88rem;font-weight:500;color:var(--text);margin-top:2px}
+.client-modal-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:8px}
+.client-modal-title{font-size:1rem;font-weight:700}
+.client-modal-sub{font-size:.8rem;color:var(--text2);margin-top:3px}
+
+/* Legend */
+.agenda-legend{display:flex;gap:12px;padding:10px 0 2px;flex-wrap:wrap}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:middle}
+.legend-item{font-size:.72rem;color:var(--text2);display:flex;align-items:center}
 
 /* ── ADD SLOTS ── */
 .add-mode-bar{display:flex;gap:8px;margin:12px 0}
@@ -353,6 +375,25 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
   </div>
 </div>
 
+<!-- Client detail modal -->
+<div class="modal-backdrop hidden" id="clientModal">
+  <div class="modal-box" style="max-width:390px">
+    <div class="client-modal-header">
+      <div>
+        <div class="client-modal-title" id="clientModalTitle">Detalle de reserva</div>
+        <div class="client-modal-sub" id="clientModalSub"></div>
+      </div>
+      <button class="btn btn-secondary btn-sm btn-icon" onclick="closeClientModal()">✕</button>
+    </div>
+    <div id="clientModalBadges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>
+    <div id="clientModalBody"></div>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="closeClientModal()">Cerrar</button>
+      <button class="btn btn-danger btn-sm" id="clientCancelBtn" style="display:none" onclick="cancelFromModal()">Cancelar horario</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ LOGIN ══════════════════════════════════════════════════════ -->
 <div id="loginScreen">
   <div class="login-card">
@@ -404,16 +445,27 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
         <button class="sub-tab" onclick="showSubTab('addAgenda',this)">➕ Agregar Horarios</button>
       </div>
 
-      <!-- Ver Agenda -->
+      <!-- Ver Agenda — Vista semanal -->
       <div id="verAgenda">
-        <div class="agenda-toolbar">
-          <input type="month" id="filterMonth" oninput="renderAgenda()">
+        <div class="week-nav">
+          <button class="week-nav-btn" onclick="prevWeek()" title="Semana anterior">‹</button>
+          <span class="week-label" id="weekLabel"></span>
+          <button class="week-nav-btn" onclick="nextWeek()" title="Semana siguiente">›</button>
+        </div>
+        <div style="padding:0 0 8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <label class="toggle-label">
             <input type="checkbox" id="showAll" onchange="renderAgenda()">
             Ver también cancelados/reservados
           </label>
         </div>
-        <div id="agendaList"></div>
+        <div class="week-scroll">
+          <div class="week-grid" id="weekGrid"></div>
+        </div>
+        <div class="agenda-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#e6f7ee;border:1px solid #a8d5be"></span>Disponible</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#fff3e0;border:1px solid #f5cc8c"></span>Reservado</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--bg2);border:1px solid var(--border)"></span>Cancelado</span>
+        </div>
       </div>
 
       <!-- Agregar Horarios -->
@@ -727,10 +779,6 @@ function enterDashboard() {
   document.getElementById('headerName').textContent = SESSION.nombre;
   fillProfile();
   loadAgenda();
-  // month filter defaults to current month
-  const now = new Date();
-  document.getElementById('filterMonth').value =
-    now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
 }
 
 function logout() {
@@ -768,70 +816,181 @@ function showAddMode(mode, btn) {
 }
 
 // ════════════════════════════════════════════════════════════
-//  AGENDA — VER
+//  AGENDA — VER (Vista semanal)
 // ════════════════════════════════════════════════════════════
+
+let currentWeekStart = _getWeekStart(new Date());
+let _clientSlot = null; // slot abierto en el modal
+
+function _getWeekStart(d) {
+  const day = new Date(d);
+  day.setHours(0, 0, 0, 0);
+  const dow = day.getDay(); // 0=Dom … 6=Sáb
+  day.setDate(day.getDate() - dow);
+  return day;
+}
+
+function prevWeek() {
+  currentWeekStart = new Date(currentWeekStart);
+  currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+  renderAgenda();
+}
+
+function nextWeek() {
+  currentWeekStart = new Date(currentWeekStart);
+  currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+  renderAgenda();
+}
 
 function loadAgenda() {
   runGAS('getMySlots', [SESSION.correo, SESSION.clave, true], function(r) {
     if (!r) return;
     SLOTS = r.slots || [];
+    currentWeekStart = _getWeekStart(new Date());
     renderAgenda();
   });
 }
 
 function renderAgenda() {
-  const monthVal = document.getElementById('filterMonth').value; // "YYYY-MM"
-  const showAll  = document.getElementById('showAll').checked;
-  const list     = document.getElementById('agendaList');
+  const showAll = document.getElementById('showAll').checked;
+  const grid    = document.getElementById('weekGrid');
+  const label   = document.getElementById('weekLabel');
 
-  let filtered = SLOTS;
-  if (monthVal) {
-    const [yr, mo] = monthVal.split('-').map(Number);
-    filtered = SLOTS.filter(s => {
-      const [d, m, y] = s.fecha.split('/').map(Number);
-      return y === yr && m === mo;
-    });
+  const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+  // Etiqueta de semana
+  const wEnd = new Date(currentWeekStart);
+  wEnd.setDate(wEnd.getDate() + 6);
+  const startMo = MONTHS[currentWeekStart.getMonth()];
+  const endMo   = MONTHS[wEnd.getMonth()];
+  if (startMo === endMo) {
+    label.textContent = currentWeekStart.getDate() + '–' + wEnd.getDate() + ' ' + startMo + ' ' + wEnd.getFullYear();
+  } else {
+    label.textContent = currentWeekStart.getDate() + ' ' + startMo + ' – ' + wEnd.getDate() + ' ' + endMo + ' ' + wEnd.getFullYear();
   }
-  if (!showAll) filtered = filtered.filter(s => s.disponible === 'Sí');
 
-  if (!filtered.length) {
-    list.innerHTML = '<div class="agenda-table"><div class="agenda-empty">No hay horarios para este mes.</div></div>';
-    return;
-  }
-
-  const rows = filtered.map(s => {
-    const isCancelled = s.disponible !== 'Sí';
-    const isBooked    = isCancelled && s.cliente;
-    let statusHtml;
-    if (s.disponible === 'Sí') {
-      statusHtml = '<span class="agenda-status avail">Disponible</span>';
-    } else if (s.cliente) {
-      statusHtml = '<span class="agenda-status booked" title="' + esc(s.cliente) + '">Reservado</span>';
-    } else {
-      statusHtml = '<span class="agenda-status cancelled">Cancelado</span>';
-    }
-    const modClass = s.modalidad.toLowerCase() === 'domicilio' ? 'dom' : '';
-    const canCancel = s.disponible === 'Sí';
-
-    return `<div class="agenda-row${isCancelled&&!isBooked?' cancelled':''}{isBooked?' booked':''}">
-      <div>
-        <div class="agenda-day">${esc(s.dia)}</div>
-        <div class="agenda-date">${esc(s.fecha)}</div>
-      </div>
-      <div class="agenda-hora">${esc(s.hora)}</div>
-      <div>
-        <div><span class="agenda-mod ${modClass}">${esc(s.modalidad)}</span></div>
-        <div style="margin-top:3px">${statusHtml}</div>
-      </div>
-      <div>
-        ${canCancel
-          ? `<button class="btn btn-danger btn-sm btn-icon" title="Cancelar" onclick="cancelSlot(${s.row},'${esc(s.fecha)} ${esc(s.hora)}')">✕</button>`
-          : ''}
-      </div>
-    </div>`;
+  // Índice de slots por fecha "DD/MM/YYYY"
+  const byDate = {};
+  SLOTS.forEach(function(s) {
+    if (!byDate[s.fecha]) byDate[s.fecha] = [];
+    byDate[s.fecha].push(s);
   });
 
-  list.innerHTML = '<div class="agenda-table">' + rows.join('') + '</div>';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  grid.innerHTML = '';
+
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(currentWeekStart);
+    day.setDate(day.getDate() + i);
+
+    const dd  = String(day.getDate()).padStart(2, '0');
+    const mm  = String(day.getMonth() + 1).padStart(2, '0');
+    const yy  = day.getFullYear();
+    const key = dd + '/' + mm + '/' + yy;
+
+    const isToday = day.getTime() === today.getTime();
+
+    const col = document.createElement('div');
+    col.className = 'day-col';
+
+    // Cabecera del día
+    const hdr = document.createElement('div');
+    hdr.className = 'day-header' + (isToday ? ' today' : '');
+    hdr.innerHTML = '<div class="day-name">' + DAYS[day.getDay()] + '</div>'
+                  + '<div class="day-num">' + day.getDate() + '</div>';
+    col.appendChild(hdr);
+
+    // Slots del día
+    const daySlots = byDate[key] || [];
+    const filtered = showAll ? daySlots : daySlots.filter(function(s) { return s.disponible === 'Sí'; });
+
+    if (!filtered.length) {
+      const emp = document.createElement('div');
+      emp.className = 'day-empty';
+      emp.textContent = '—';
+      col.appendChild(emp);
+    } else {
+      filtered.forEach(function(s) {
+        const isAvail    = s.disponible === 'Sí';
+        const isCancelled = !isAvail && !s.cliente;
+        const isBooked   = !isAvail && !!s.cliente;
+
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'slot-pill ' + (isAvail ? 'avail' : (isBooked ? 'booked' : 'cancelled'));
+
+        const modAbbr = s.modalidad === 'Domicilio' ? 'Dom' : 'Sede';
+        pill.innerHTML = '<div class="pill-hora">' + esc(s.hora) + '</div>'
+          + '<div class="pill-mod">' + modAbbr + '</div>'
+          + (isBooked ? '<div class="pill-lock">🔒</div>' : '');
+
+        if (isBooked) {
+          pill.onclick = (function(slot){ return function() { showClientDetails(slot); }; })(s);
+        } else if (isAvail) {
+          pill.onclick = (function(slot){ return function() { cancelSlot(slot.row, slot.fecha + ' ' + slot.hora); }; })(s);
+        } else {
+          pill.disabled = true;
+        }
+
+        col.appendChild(pill);
+      });
+    }
+
+    grid.appendChild(col);
+  }
+}
+
+// ── MODAL DE CLIENTE ─────────────────────────────────────────
+
+function showClientDetails(s) {
+  _clientSlot = s;
+  const modal   = document.getElementById('clientModal');
+  const title   = document.getElementById('clientModalTitle');
+  const sub     = document.getElementById('clientModalSub');
+  const badges  = document.getElementById('clientModalBadges');
+  const body    = document.getElementById('clientModalBody');
+  const cancelBtn = document.getElementById('clientCancelBtn');
+
+  title.textContent = s.fecha + '  ·  ' + s.hora;
+  sub.textContent   = s.dia || '';
+
+  const modClass = s.modalidad === 'Domicilio' ? 'dom' : '';
+  badges.innerHTML  = '<span class="agenda-mod ' + modClass + '">' + esc(s.modalidad) + '</span>'
+    + '&nbsp;<span class="agenda-status booked">Reservado</span>';
+
+  function field(icon, lbl, val) {
+    if (!val) return '';
+    return '<div class="client-field">'
+      + '<div class="client-field-icon">' + icon + '</div>'
+      + '<div><div class="client-field-label">' + lbl + '</div>'
+      + '<div class="client-field-val">' + esc(val) + '</div></div></div>';
+  }
+
+  body.innerHTML =
+    field('👤', 'Cliente',       s.cliente)
+    + field('📧', 'Correo',      s.email)
+    + field('📱', 'Teléfono',    s.telefono)
+    + field('💆', 'Procedimiento', s.procedimiento)
+    + field('💰', 'Anticipo',    s.anticipo)
+    + field('🏙️', 'Ciudad',      s.ciudad)
+    + (s.modalidad === 'Domicilio' ? field('📍', 'Dirección', s.direccion) : '');
+
+  cancelBtn.style.display = 'none'; // reservados no se cancelan desde aquí
+  modal.classList.remove('hidden');
+}
+
+function closeClientModal() {
+  document.getElementById('clientModal').classList.add('hidden');
+  _clientSlot = null;
+}
+
+function cancelFromModal() {
+  if (!_clientSlot) return;
+  closeClientModal();
+  cancelSlot(_clientSlot.row, _clientSlot.fecha + ' ' + _clientSlot.hora);
 }
 
 function cancelSlot(row, label) {
