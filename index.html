@@ -82,6 +82,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap">
+<!-- Leaflet (mapa interactivo) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTLSeB68ARYJipY1SQ==" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous" defer></script>
 <style>
 
 [hidden]{display:none!important}
@@ -143,7 +146,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .hero-content{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:center;padding-top:calc(var(--nav-h) + 3rem);padding-bottom:4rem;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));max-width:1200px;margin:0 auto}
 .hero-text{max-width:560px}
 .hero-img-col{border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(45,26,16,.5);position:relative}
-.hero-img-col img{width:100%;height:clamp(380px,55vh,560px);object-fit:cover;object-position:center 25%;display:block}
+.hero-img-col img{width:100%;height:auto;display:block}
 .hero-img-col::before{content:'';position:absolute;inset:0;border-radius:24px;border:1px solid rgba(191,155,111,.25);pointer-events:none;z-index:1}
 @media(max-width:900px){.hero-content{grid-template-columns:1fr;padding-top:calc(var(--nav-h) + 2rem)}.hero-img-col{display:none}}
 .hero-eyebrow{display:inline-block;margin-bottom:.75rem;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--caramel)}
@@ -488,6 +491,70 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
   }
 }
 
+/* ── SECCIÓN ENCUENTRA TU PROFESIONAL ───────────────────────────── */
+.find-section{background:var(--bg-alt);padding:5rem 0}
+.find-inner{max-width:1180px;margin:0 auto;padding:0 max(24px,env(safe-area-inset-left,0px))}
+.find-header{text-align:center;margin-bottom:2.5rem}
+.find-header .eyebrow{display:block;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--caramel);font-weight:500;margin-bottom:.5rem}
+.find-header h2{font-family:var(--fd);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:600;color:var(--espresso);line-height:1.15}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .find-header h2{color:var(--caramel)}}
+:root[data-theme="dark"] .find-header h2{color:var(--caramel)}
+.find-header p{color:var(--text-mid);margin-top:.7rem;font-size:.95rem;max-width:540px;margin-inline:auto}
+
+/* Filtros */
+.find-filters{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin-bottom:2rem}
+.find-filters select{font-family:var(--fb);font-size:.88rem;padding:.55rem 1.1rem;border:1.5px solid var(--border-s);border-radius:50px;background:var(--surface);color:var(--text);cursor:pointer;outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;padding-right:2.2rem;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23BF9B6F' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center}
+.find-filters select:focus{border-color:var(--caramel);box-shadow:0 0 0 3px rgba(191,155,111,.2)}
+
+/* Layout grid: tarjetas izquierda, mapa derecha */
+.find-grid{display:grid;grid-template-columns:380px 1fr;gap:1.5rem;align-items:start}
+@media(max-width:900px){.find-grid{grid-template-columns:1fr}}
+
+/* Tarjetas */
+.find-cards{display:flex;flex-direction:column;gap:1rem;max-height:480px;overflow-y:auto;padding-right:4px}
+.find-cards::-webkit-scrollbar{width:4px}
+.find-cards::-webkit-scrollbar-track{background:transparent}
+.find-cards::-webkit-scrollbar-thumb{background:var(--caramel-lt);border-radius:2px}
+
+.prof-card{background:var(--surface);border-radius:14px;padding:1.1rem 1.25rem;border:1.5px solid var(--border);cursor:pointer;transition:border-color .2s,box-shadow .2s;display:flex;flex-direction:column;gap:.5rem}
+.prof-card:hover,.prof-card.active{border-color:var(--caramel);box-shadow:var(--sh-sm)}
+.prof-card-top{display:flex;align-items:center;gap:.9rem}
+.prof-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--caramel-lt),var(--caramel));display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:1.3rem;font-weight:600;color:var(--espresso);flex-shrink:0}
+.prof-info{min-width:0;flex:1}
+.prof-name{font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--espresso);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .prof-name{color:var(--text)}}
+:root[data-theme="dark"] .prof-name{color:var(--text)}
+.prof-city{font-size:.8rem;color:var(--text-muted);display:flex;align-items:center;gap:.3rem}
+.prof-services{display:flex;flex-wrap:wrap;gap:.35rem}
+.prof-tag{font-size:.75rem;padding:.2rem .6rem;border-radius:50px;background:var(--caramel-lt);color:var(--brown);line-height:1.4}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .prof-tag{background:rgba(191,155,111,.15);color:var(--caramel)}}
+:root[data-theme="dark"] .prof-tag{background:rgba(191,155,111,.15);color:var(--caramel)}
+.prof-addr{font-size:.82rem;color:var(--text-muted);display:flex;align-items:flex-start;gap:.4rem;line-height:1.4}
+.prof-actions{display:flex;gap:.6rem;margin-top:.25rem;flex-wrap:wrap}
+.prof-btn{font-size:.8rem;padding:.35rem .85rem;border-radius:50px;text-decoration:none;font-family:var(--fb);font-weight:500;transition:background .2s,color .2s;border:1.5px solid var(--caramel);color:var(--caramel);background:transparent;display:inline-flex;align-items:center;gap:.3rem}
+.prof-btn:hover{background:var(--caramel);color:#fff}
+.prof-btn.primary{background:var(--caramel);color:#fff}
+.prof-btn.primary:hover{background:var(--caramel-dk)}
+
+/* Estado vacío y cargando */
+.find-empty{text-align:center;padding:2.5rem;color:var(--text-muted);font-size:.95rem}
+.find-loading{text-align:center;padding:2rem;color:var(--caramel)}
+.find-spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--caramel-lt);border-top-color:var(--caramel);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Mapa */
+.find-map-wrap{border-radius:16px;overflow:hidden;box-shadow:var(--sh-md);position:sticky;top:calc(var(--nav-h) + 1.5rem);border:1.5px solid var(--border)}
+#prof-map{height:480px;background:var(--bg)}
+@media(max-width:900px){.find-map-wrap{position:static}.find-cards{max-height:none;overflow-y:visible}}
+
+/* Leaflet popup personalizado */
+.leaflet-popup-content-wrapper{border-radius:12px!important;box-shadow:var(--sh-md)!important;font-family:var(--fb)!important}
+.leaflet-popup-content{margin:12px 14px!important;font-size:.87rem!important;line-height:1.5!important}
+.lp-name{font-family:'Cormorant Garant',Georgia,serif;font-size:1rem;font-weight:600;color:#2D1A10;margin-bottom:.25rem}
+.lp-svc{color:#9A7060;font-size:.8rem;margin-bottom:.4rem}
+.lp-link{color:#BF9B6F;font-size:.82rem;text-decoration:none;font-weight:500}
+.lp-link:hover{text-decoration:underline}
+
 </style>
 </head>
 <body>
@@ -499,6 +566,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       <a href="#servicios">Servicios</a>
       <a href="#equipo">Equipo</a>
       <a href="#contacto">Contacto</a>
+      <a href="#profesionales">Profesionales</a>
       <a href="politica-privacidad.html">Privacidad</a>
       <a href="https://koneksispa.com/unirse" style="font-size:.88rem;letter-spacing:.05em">Únete al equipo</a>
       <a href="https://koneksispa.com/koneksi-portal" target="_blank" rel="noopener" style="font-size:.88rem;letter-spacing:.05em">Portal Profesionales</a>
@@ -512,6 +580,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
     <a href="#servicios" role="menuitem">Servicios</a>
     <a href="#equipo" role="menuitem">Equipo</a>
     <a href="#contacto" role="menuitem">Contacto</a>
+    <a href="#profesionales" role="menuitem">Profesionales</a>
     <a href="politica-privacidad.html" role="menuitem">Política de Privacidad</a>
     <a href="https://koneksispa.com/unirse" role="menuitem" style="color:var(--caramel);font-weight:500">Únete al equipo</a>
     <a href="https://koneksispa.com/koneksi-portal" role="menuitem" target="_blank" rel="noopener" style="color:var(--caramel);font-weight:500">Portal Profesionales</a>
@@ -522,7 +591,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 <main>
   <section id="inicio" class="hero" aria-label="Bienvenida">
     <div class="hero-bg" aria-hidden="true">
-      <img src="img/equipo.jpg" alt="Equipo de profesionales de Koneksi" width="1438" height="2576" loading="eager">
+      <img src="img/equipo.jpg" alt="Equipo de profesionales de Koneksi" loading="eager">
       <div class="hero-overlay"></div>
     </div>
     <div class="hero-content">
@@ -537,7 +606,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         </div>
       </div>
       <div class="hero-img-col">
-        <img src="img/relax.jpg" alt="Masaje relajante en Koneksi" loading="eager">
+        <img src="img/equipo.jpg" alt="Collage de servicios de bienestar Koneksi" loading="eager">
       </div>
     </div>
   </section>
@@ -696,6 +765,37 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       </div>
     </div>
   </section>
+  <!-- ENCUENTRA TU PROFESIONAL -->
+  <section id="profesionales" class="section find-section" aria-labelledby="find-h">
+    <div class="find-inner">
+      <div class="find-header reveal">
+        <span class="eyebrow">Nuestra red</span>
+        <h2 id="find-h">Encuentra tu profesional</h2>
+        <p>Filtra por ciudad y por el servicio que buscas, y conecta directamente con el profesional de bienestar ideal para ti.</p>
+      </div>
+      <!-- Filtros -->
+      <div class="find-filters" id="findFilters">
+        <select id="filterCiudad" aria-label="Filtrar por ciudad">
+          <option value="">Todas las ciudades</option>
+        </select>
+        <select id="filterServicio" aria-label="Filtrar por servicio">
+          <option value="">Todos los servicios</option>
+        </select>
+      </div>
+      <!-- Grid tarjetas + mapa -->
+      <div class="find-grid">
+        <div>
+          <div id="findCards" class="find-cards" aria-live="polite" aria-label="Listado de profesionales">
+            <div class="find-loading"><div class="find-spinner"></div></div>
+          </div>
+        </div>
+        <div class="find-map-wrap">
+          <div id="prof-map" role="application" aria-label="Mapa de profesionales"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ÚNETE AL EQUIPO -->
   <section id="unirse" class="join-section" aria-labelledby="join-h">
     <div class="join-inner">
@@ -1912,6 +2012,337 @@ async function ksSend() {
 document.getElementById('ks-input').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ksSend(); }
 });
+// Auto-resize textarea
+document.getElementById('ks-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 90) + 'px';
+});
+
+// ── ENCUENTRA TU PROFESIONAL ─────────────────────────────────────────────────
+(function() {
+  'use strict';
+
+  /* ---- Estado ---- */
+  let _profs = [];          // todos los profesionales cargados
+  let _map   = null;        // instancia Leaflet
+  let _markers = {};        // { codigo: L.marker }
+  let _activeCard = null;   // código del card activo
+
+  /* ---- Geocodificación con caché localStorage ---- */
+  const GEO_CACHE_KEY = 'koneksi_geo_v1';
+  function _loadCache() {
+    try { return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}'); }
+    catch(e) { return {}; }
+  }
+  function _saveCache(c) {
+    try { localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+  }
+
+  /**
+   * Geocodifica una dirección colombiana usando Nominatim.
+   * Retorna { lat, lon } o null si falla.
+   * Rate-limit: 1 req/s. Usa caché de localStorage.
+   */
+  let _geoQueue = Promise.resolve();
+  async function geocode(address, ciudad) {
+    if (!address || address.trim() === '') {
+      // Si no hay dirección, geocodificar solo la ciudad de Colombia
+      address = ciudad + ', Colombia';
+    } else {
+      address = address + ', ' + ciudad + ', Colombia';
+    }
+    const key = address.trim().toLowerCase();
+    const cache = _loadCache();
+    if (cache[key]) return cache[key];
+
+    // Encolar respetando 1 req/s
+    const result = await (_geoQueue = _geoQueue.then(async () => {
+      await new Promise(r => setTimeout(r, 1100));
+      try {
+        const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' +
+                    encodeURIComponent(address);
+        const resp = await fetch(url, {
+          headers: { 'Accept-Language': 'es', 'User-Agent': 'KoneksiSpa/1.0 (koneksispa.com)' }
+        });
+        const data = await resp.json();
+        if (data && data[0]) {
+          const coords = { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+          const updated = _loadCache();
+          updated[key] = coords;
+          _saveCache(updated);
+          return coords;
+        }
+      } catch(e) {}
+      return null;
+    }));
+    return result;
+  }
+
+  /* ---- Inicializar mapa ---- */
+  function initMap() {
+    if (_map) return;
+    // Centro en Cali, Colombia
+    _map = L.map('prof-map', { zoomControl: true, scrollWheelZoom: false })
+             .setView([3.4516, -76.5320], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19
+    }).addTo(_map);
+
+    // Icono personalizado
+    _leafletIcon = L.divIcon({
+      className: '',
+      html: '<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#BF9B6F,#A07845);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;box-shadow:0 2px 8px rgba(45,26,16,.35);border:2.5px solid #fff;">🌿</div>',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -34]
+    });
+  }
+
+  let _leafletIcon = null;
+
+  /* ---- Renderizar marcadores ---- */
+  async function renderMarkers(profs) {
+    if (!_map) return;
+    // Limpiar marcadores existentes
+    Object.values(_markers).forEach(m => _map.removeLayer(m));
+    _markers = {};
+
+    for (const p of profs) {
+      const coords = await geocode(p.direccion, p.ciudad);
+      if (!coords) continue;
+
+      const marker = L.marker([coords.lat, coords.lon], { icon: _leafletIcon })
+        .addTo(_map)
+        .bindPopup(`
+          <div class="lp-name">${p.nombre}</div>
+          <div class="lp-svc">${p.servicios.slice(0,3).join(' · ')}</div>
+          ${p.direccion ? '<div class="lp-svc">📍 ' + p.direccion + '</div>' : ''}
+          ${p.link ? '<a class="lp-link" href="' + p.link + '" target="_blank" rel="noopener">Ver perfil →</a>' : ''}
+        `);
+
+      marker.on('click', () => {
+        setActiveCard(p.codigo);
+        scrollToCard(p.codigo);
+      });
+
+      _markers[p.codigo] = marker;
+    }
+
+    // Ajustar vista
+    const validMarkers = Object.values(_markers);
+    if (validMarkers.length > 0) {
+      const group = L.featureGroup(validMarkers);
+      _map.fitBounds(group.getBounds().pad(0.2), { maxZoom: 14 });
+    }
+  }
+
+  /* ---- Tarjetas ---- */
+  function inicial(nombre) {
+    return (nombre || '?')[0].toUpperCase();
+  }
+
+  function buildCard(p) {
+    const card = document.createElement('div');
+    card.className = 'prof-card';
+    card.dataset.codigo = p.codigo;
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', 'Ver ' + p.nombre);
+
+    const tags = p.servicios.slice(0, 4).map(s =>
+      `<span class="prof-tag">${s}</span>`
+    ).join('');
+
+    const dirHtml = p.direccion
+      ? `<div class="prof-addr"><span>📍</span><span>${p.direccion}</span></div>`
+      : '';
+
+    const horHtml = (p.dias || p.horarios)
+      ? `<div class="prof-addr"><span>🕐</span><span>${[p.dias, p.horarios].filter(Boolean).join(' · ')}</span></div>`
+      : '';
+
+    const bookUrl = `${GAS_CONTACT}?action=getSlots&profesional=${encodeURIComponent(p.nombre)}&codigo=${encodeURIComponent(p.codigo)}`;
+    const ctaBook = `<button class="prof-btn primary" onclick="openBookingWizardForProf('${p.codigo}','${p.nombre.replace(/'/g,"\\'")}')">Reservar</button>`;
+    const ctaLink = p.link
+      ? `<a class="prof-btn" href="${p.link}" target="_blank" rel="noopener">Ver perfil</a>`
+      : '';
+    const ctaWa = p.telefono
+      ? `<a class="prof-btn" href="https://wa.me/${p.telefono.replace(/\D/g,'')}?text=Hola%20${encodeURIComponent(p.nombre)}%2C%20vi%20tu%20perfil%20en%20Koneksi%20y%20quer%C3%ADa%20consultar%20disponibilidad." target="_blank" rel="noopener">WhatsApp</a>`
+      : '';
+
+    card.innerHTML = `
+      <div class="prof-card-top">
+        <div class="prof-avatar">${inicial(p.nombre)}</div>
+        <div class="prof-info">
+          <div class="prof-name">${p.nombre}</div>
+          <div class="prof-city">📍 ${p.ciudad}</div>
+        </div>
+      </div>
+      ${tags ? `<div class="prof-services">${tags}</div>` : ''}
+      ${dirHtml}
+      ${horHtml}
+      <div class="prof-actions">${ctaBook}${ctaLink}${ctaWa}</div>
+    `;
+
+    card.addEventListener('click', (e) => {
+      // No activar si se hizo click en un botón/link
+      if (e.target.closest('button,a')) return;
+      setActiveCard(p.codigo);
+      panToMarker(p.codigo);
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setActiveCard(p.codigo);
+        panToMarker(p.codigo);
+      }
+    });
+
+    return card;
+  }
+
+  function setActiveCard(codigo) {
+    _activeCard = codigo;
+    document.querySelectorAll('.prof-card').forEach(c => {
+      c.classList.toggle('active', c.dataset.codigo === codigo);
+    });
+  }
+
+  function scrollToCard(codigo) {
+    const el = document.querySelector(`.prof-card[data-codigo="${codigo}"]`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function panToMarker(codigo) {
+    const m = _markers[codigo];
+    if (m && _map) {
+      _map.setView(m.getLatLng(), 15, { animate: true });
+      m.openPopup();
+    }
+  }
+
+  /* ---- Filtros ---- */
+  function populateFilters(profs) {
+    const ciudades = [...new Set(profs.map(p => p.ciudad).filter(Boolean))].sort();
+    const servicios = [...new Set(profs.flatMap(p => p.servicios))].sort();
+
+    const selC = document.getElementById('filterCiudad');
+    const selS = document.getElementById('filterServicio');
+
+    // Mantener opción "Todas"
+    selC.innerHTML = '<option value="">Todas las ciudades</option>';
+    ciudades.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      selC.appendChild(o);
+    });
+
+    selS.innerHTML = '<option value="">Todos los servicios</option>';
+    servicios.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      selS.appendChild(o);
+    });
+
+    selC.addEventListener('change', applyFilters);
+    selS.addEventListener('change', applyFilters);
+  }
+
+  function applyFilters() {
+    const ciudad   = document.getElementById('filterCiudad').value;
+    const servicio = document.getElementById('filterServicio').value;
+
+    const filtered = _profs.filter(p => {
+      if (ciudad   && p.ciudad !== ciudad)              return false;
+      if (servicio && !p.servicios.includes(servicio))  return false;
+      return true;
+    });
+
+    renderCards(filtered);
+    renderMarkers(filtered);
+  }
+
+  /* ---- Render tarjetas ---- */
+  function renderCards(profs) {
+    const container = document.getElementById('findCards');
+    if (!profs.length) {
+      container.innerHTML = '<div class="find-empty">No se encontraron profesionales con ese filtro.</div>';
+      return;
+    }
+    container.innerHTML = '';
+    profs.forEach(p => container.appendChild(buildCard(p)));
+  }
+
+  /* ---- Carga inicial ---- */
+  async function loadProfesionales() {
+    // Esperar a que Leaflet esté disponible (defer)
+    let attempts = 0;
+    while (typeof L === 'undefined' && attempts < 20) {
+      await new Promise(r => setTimeout(r, 300));
+      attempts++;
+    }
+    initMap();
+
+    try {
+      const resp = await fetch(GAS_CONTACT + '?action=getProfesionales');
+      const data = await resp.json();
+      if (!data.ok || !data.profesionales) throw new Error(data.error || 'Sin datos');
+
+      _profs = data.profesionales;
+      populateFilters(_profs);
+      renderCards(_profs);
+      renderMarkers(_profs);
+    } catch (err) {
+      document.getElementById('findCards').innerHTML =
+        '<div class="find-empty">No se pudo cargar la lista de profesionales. Por favor intenta más tarde.</div>';
+    }
+  }
+
+  /* ---- Función global para reserva directa por profesional ---- */
+  window.openBookingWizardForProf = function(codigo, nombre) {
+    // Reutiliza el wizard existente preseleccionando el profesional
+    if (typeof openBookingWizard === 'function') {
+      openBookingWizard();
+      // Intentar preseleccionar después de que carguen las opciones
+      const trySelect = (n) => {
+        const sel = document.getElementById('bwProf');
+        if (sel) {
+          const opt = [...sel.options].find(o =>
+            o.textContent.toLowerCase().includes(nombre.toLowerCase()) ||
+            o.value === codigo
+          );
+          if (opt) { sel.value = opt.value; sel.dispatchEvent(new Event('change')); }
+          else if (n > 0) setTimeout(() => trySelect(n - 1), 400);
+        } else if (n > 0) {
+          setTimeout(() => trySelect(n - 1), 400);
+        }
+      };
+      setTimeout(() => trySelect(8), 600);
+    }
+  };
+
+  /* ---- Observador de intersección para carga diferida ---- */
+  const section = document.getElementById('profesionales');
+  if (section) {
+    if ('IntersectionObserver' in window) {
+      let loaded = false;
+      const obs = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && !loaded) {
+          loaded = true;
+          obs.disconnect();
+          loadProfesionales();
+        }
+      }, { rootMargin: '200px' });
+      obs.observe(section);
+    } else {
+      // Fallback: cargar inmediatamente
+      loadProfesionales();
+    }
+  }
+})();
+// ── FIN ENCUENTRA TU PROFESIONAL ─────────────────────────────────────────────
+
 // Auto-resize textarea
 document.getElementById('ks-input').addEventListener('input', function() {
   this.style.height = 'auto';
