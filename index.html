@@ -253,6 +253,53 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 #tmodLightbox .tmod-lb-close{position:absolute;top:1rem;right:1.25rem;color:#fff;font-size:1.8rem;font-weight:300;cursor:pointer;line-height:1;background:none;border:none;padding:.25rem;opacity:.8}
 #tmodLightbox .tmod-lb-close:hover{opacity:1}
 
+/* ── VALORACIONES / ESTRELLAS ── */
+.stars-row{display:inline-flex;gap:1px;line-height:1;vertical-align:middle}
+.star{font-size:.95rem;position:relative;display:inline-block}
+.star.sf{color:var(--caramel)}
+.star.se{color:rgba(191,155,111,.22)}
+.star.sh{color:rgba(191,155,111,.22)}
+.star.sh::before{content:'★';position:absolute;left:0;top:0;width:50%;overflow:hidden;color:var(--caramel)}
+/* En tarjeta del profesional */
+.team-rating{display:flex;align-items:center;gap:.35rem;margin-bottom:.4rem}
+.team-rating-val{font-size:.78rem;font-weight:600;color:var(--caramel);letter-spacing:.01em}
+/* En modal del profesional */
+.tmod-rating-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;padding-top:.45rem;border-top:1px solid var(--border)}
+.tmod-rating-val{font-size:.85rem;font-weight:600;color:var(--caramel)}
+.tmod-rating-count{font-size:.78rem;color:var(--text-muted)}
+.tmod-reviews-btn,.tmod-link-btn{background:none;border:none;cursor:pointer;font-family:var(--fb);font-size:.8rem;color:var(--caramel);text-decoration:underline;text-decoration-style:dotted;padding:0;line-height:1}
+.tmod-reviews-btn:hover,.tmod-link-btn:hover{color:var(--caramel-dk);text-decoration-style:solid}
+.tmod-no-rating{font-size:.8rem;color:var(--text-muted)}
+/* Sección de reviews y formulario de calificación */
+#tmodReviewsSection{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+.tmod-rev-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
+.tmod-rev-title{font-family:var(--fd);font-size:1rem;font-weight:600;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase}
+.tmod-rev-toggle{background:none;border:1px solid var(--border);border-radius:20px;padding:.28rem .75rem;font-family:var(--fb);font-size:.78rem;color:var(--text-muted);cursor:pointer;transition:border-color .2s,color .2s}
+.tmod-rev-toggle:hover{border-color:var(--caramel);color:var(--caramel)}
+.tmod-reviews-list{margin-bottom:1rem}
+.tmod-review-item{padding:.65rem 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr;gap:.4rem .7rem;align-items:start}
+.tmod-review-item:last-child{border-bottom:none}
+.tmod-rev-stars{grid-column:1}
+.tmod-rev-comment{grid-column:2;font-size:.85rem;color:var(--text-mid);line-height:1.6;grid-row:1 / span 2}
+.tmod-rev-comment:empty{display:none}
+.tmod-rev-anon{grid-column:1;font-size:.72rem;color:var(--text-muted)}
+/* Formulario de calificación */
+.tmod-rate-form{background:var(--bg-alt);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;margin-top:.85rem}
+.tmod-rate-form-title{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.8rem}
+.tmod-star-picker{display:flex;gap:.3rem;margin-bottom:.75rem;cursor:pointer}
+.tmod-star-picker .sp{font-size:1.6rem;color:rgba(191,155,111,.22);transition:color .15s;line-height:1}
+.tmod-star-picker .sp.on{color:var(--caramel)}
+.tmod-rate-comment{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:.5rem .7rem;font-family:var(--fb);font-size:.84rem;color:var(--text);resize:none;line-height:1.5;outline:none;transition:border-color .2s;min-height:60px}
+.tmod-rate-comment:focus{border-color:var(--caramel)}
+.tmod-rate-comment::placeholder{color:var(--text-muted)}
+.tmod-rate-actions{display:flex;align-items:center;gap:.7rem;margin-top:.65rem;flex-wrap:wrap}
+.tmod-rate-submit{background:var(--caramel);color:#fff;border:none;border-radius:50px;padding:.5rem 1.3rem;font-family:var(--fb);font-size:.85rem;font-weight:500;cursor:pointer;transition:background .2s,opacity .2s}
+.tmod-rate-submit:hover{background:var(--caramel-dk)}
+.tmod-rate-submit:disabled{opacity:.55;cursor:default}
+.tmod-rate-msg{font-size:.8rem;color:var(--caramel)}
+.tmod-rate-msg.err{color:#c0392b}
+.tmod-rev-loading{font-size:.82rem;color:var(--text-muted);padding:.4rem 0}
+
 /* CONTACT */
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
 @media(max-width:768px){.contact-grid{grid-template-columns:1fr}}
@@ -975,6 +1022,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <div class="tmod-svcs" id="tmodSvcs"></div>
         <div class="tmod-sched" id="tmodSched"></div>
         <div class="tmod-koneksi-sede" id="tmodKoneksiSede" style="display:none"></div>
+        <div class="tmod-rating-row" id="tmodRatingRow"></div>
       </div>
     </div>
     <!-- Galería de fotos / videos desde Drive -->
@@ -982,6 +1030,8 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
     <!-- Servicios adicionales del profesional (SERVICIOS COLA) -->
     <div id="tmodExtraSvcs"></div>
     <p class="tmod-bio" id="tmodBio"></p>
+    <!-- Valoraciones y opiniones -->
+    <div id="tmodReviewsSection"></div>
     <div class="modal-booking" id="tmodBooking"></div>
   </div>
 </div>
@@ -1199,7 +1249,8 @@ function renderTeamCards(){
     let sched='';
     if(t.sched)sched+='<div class="team-sched">&#x23F0; '+t.sched+'</div>';
     if(t.days)sched+='<div class="team-sched">&#x1F4C5; '+t.days+'</div>';
-    card.innerHTML=banner+'<div class="team-card-body"><div class="team-name">'+t.name+'</div><div class="team-svcs">'+t.svcs+'</div>'+sched+'<div class="team-cta">Ver perfil &#x2192;</div></div>';
+    const rHtml=t.rating>0?'<div class="team-rating">'+starsHtml(t.rating)+'<span class="team-rating-val">'+t.rating.toFixed(1)+'</span></div>':'';
+    card.innerHTML=banner+'<div class="team-card-body"><div class="team-name">'+t.name+'</div>'+rHtml+'<div class="team-svcs">'+t.svcs+'</div>'+sched+'<div class="team-cta">Ver perfil &#x2192;</div></div>';
     card.addEventListener('click',()=>openTeamModal(t,ph));
     teamGrid.appendChild(card);
   });
@@ -1251,7 +1302,8 @@ async function loadTeam(){
       codigo:(r.c[14]?.v||'').toString().trim().toLowerCase(),
       days:(r.c[7]?.v||'').trim(),
       bio:(r.c[8]?.v||'').trim(),
-      ciudad:(r.c[11]?.v||'').trim()
+      ciudad:(r.c[11]?.v||'').trim(),
+      rating:parseFloat(r.c[17]?.v)||0
     })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs);
     teamGrid.innerHTML='';
     if(!teamData.length){teamGrid.innerHTML='<p class="team-loading">Equipo disponible próximamente.</p>';return;}
@@ -1321,6 +1373,20 @@ function openTeamModal(t,ph){
   document.getElementById('tmodSched').innerHTML=sched;
   document.getElementById('tmodBio').textContent=t.bio||'';
   document.getElementById('tmodBio').hidden=!t.bio;
+  // Rating row
+  const ratingRowEl=document.getElementById('tmodRatingRow');
+  if(ratingRowEl){
+    if(t.rating>0){
+      ratingRowEl.innerHTML=starsHtml(t.rating)
+        +'<span class="tmod-rating-val">'+t.rating.toFixed(1)+'</span>'
+        +'<button class="tmod-reviews-btn" onclick="_openReviews(\''+encodeURIComponent(t.codigo||'')+'\',\''+encodeURIComponent(t.name.split(' ')[0])+'\')">Ver opiniones</button>';
+    }else{
+      ratingRowEl.innerHTML='<span class="tmod-no-rating">Sin calificaciones aún &nbsp;·&nbsp; <button class="tmod-link-btn" onclick="_openReviews(\''+encodeURIComponent(t.codigo||'')+'\',\''+encodeURIComponent(t.name.split(' ')[0])+'\',true)">Calificar primero</button></span>';
+    }
+  }
+  // Reviews section (formulario de calificación + lista de opiniones)
+  const revSecEl=document.getElementById('tmodReviewsSection');
+  if(revSecEl){revSecEl.innerHTML=_buildRatingFormHtml(t.codigo||'',t.name.split(' ')[0]);}
   // Limpiar secciones dinámicas
   document.getElementById('tmodMedia').innerHTML='';
   document.getElementById('tmodExtraSvcs').innerHTML='<p class="tmod-loading-text">Cargando…</p>';
@@ -1442,6 +1508,139 @@ function _tmodLightbox(src,alt){
   document.getElementById('tmodLbImg').alt=alt||'';
   lb.hidden=false;
 }
+// ── SISTEMA DE VALORACIONES ──────────────────────────────────────
+function starsHtml(rating){
+  if(!rating||isNaN(rating))return'';
+  const r=Math.round(rating*2)/2;
+  let h='<span class="stars-row" role="img" aria-label="'+r.toFixed(1)+' de 5 estrellas">';
+  for(let i=1;i<=5;i++){
+    if(r>=i)h+='<span class="star sf">★</span>';
+    else if(r>=i-.5)h+='<span class="star sh">★</span>';
+    else h+='<span class="star se">★</span>';
+  }
+  return h+'</span>';
+}
+function _buildRatingFormHtml(codigo,firstName){
+  const ec=encodeURIComponent(codigo),ef=encodeURIComponent(firstName);
+  return`<div class="tmod-rev-header">
+    <span class="tmod-rev-title">Opiniones</span>
+    <button class="tmod-rev-toggle" onclick="_toggleRevList(this,'${ec}')">Ver opiniones ▾</button>
+  </div>
+  <div class="tmod-reviews-list" id="revList_${ec}" style="display:none"></div>
+  <div class="tmod-rate-form" id="rateForm_${ec}">
+    <div class="tmod-rate-form-title">Califica a ${firstName}</div>
+    <div class="tmod-star-picker" id="picker_${ec}" data-val="0">
+      ${[1,2,3,4,5].map(i=>'<span class="sp" data-v="'+i+'" onclick="_pickStar(\''+ec+'\','+i+')" onmouseenter="_hoverStar(\''+ec+'\','+i+')" onmouseleave="_hoverStar(\''+ec+'\',0)">★</span>').join('')}
+    </div>
+    <textarea class="tmod-rate-comment" id="comment_${ec}" placeholder="Cuéntanos tu experiencia (opcional)" rows="2" maxlength="300"></textarea>
+    <div class="tmod-rate-actions">
+      <button class="tmod-rate-submit" id="rateSubmit_${ec}" onclick="_submitRating('${ec}','${ef}')" disabled>Enviar</button>
+      <span class="tmod-rate-msg" id="rateMsg_${ec}"></span>
+    </div>
+  </div>`;
+}
+function _pickStar(ec,val){
+  const pk=document.getElementById('picker_'+ec);
+  if(!pk)return;
+  pk.dataset.val=val;
+  Array.from(pk.children).forEach((s,i)=>{s.classList.toggle('on',i<val);});
+  const btn=document.getElementById('rateSubmit_'+ec);
+  if(btn)btn.disabled=val<1;
+}
+function _hoverStar(ec,val){
+  const pk=document.getElementById('picker_'+ec);
+  if(!pk)return;
+  const cur=parseInt(pk.dataset.val)||0;
+  const show=val||cur;
+  Array.from(pk.children).forEach((s,i)=>{s.classList.toggle('on',i<show);});
+}
+async function _toggleRevList(btn,ec){
+  const listEl=document.getElementById('revList_'+ec);
+  if(!listEl)return;
+  if(listEl.style.display==='none'){
+    listEl.style.display='';
+    btn.textContent='Ocultar opiniones ▴';
+    if(!listEl.dataset.loaded){
+      listEl.innerHTML='<p class="tmod-rev-loading">Cargando opiniones…</p>';
+      try{
+        const r=await fetch(GAS_CONTACT+'?action=getReviews&codigo='+ec);
+        const d=await r.json();
+        listEl.dataset.loaded='1';
+        if(d.ok&&d.reviews&&d.reviews.length){
+          listEl.innerHTML=d.reviews.map(rv=>{
+            const sc=parseFloat(rv.rating)||0;
+            return`<div class="tmod-review-item">
+              <span class="tmod-rev-stars">${starsHtml(sc)}</span>
+              <span class="tmod-rev-anon">Cliente Koneksi</span>
+              <span class="tmod-rev-comment">${rv.comment?rv.comment.replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}</span>
+            </div>`;
+          }).join('');
+        }else{
+          listEl.innerHTML='<p class="tmod-rev-loading">Aún no hay opiniones escritas.</p>';
+        }
+      }catch(e){
+        listEl.innerHTML='<p class="tmod-rev-loading">No se pudieron cargar las opiniones.</p>';
+      }
+    }
+  }else{
+    listEl.style.display='none';
+    btn.textContent='Ver opiniones ▾';
+  }
+}
+function _openReviews(ec,ef,showForm){
+  const btn=document.querySelector(`button.tmod-reviews-btn`);
+  _toggleRevList(document.querySelector(`[onclick*="_toggleRevList"][onclick*="${ec}"]`)||{textContent:''},ec);
+  if(showForm){
+    const form=document.getElementById('rateForm_'+ec);
+    if(form)form.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+async function _submitRating(ec,ef){
+  const pk=document.getElementById('picker_'+ec);
+  const rating=pk?parseInt(pk.dataset.val)||0:0;
+  if(rating<1){
+    const msg=document.getElementById('rateMsg_'+ec);
+    if(msg){msg.className='tmod-rate-msg err';msg.textContent='Elige al menos 1 estrella.';}
+    return;
+  }
+  const comment=(document.getElementById('comment_'+ec)||{}).value||'';
+  const btn=document.getElementById('rateSubmit_'+ec);
+  const msg=document.getElementById('rateMsg_'+ec);
+  if(btn)btn.disabled=true;
+  if(msg){msg.className='tmod-rate-msg';msg.textContent='Enviando…';}
+  try{
+    const url=GAS_CONTACT+'?action=submitReview&codigo='+ec
+      +'&rating='+rating
+      +'&comment='+encodeURIComponent(comment.trim().substring(0,300));
+    const r=await fetch(url);
+    const d=await r.json();
+    if(d.ok){
+      if(msg){msg.className='tmod-rate-msg';msg.textContent='¡Gracias por tu valoración!';}
+      _pickStar(ec,0);
+      const cm=document.getElementById('comment_'+ec);if(cm)cm.value='';
+      // Actualizar estrellas en header del modal
+      const ratingRowEl=document.getElementById('tmodRatingRow');
+      if(ratingRowEl&&d.newAvg){
+        const na=d.newAvg;
+        ratingRowEl.innerHTML=starsHtml(na)
+          +'<span class="tmod-rating-val">'+na.toFixed(1)+'</span>'
+          +'<span class="tmod-rating-count">('+d.totalCount+' '+(d.totalCount===1?'valoración':'valoraciones')+')</span>'
+          +'<button class="tmod-reviews-btn" onclick="_toggleRevList(this,\''+ec+'\')">Ver opiniones</button>';
+      }
+      // Marcar la lista como no-cargada para que recargue con nueva valoración
+      const listEl=document.getElementById('revList_'+ec);
+      if(listEl)listEl.dataset.loaded='';
+    }else{
+      if(msg){msg.className='tmod-rate-msg err';msg.textContent='No se pudo enviar. Intenta de nuevo.';}
+      if(btn)btn.disabled=false;
+    }
+  }catch(e){
+    if(msg){msg.className='tmod-rate-msg err';msg.textContent='Error de conexión. Intenta de nuevo.';}
+    if(btn)btn.disabled=false;
+  }
+}
+// ── FIN SISTEMA DE VALORACIONES ──────────────────────────────────
+
 function closeTeamModal(){teamModal.hidden=true;teamModal.style.display='';document.body.style.overflow='';}
 teamModalClose.addEventListener('click',closeTeamModal);
 teamModal.addEventListener('click',e=>{if(e.target===teamModal)closeTeamModal();});
