@@ -146,8 +146,20 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .hero-content{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:center;padding-top:calc(var(--nav-h) + 3rem);padding-bottom:4rem;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));max-width:1200px;margin:0 auto}
 .hero-text{max-width:560px}
 .hero-img-col{border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(45,26,16,.5);position:relative}
-.hero-img-col img{width:100%;height:auto;display:block}
-.hero-img-col::before{content:'';position:absolute;inset:0;border-radius:24px;border:1px solid rgba(191,155,111,.25);pointer-events:none;z-index:1}
+.hero-img-col::before{content:'';position:absolute;inset:0;border-radius:24px;border:1px solid rgba(191,155,111,.25);pointer-events:none;z-index:2}
+/* Hero slideshow */
+.hero-slides{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:24px}
+.hero-slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity 1s ease}
+.hero-slide.active{opacity:1}
+/* Dots */
+.hero-dots{position:absolute;bottom:.8rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:3}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4);transition:background .3s,transform .3s;cursor:pointer;border:none;padding:0}
+.hero-dot.active{background:#fff;transform:scale(1.4)}
+/* "Nuestra red" CTA */
+.hero-find-link{position:absolute;bottom:.8rem;right:.85rem;display:flex;align-items:center;gap:.45rem;background:rgba(45,26,16,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--caramel-lt);border:1px solid rgba(191,155,111,.45);border-radius:50px;padding:.42rem .9rem .42rem .6rem;font-size:.78rem;font-weight:500;text-decoration:none;z-index:3;transition:background .2s,transform .2s,color .2s;letter-spacing:.02em;white-space:nowrap}
+.hero-find-link svg{width:14px;height:14px;flex-shrink:0}
+.hero-find-link .arrow-r{opacity:.65;margin-left:.1rem}
+.hero-find-link:hover{background:rgba(45,26,16,.95);transform:translateY(-2px);color:#fff;border-color:rgba(191,155,111,.75)}
 @media(max-width:900px){.hero-content{grid-template-columns:1fr;padding-top:calc(var(--nav-h) + 2rem)}.hero-img-col{display:none}}
 .hero-eyebrow{display:inline-block;margin-bottom:.75rem;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--caramel)}
 .hero-text h1{font-family:var(--fd);font-size:clamp(2.2rem,5vw,3.8rem);font-weight:500;line-height:1.1;color:#fff;text-wrap:balance;margin-bottom:1.25rem}
@@ -606,7 +618,23 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         </div>
       </div>
       <div class="hero-img-col">
-        <img src="img/relax.jpg" alt="Servicios de bienestar Koneksi — masajes, manicura, consultoría y entrenamiento" loading="eager">
+        <div class="hero-slides" id="heroSlides">
+          <img src="img/slide-masaje.jpg"      alt="Masaje terapéutico Koneksi"           class="hero-slide active" loading="eager">
+          <img src="img/slide-manicura.jpg"    alt="Manicura profesional Koneksi"          class="hero-slide" loading="lazy">
+          <img src="img/slide-peluqueria.jpg"  alt="Peluquería y estilismo Koneksi"        class="hero-slide" loading="lazy">
+          <img src="img/slide-cuidado.jpg"     alt="Cuidado integral y acompañamiento"     class="hero-slide" loading="lazy">
+          <img src="img/slide-fitness.jpg"     alt="Entrenamiento personalizado Koneksi"   class="hero-slide" loading="lazy">
+          <img src="img/slide-facial.jpg"      alt="Tratamiento facial Koneksi"            class="hero-slide" loading="lazy">
+          <img src="img/slide-consultoria.jpg" alt="Consultoría de bienestar Koneksi"      class="hero-slide" loading="lazy">
+        </div>
+        <div class="hero-dots" id="heroDots" role="tablist" aria-label="Diapositivas del hero"></div>
+        <a href="#profesionales" class="hero-find-link" aria-label="Ir a Nuestra red · Encuentra tu profesional">
+          <!-- map-pin icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Nuestra red</span>
+          <!-- arrow right icon -->
+          <svg class="arrow-r" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
       </div>
     </div>
   </section>
@@ -2363,6 +2391,49 @@ document.getElementById('ks-input').addEventListener('input', function() {
   }
 })();
 // ── FIN ENCUENTRA TU PROFESIONAL ─────────────────────────────────────────────
+
+// ── HERO SLIDESHOW ───────────────────────────────────────────────────────────
+(function() {
+  const slidesEl = document.getElementById('heroSlides');
+  const dotsEl   = document.getElementById('heroDots');
+  if (!slidesEl || !dotsEl) return;
+
+  const slides = Array.from(slidesEl.querySelectorAll('.hero-slide'));
+  let current = 0;
+  let timer;
+
+  // Build dots
+  slides.forEach(function(_, i) {
+    const btn = document.createElement('button');
+    btn.className = 'hero-dot' + (i === 0 ? ' active' : '');
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-label', 'Diapositiva ' + (i + 1));
+    btn.addEventListener('click', function() { goTo(i); });
+    dotsEl.appendChild(btn);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dotsEl.children[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dotsEl.children[current].classList.add('active');
+    clearInterval(timer);
+    timer = setInterval(next, 4500);
+  }
+
+  function next() { goTo(current + 1); }
+
+  timer = setInterval(next, 4500);
+
+  // Pause on hover
+  const col = slidesEl.closest('.hero-img-col');
+  if (col) {
+    col.addEventListener('mouseenter', function() { clearInterval(timer); });
+    col.addEventListener('mouseleave', function() { timer = setInterval(next, 4500); });
+  }
+})();
+// ── FIN HERO SLIDESHOW ────────────────────────────────────────────────────────
 
 // Auto-resize textarea
 document.getElementById('ks-input').addEventListener('input', function() {
