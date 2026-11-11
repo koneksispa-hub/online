@@ -386,6 +386,18 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 }
 .sede-remove:hover{background:var(--rose-lt)}
 
+/* ── LINKS DE SERVICIOS ── */
+.link-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.link-row input{
+  flex:1;min-width:120px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;
+  font:inherit;font-size:.85rem;background:var(--bg);color:var(--text);
+  transition:border-color .2s;outline:none;
+}
+.link-row input:focus{border-color:var(--rose)}
+.link-row input.link-name{max-width:200px}
+.links-hint{font-size:.8rem;color:var(--text2);margin-bottom:12px;line-height:1.5}
+.links-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+
 /* ── INFORME DE INGRESOS ── */
 .report-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0 16px}
 .report-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
@@ -719,6 +731,19 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
         </form>
       </div>
 
+      <p class="section-title">Links / Vínculos de servicios</p>
+      <div class="perfil-section">
+        <div class="links-hint">
+          Agrega links con nombre para mostrarlos en tu perfil público.<br>
+          Ej: <strong>Masaje relajante</strong> → https://koneksispa.com/masaje
+        </div>
+        <div id="linkInputs"></div>
+        <div class="links-actions">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addLinkInput()">➕ Agregar link</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="saveLinks()">💾 Guardar links</button>
+        </div>
+      </div>
+
       <p class="section-title">Cambiar contraseña</p>
       <div class="perfil-section">
         <form id="cpForm" onsubmit="doChangePass(event)">
@@ -1012,6 +1037,7 @@ function showAddMode(mode, btn) {
 
 let currentWeekStart = _getWeekStart(new Date());
 let _clientSlot = null; // slot abierto en el modal
+let LINKS_DATA = [];    // [{nombre, url}] para la sección de links del perfil
 
 function _getWeekStart(d) {
   const day = new Date(d);
@@ -1165,7 +1191,14 @@ function showClientDetails(s) {
     + field('📧', 'Correo',      s.email)
     + field('📱', 'Teléfono',    s.telefono)
     + field('💆', 'Procedimiento', s.procedimiento)
-    + field('💰', 'Anticipo',    s.anticipo)
+    + field('💰', 'Anticipo',      s.anticipo    ? _fmt$$(s.anticipo)   : '')
+    + field('🏷️', 'Valor cita',    s.valorCita   ? _fmt$$(s.valorCita)  : '')
+    + (function() {
+        var ant = parseFloat((s.anticipo  || '').replace(/[^0-9.-]/g,'')) || 0;
+        var val = parseFloat((s.valorCita || '').replace(/[^0-9.-]/g,'')) || 0;
+        if (!val) return '';
+        return field('📊', 'Saldo a cobrar', _fmt$$(val - ant));
+      })()
     + field('🏙️', 'Ciudad',      s.ciudad)
     + (s.modalidad === 'Domicilio' ? field('📍', 'Dirección', s.direccion) : '');
 
@@ -1379,6 +1412,7 @@ function fillProfile() {
   document.getElementById('pfDias').value      = SESSION.dias      || '';
   document.getElementById('pfDesc').value      = SESSION.descripcion|| '';
   document.getElementById('pfCiudad').value    = SESSION.ciudad    || '';
+  initLinks(SESSION.links || '');
 
   document.getElementById('perfilInfo').innerHTML =
     '<strong>Nombre:</strong> ' + esc(SESSION.nombre) +
@@ -1757,6 +1791,72 @@ function saveSedes() {
     if (!r) return;
     SEDES = values;
     toast(r.msg || 'Sedes actualizadas', 'ok');
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  LINKS DE SERVICIOS
+// ════════════════════════════════════════════════════════════
+
+/**
+ * Convierte la cadena almacenada en Sheets ("nombre|url\nnombre2|url2")
+ * a LINKS_DATA y renderiza las filas de inputs.
+ */
+function initLinks(str) {
+  LINKS_DATA = (str || '').split('\n')
+    .map(function(l) { return l.trim(); })
+    .filter(function(l) { return l.indexOf('|') >= 0; })
+    .map(function(l) {
+      var parts = l.split('|');
+      return { nombre: parts[0].trim(), url: parts.slice(1).join('|').trim() };
+    });
+  if (!LINKS_DATA.length) LINKS_DATA = [{ nombre: '', url: '' }];
+  renderLinkInputs();
+}
+
+function renderLinkInputs() {
+  var container = document.getElementById('linkInputs');
+  if (!container) return;
+  if (!LINKS_DATA.length) LINKS_DATA = [{ nombre: '', url: '' }];
+  container.innerHTML = LINKS_DATA.map(function(l, i) {
+    return '<div class="link-row">'
+      + '<input type="text" class="link-name" placeholder="Nombre del servicio" value="' + esc(l.nombre) + '"'
+      + '  oninput="LINKS_DATA[' + i + '].nombre=this.value">'
+      + '<input type="url" placeholder="https://..." value="' + esc(l.url) + '"'
+      + '  oninput="LINKS_DATA[' + i + '].url=this.value">'
+      + '<button class="sede-remove" onclick="removeLink(' + i + ')" title="Eliminar">×</button>'
+      + '</div>';
+  }).join('');
+}
+
+function addLinkInput() {
+  LINKS_DATA.push({ nombre: '', url: '' });
+  renderLinkInputs();
+  // Enfocar el primer campo del nuevo row
+  var rows = document.querySelectorAll('#linkInputs .link-row');
+  if (rows.length) {
+    var inp = rows[rows.length - 1].querySelector('input');
+    if (inp) inp.focus();
+  }
+}
+
+function removeLink(i) {
+  LINKS_DATA.splice(i, 1);
+  if (!LINKS_DATA.length) LINKS_DATA = [{ nombre: '', url: '' }];
+  renderLinkInputs();
+}
+
+function saveLinks() {
+  var str = LINKS_DATA
+    .filter(function(l) { return l.nombre.trim() && l.url.trim(); })
+    .map(function(l)    { return l.nombre.trim() + '|' + l.url.trim(); })
+    .join('\n');
+  showLoading();
+  runGAS('updateProfile', [SESSION.correo, SESSION.clave, { links: str }], function(r) {
+    hideLoading();
+    if (!r) return;
+    SESSION.links = str;
+    toast('Links guardados correctamente', 'ok');
   });
 }
 
