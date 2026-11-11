@@ -270,6 +270,14 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .tmod-reviews-btn,.tmod-link-btn{background:none;border:none;cursor:pointer;font-family:var(--fb);font-size:.8rem;color:var(--caramel);text-decoration:underline;text-decoration-style:dotted;padding:0;line-height:1}
 .tmod-reviews-btn:hover,.tmod-link-btn:hover{color:var(--caramel-dk);text-decoration-style:solid}
 .tmod-no-rating{font-size:.8rem;color:var(--text-muted)}
+/* Sección de links / vínculos de servicios */
+#tmodLinks{margin:1rem 0 0}
+.tmod-links-title{font-family:var(--fd);font-size:.78rem;font-weight:600;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.55rem}
+.tmod-links-list{display:flex;flex-direction:column;gap:.45rem}
+.tmod-link-item{display:flex;align-items:center;gap:.5rem;font-size:.88rem}
+.tmod-link-item a{color:var(--caramel);text-decoration:none;font-weight:500;word-break:break-word}
+.tmod-link-item a:hover{color:var(--caramel-dk);text-decoration:underline}
+.tmod-link-item::before{content:'🔗';font-size:.8rem;flex-shrink:0}
 /* Sección de reviews y formulario de calificación */
 #tmodReviewsSection{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
 .tmod-rev-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
@@ -1025,6 +1033,8 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <div class="tmod-rating-row" id="tmodRatingRow"></div>
       </div>
     </div>
+    <!-- Links / Vínculos de servicios del profesional -->
+    <div id="tmodLinks"></div>
     <!-- Galería de fotos / videos desde Drive -->
     <div id="tmodMedia"></div>
     <!-- Servicios adicionales del profesional (SERVICIOS COLA) -->
@@ -1303,7 +1313,8 @@ async function loadTeam(){
       days:(r.c[7]?.v||'').trim(),
       bio:(r.c[8]?.v||'').trim(),
       ciudad:(r.c[11]?.v||'').trim(),
-      rating:parseFloat(r.c[17]?.v)||0
+      rating:parseFloat(r.c[17]?.v)||0,
+      link_servicios:(r.c[18]?.v||'').trim()
     })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs);
     teamGrid.innerHTML='';
     if(!teamData.length){teamGrid.innerHTML='<p class="team-loading">Equipo disponible próximamente.</p>';return;}
@@ -1387,6 +1398,30 @@ function openTeamModal(t,ph){
   // Reviews section (formulario de calificación + lista de opiniones)
   const revSecEl=document.getElementById('tmodReviewsSection');
   if(revSecEl){revSecEl.innerHTML=_buildRatingFormHtml(t.codigo||'',t.name.split(' ')[0]);}
+  // Links / Vínculos de servicios
+  const linksEl=document.getElementById('tmodLinks');
+  if(linksEl){
+    const rawLinks=(t.link_servicios||'').trim();
+    if(rawLinks){
+      const pairs=rawLinks.split(/\n+/).map(l=>l.trim()).filter(Boolean);
+      let lhtml='<div class="tmod-links-title">Vínculos de servicios</div><div class="tmod-links-list">';
+      pairs.forEach(pair=>{
+        const sep=pair.indexOf('|');
+        if(sep>0){
+          const lname=pair.slice(0,sep).trim();
+          let lurl=pair.slice(sep+1).trim();
+          if(lurl&&!/^https?:\/\//i.test(lurl))lurl='https://'+lurl;
+          if(lname&&lurl)lhtml+='<div class="tmod-link-item"><a href="'+lurl+'" target="_blank" rel="noopener noreferrer">'+lname+'</a></div>';
+        }
+      });
+      lhtml+='</div>';
+      linksEl.innerHTML=lhtml;
+      linksEl.hidden=false;
+    }else{
+      linksEl.innerHTML='';
+      linksEl.hidden=true;
+    }
+  }
   // Limpiar secciones dinámicas
   document.getElementById('tmodMedia').innerHTML='';
   document.getElementById('tmodExtraSvcs').innerHTML='<p class="tmod-loading-text">Cargando…</p>';
