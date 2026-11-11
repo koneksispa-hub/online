@@ -2276,13 +2276,23 @@ document.getElementById('ks-input').addEventListener('input', function() {
 
   /* ---- Carga inicial ---- */
   async function loadProfesionales() {
-    // 1. Lanzar fetch al GAS de inmediato (con timeout de 15 s)
+    // Espera a Leaflet (defer) como promise independiente
+    const leafletReady = (async () => {
+      let n = 0;
+      while (typeof L === 'undefined' && n++ < 20)
+        await new Promise(r => setTimeout(r, 300));
+    })();
+
+    // Fetch al GAS con timeout de 15 s — corre en paralelo con la espera de Leaflet
     const ctrl = new AbortController();
     const tOut = setTimeout(() => ctrl.abort(), 15000);
 
     let data;
     try {
-      const resp = await fetch(GAS_CONTACT + '?action=getProfesionales', { signal: ctrl.signal });
+      const [resp] = await Promise.all([
+        fetch(GAS_CONTACT + '?action=getProfesionales', { signal: ctrl.signal }),
+        leafletReady
+      ]);
       clearTimeout(tOut);
       data = await resp.json();
       if (!data.ok || !data.profesionales) throw new Error(data.error || 'Sin datos');
@@ -2296,19 +2306,18 @@ document.getElementById('ks-input').addEventListener('input', function() {
       return;
     }
 
-    // 2. Mostrar tarjetas en cuanto llegan los datos
+    // Renderizar tarjetas
     _profs = data.profesionales;
     populateFilters(_profs);
     renderCards(_profs);
 
-    // 3. Inicializar mapa una vez Leaflet esté listo (cargado con defer)
-    let attempts = 0;
-    while (typeof L === 'undefined' && attempts < 20) {
-      await new Promise(r => setTimeout(r, 300));
-      attempts++;
+    // Inicializar mapa y marcadores; invalidateSize un frame después para que
+    // el navegador haya calculado las dimensiones finales del contenedor
+    if (typeof L !== 'undefined') {
+      initMap();
+      renderMarkers(_profs);
+      requestAnimationFrame(() => { if (_map) _map.invalidateSize(); });
     }
-    initMap();
-    renderMarkers(_profs);
   }
 
   /* ---- Función global para reserva directa por profesional ---- */
