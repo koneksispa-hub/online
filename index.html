@@ -2276,27 +2276,39 @@ document.getElementById('ks-input').addEventListener('input', function() {
 
   /* ---- Carga inicial ---- */
   async function loadProfesionales() {
-    // Esperar a que Leaflet esté disponible (defer)
+    // 1. Lanzar fetch al GAS de inmediato (con timeout de 15 s)
+    const ctrl = new AbortController();
+    const tOut = setTimeout(() => ctrl.abort(), 15000);
+
+    let data;
+    try {
+      const resp = await fetch(GAS_CONTACT + '?action=getProfesionales', { signal: ctrl.signal });
+      clearTimeout(tOut);
+      data = await resp.json();
+      if (!data.ok || !data.profesionales) throw new Error(data.error || 'Sin datos');
+    } catch (err) {
+      clearTimeout(tOut);
+      const msg = err.name === 'AbortError'
+        ? 'La carga tardó demasiado. Revisa tu conexión e intenta de nuevo.'
+        : 'No se pudo cargar la lista de profesionales. Por favor intenta más tarde.';
+      document.getElementById('findCards').innerHTML =
+        `<div class="find-empty">${msg}</div>`;
+      return;
+    }
+
+    // 2. Mostrar tarjetas en cuanto llegan los datos
+    _profs = data.profesionales;
+    populateFilters(_profs);
+    renderCards(_profs);
+
+    // 3. Inicializar mapa una vez Leaflet esté listo (cargado con defer)
     let attempts = 0;
     while (typeof L === 'undefined' && attempts < 20) {
       await new Promise(r => setTimeout(r, 300));
       attempts++;
     }
     initMap();
-
-    try {
-      const resp = await fetch(GAS_CONTACT + '?action=getProfesionales');
-      const data = await resp.json();
-      if (!data.ok || !data.profesionales) throw new Error(data.error || 'Sin datos');
-
-      _profs = data.profesionales;
-      populateFilters(_profs);
-      renderCards(_profs);
-      renderMarkers(_profs);
-    } catch (err) {
-      document.getElementById('findCards').innerHTML =
-        '<div class="find-empty">No se pudo cargar la lista de profesionales. Por favor intenta más tarde.</div>';
-    }
+    renderMarkers(_profs);
   }
 
   /* ---- Función global para reserva directa por profesional ---- */
