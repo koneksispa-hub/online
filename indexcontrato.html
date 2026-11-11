@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vinculación de Profesional — Koneksi Spa & Wellness</title>
+  <style>
+    :root {
+      --primary: #1A5276;
+      --primary-dark: #154360;
+      --primary-light: #2874A6;
+      --accent: #3498DB;
+      --success: #1E8449;
+      --danger: #C0392B;
+      --warn-bg: #FEF9E7;
+      --warn-border: #F39C12;
+      --bg: #EAF2F8;
+      --white: #FFFFFF;
+      --card-bg: #FFFFFF;
+      --text: #1C2833;
+      --text-mid: #566573;
+      --text-light: #AAB7B8;
+      --border: #D5D8DC;
+      --shadow: 0 2px 16px rgba(26,82,118,0.10);
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo-circle {
+      width: 42px; height: 42px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 900; color: #fff;
+      flex-shrink: 0;
+    }
+    .header-text h1 { font-size: 17px; font-weight: 700; line-height: 1.2; }
+    .header-text p  { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+
+    /* ── Progress Bar ───────────────────────────────── */
+    .progress-wrap {
+      background: var(--white);
+      padding: 16px 24px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      max-width: 560px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 16px; left: 15%; right: 15%;
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .step {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      flex: 1;
+      position: relative; z-index: 1;
+      cursor: default;
+    }
+    .step-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--text-light);
+      font-weight: 700; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .3s;
+    }
+    .step-label { font-size: 11px; color: var(--text-light); font-weight: 500; text-align: center; }
+    .step.active   .step-dot  { background: var(--primary); color: #fff; }
+    .step.active   .step-label{ color: var(--primary); font-weight: 700; }
+    .step.done     .step-dot  { background: var(--success); color: #fff; }
+    .step.done     .step-label{ color: var(--success); }
+
+    /* ── Container ──────────────────────────────────── */
+    .container { max-width: 760px; margin: 0 auto; padding: 28px 16px 60px; }
+
+    /* ── Card ───────────────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 32px 28px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 540px) { .card { padding: 22px 16px 20px; } }
+    .card-title {
+      font-size: 20px; font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .card-subtitle {
+      font-size: 14px; color: var(--text-mid);
+      margin-bottom: 24px; line-height: 1.5;
+    }
+
+    /* ── Contract ───────────────────────────────────── */
+    .contract-box {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      max-height: 55vh;
+      overflow-y: auto;
+      background: #FAFCFF;
+      font-size: 13px;
+      line-height: 1.75;
+      color: var(--text);
+      scrollbar-width: thin;
+    }
+    .contract-box::-webkit-scrollbar { width: 6px; }
+    .contract-box::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+    .contract-title-main {
+      font-size: 15px; font-weight: 800;
+      color: var(--primary); text-align: center;
+      margin-bottom: 4px; letter-spacing: .3px;
+    }
+    .contract-subtitle-main {
+      font-size: 12px; color: var(--text-mid); text-align: center;
+      font-style: italic; margin-bottom: 18px;
+    }
+    .c-hr { border: none; border-top: 1.5px solid var(--border); margin: 16px 0; }
+    .c-h2 { font-size: 13px; font-weight: 700; color: var(--primary); margin: 18px 0 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .c-clause { font-size: 13px; font-weight: 700; color: var(--text); margin: 16px 0 4px; }
+    .c-p  { margin-bottom: 8px; text-align: justify; }
+    .c-b  { font-weight: 700; }
+    .c-u  { text-decoration: underline; }
+    .c-i  { font-style: italic; }
+    .c-ul { margin: 6px 0 8px 20px; }
+    .c-ul li { margin-bottom: 4px; }
+
+    /* ── Form ───────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 540px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 13px; font-weight: 600; color: var(--text-mid); }
+    label span.req { color: var(--danger); margin-left: 2px; }
+    input, select, textarea {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 13px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      width: 100%;
+      font-family: inherit;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(52,152,219,0.15);
+    }
+    input.error, select.error { border-color: var(--danger); }
+    .field-error { font-size: 11.5px; color: var(--danger); display: none; }
+    .field-error.show { display: block; }
+
+    /* ── Checkbox ───────────────────────────────────── */
+    .check-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--warn-bg);
+      border: 1.5px solid var(--warn-border);
+      border-radius: var(--radius-sm);
+    }
+    .check-row input[type=checkbox] {
+      width: 18px; height: 18px; min-width: 18px;
+      margin-top: 2px; cursor: pointer;
+      accent-color: var(--primary);
+    }
+    .check-row label { font-size: 13.5px; color: var(--text); cursor: pointer; line-height: 1.5; }
+
+    /* ── Signature Canvas ───────────────────────────── */
+    .sig-wrapper {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      background: #FAFCFF;
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .sig-wrapper.signed { border-color: var(--primary); border-style: solid; }
+    #signatureCanvas {
+      display: block;
+      width: 100%;
+      height: 200px;
+    }
+    .sig-placeholder {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 8px;
+      pointer-events: none;
+      transition: opacity .3s;
+    }
+    .sig-placeholder .sig-icon { font-size: 36px; opacity: 0.25; }
+    .sig-placeholder p { font-size: 13px; color: var(--text-light); }
+    .sig-clear {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px; font-weight: 600;
+      color: var(--text-mid);
+      cursor: pointer;
+      display: none;
+    }
+    .sig-clear:hover { background: #fff; color: var(--danger); border-color: var(--danger); }
+
+    /* ── Date / City row ────────────────────────────── */
+    .sign-meta {
+      display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .sign-meta .form-group { flex: 1; min-width: 180px; }
+
+    /* ── Buttons ────────────────────────────────────── */
+    .btn-row {
+      display: flex; gap: 12px;
+      margin-top: 28px; justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; border: none;
+      transition: all .2s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(26,82,118,.35);
+    }
+    .btn-primary:hover  { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    .btn-secondary:hover { background: rgba(26,82,118,.06); }
+
+    /* ── Success ────────────────────────────────────── */
+    .success-card {
+      text-align: center;
+      padding: 48px 32px;
+    }
+    .success-icon {
+      width: 80px; height: 80px;
+      background: var(--success);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; color: #fff;
+      margin: 0 auto 24px;
+      animation: popIn .4s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .success-card h2 { font-size: 24px; color: var(--primary); margin-bottom: 10px; }
+    .success-card p  { font-size: 15px; color: var(--text-mid); line-height: 1.6; }
+    .success-detail {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      margin: 24px auto;
+      max-width: 400px;
+      text-align: left;
+    }
+    .success-detail p { font-size: 13px; color: var(--text); display: flex; gap: 8px; align-items: flex-start; }
+    .success-detail p + p { margin-top: 8px; }
+    .detail-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Toast / spinner ────────────────────────────── */
+    .loading-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 999;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+    }
+    .loading-overlay.show { display: flex; }
+    .spinner {
+      width: 52px; height: 52px;
+      border: 5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-overlay p { color: #fff; font-size: 15px; font-weight: 600; }
+
+    /* ── Info box ───────────────────────────────────── */
+    .info-box {
+      background: #EBF5FB;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--primary);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* ── Hidden ─────────────────────────────────────── */
+    .step-section { display: none; }
+    .step-section.active { display: block; }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo-circle">K</div>
+  <div class="header-text">
+    <h1>Koneksi Spa &amp; Wellness</h1>
+    <p>koneksiespa.com · Vinculación de Profesionales</p>
+  </div>
+</header>
+
+<!-- Progress -->
+<div class="progress-wrap">
+  <div class="steps">
+    <div class="step active" id="pstep1">
+      <div class="step-dot">1</div>
+      <div class="step-label">Acuerdo</div>
+    </div>
+    <div class="step" id="pstep2">
+      <div class="step-dot">2</div>
+      <div class="step-label">Tus datos</div>
+    </div>
+    <div class="step" id="pstep3">
+      <div class="step-dot">3</div>
+      <div class="step-label">Firma</div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p>Enviando tu acuerdo firmado…</p>
+</div>
+
+<div class="container">
+
+  <!-- ── PASO 1: ACUERDO ─────────────────────────────── -->
+  <section class="step-section active" id="section1">
+    <div class="card">
+      <div class="card-title">Acuerdo de Vinculación</div>
+      <div class="card-subtitle">Lee el acuerdo completo antes de continuar. Puedes hacer scroll dentro del recuadro.</div>
+
+      <div class="contract-box" id="contractBox">
+        <div class="contract-title-main">KONEKSI SPA &amp; WELLNESS — koneksiespa.com</div>
+        <div class="contract-title-main" style="font-size:14px;margin-top:4px;">ACUERDO DE VINCULACIÓN DE PROFESIONAL INDEPENDIENTE</div>
+        <div class="contract-subtitle-main">Plataforma Digital de Servicios de Bienestar y Estética</div>
+        <hr class="c-hr">
+
+        <div class="c-h2">I. PARTES DEL ACUERDO</div>
+        <p class="c-p"><span class="c-b">PARTE A — ADMINISTRADOR DE LA PLATAFORMA: <span class="c-u">ALEXANDER FRANCO ÁVILA</span></span>, identificado con Cédula de Ciudadanía N.° <span class="c-b">94.531.114</span>, actuando en su calidad de representante y administrador de la plataforma digital denominada <span class="c-b">KONEKSI</span>, identificada con el dominio <em>koneksiespa.com</em>, con correo de contacto <em>koneksiespa@gmail.com</em>. En adelante denominado <span class="c-b">"KONEKSI"</span>.</p>
+        <p class="c-p"><span class="c-b">PARTE B — EL PROFESIONAL:</span> La persona natural que suscribe el presente acuerdo, cuyos datos de identificación, especialidad, contacto y cuenta bancaria se registran al momento de la inscripción en el portal <em>koneksiespa.com</em>. En adelante denominado <span class="c-b">"EL PROFESIONAL"</span>.</p>
+        <p class="c-p">Las partes acuerdan suscribir el presente <span class="c-b">Acuerdo de Vinculación de Profesional Independiente</span>, que se regirá por las siguientes cláusulas:</p>
+        <hr class="c-hr">
+
+        <div class="c-clause">CLÁUSULA PRIMERA. – <span class="c-u">NATURALEZA DE LA VINCULACIÓN</span></div>
+        <p class="c-p"><span class="c-b">1.1.</span> El presente acuerdo es de carácter <span class="c-b">estrictamente civil y comercial</span>, y <span class="c-b c-u">NO constituye ni genera vínculo laboral alguno</span> entre KONEKSI y EL PROFESIONAL. No existe relación de subordinación, dependencia ni prestación personal de servicios bajo los términos del Código Sustantivo del Trabajo de la República de Colombia.</p>
+        <p class="c-p"><span class="c-b">1.2.</span> KONEKSI actúa exclusivamente como <span class="c-b">intermediario tecnológico y comercial</span>, poniendo a disposición de EL PROFESIONAL una plataforma digital para la oferta, promoción y gestión de sus servicios de bienestar y estética ante el público.</p>
+        <p class="c-p"><span class="c-b">1.3.</span> KONEKSI no responderá por salarios, prestaciones sociales, aportes al sistema de seguridad social ni por ninguna obligación derivada de la legislación laboral colombiana a favor de EL PROFESIONAL.</p>
+
+        <div class="c-clause">CLÁUSULA SEGUNDA. – <span class="c-u">AUTONOMÍA E INDEPENDENCIA DEL PROFESIONAL</span></div>
+        <p class="c-p"><span class="c-b">2.1.</span> EL PROFESIONAL conserva plena <span class="c-b">autonomía e independencia</span> en la organización y ejecución de sus servicios:</p>
+        <ul class="c-ul">
+          <li>Es libre de definir sus propios horarios de atención y días hábiles.</li>
+          <li>Puede elegir la sede física de KONEKSI en la que desea prestar sus servicios, o atender a sus clientes fuera de las sedes de KONEKSI.</li>
+          <li>Establece de manera autónoma los precios de cada uno de sus servicios publicados en el portal <em>koneksiespa.com</em>.</li>
+          <li>No está obligado a cumplir un número mínimo de servicios ni horarios fijados por KONEKSI.</li>
+        </ul>
+        <p class="c-p"><span class="c-b">2.2.</span> EL PROFESIONAL es responsable de mantener al día sus obligaciones tributarias y de seguridad social como trabajador independiente, de conformidad con la legislación colombiana vigente.</p>
+
+        <div class="c-clause">CLÁUSULA TERCERA. – <span class="c-u">COMISIÓN DE LA PLATAFORMA E IVA</span></div>
+        <p class="c-p"><span class="c-b">3.1.</span> Como contraprestación por el uso de la plataforma, KONEKSI cobrará una <span class="c-b">comisión del 12% (doce por ciento)</span> calculada sobre el valor total del servicio publicado y pagado a través de la plataforma.</p>
+        <p class="c-p"><span class="c-b">3.2.</span> Sobre el valor de dicha comisión, Alexander Franco Ávila, en su calidad de responsable del IVA, aplicará el <span class="c-b">IVA del 19% (diecinueve por ciento)</span> de conformidad con el Estatuto Tributario colombiano. Dicho IVA se calculará exclusivamente sobre el valor de la comisión, no sobre el valor total del servicio.</p>
+        <p class="c-p"><span class="c-b">3.3. Ejemplo ilustrativo:</span> Si el valor del servicio es <span class="c-b">$100.000</span>, la comisión sería <span class="c-b">$12.000</span> y el IVA sobre la comisión <span class="c-b">$2.280</span>. El neto a girar a EL PROFESIONAL sería <span class="c-b">$85.720</span>.</p>
+
+        <div class="c-clause">CLÁUSULA CUARTA. – <span class="c-u">USO DE SEDES FÍSICAS DE KONEKSI</span></div>
+        <p class="c-p"><span class="c-b">4.1.</span> Cuando el servicio se ejecuta en una <span class="c-b">sede física de KONEKSI</span>, se aplica la siguiente distribución sobre el valor del procedimiento (antes de IVA):</p>
+        <ul class="c-ul">
+          <li><span class="c-b">30%</span> → KONEKSI (uso de sede / infraestructura)</li>
+          <li><span class="c-b">70%</span> → EL PROFESIONAL (honorarios)</li>
+        </ul>
+        <p class="c-p"><span class="c-b">4.2.</span> Esta distribución (30/70) aplica <span class="c-b">únicamente</span> cuando el servicio se ejecuta en las sedes físicas de KONEKSI. Si se presta fuera de dichas sedes, se aplicará exclusivamente la comisión de la Cláusula Tercera.</p>
+        <p class="c-p"><span class="c-b">4.3.</span> El 30% de KONEKSI por uso de sede incluye el acceso a instalaciones, equipos básicos, servicios públicos y la comisión de intermediación, de modo que no se cobrarán de forma adicional.</p>
+
+        <div class="c-clause">CLÁUSULA QUINTA. – <span class="c-u">CONDICIONES Y PLAZOS DE PAGO</span></div>
+        <p class="c-p"><span class="c-b">5.1.</span> KONEKSI realizará la transferencia del valor neto a EL PROFESIONAL <span class="c-b">el día hábil siguiente a la realización del servicio</span>.</p>
+        <p class="c-p"><span class="c-b">5.2.</span> La transferencia se realizará a la cuenta bancaria registrada por EL PROFESIONAL en su perfil. Es responsabilidad de EL PROFESIONAL mantener actualizada dicha información.</p>
+        <p class="c-p"><span class="c-b">5.3.</span> Si el día siguiente es festivo o no hábil bancariamente, el pago se realizará el siguiente día hábil.</p>
+
+        <div class="c-clause">CLÁUSULA SEXTA. – <span class="c-u">PASARELA DE PAGO Y RESERVAS ANTICIPADAS</span></div>
+        <p class="c-p"><span class="c-b">6.1.</span> Cuando un cliente realice una reserva a través de la pasarela de pago de <em>koneksiespa.com</em>, deberá abonar el <span class="c-b">50% del valor total del servicio</span> como anticipo de reserva.</p>
+        <p class="c-p"><span class="c-b">6.2.</span> Este anticipo quedará retenido en la cuenta de Alexander Franco Ávila. Una vez ejecutado el servicio, se deducirá la comisión e IVA aplicables y se transferirá el saldo neto a EL PROFESIONAL el día hábil siguiente.</p>
+        <p class="c-p"><span class="c-b">6.3.</span> El 50% restante podrá ser cobrado directamente por EL PROFESIONAL al cliente en el momento de la prestación del servicio.</p>
+        <p class="c-p"><span class="c-b">6.4.</span> Es responsabilidad de EL PROFESIONAL <span class="c-b">verificar, antes de dar inicio al procedimiento</span>, que el cliente haya realizado el pago del anticipo del 50% a través de la pasarela de KONEKSI. EL PROFESIONAL podrá consultar la confirmación de reserva o contactar a KONEKSI antes de iniciar la sesión.</p>
+        <p class="c-p"><span class="c-b">6.5.</span> El saldo pendiente (50% restante) <span class="c-b">deberá ser cobrado por EL PROFESIONAL directamente al cliente el día del procedimiento, antes de dar inicio al mismo</span>. KONEKSI no se hace responsable por saldos no cobrados. <span class="c-i">Bajo ninguna circunstancia EL PROFESIONAL iniciará el procedimiento sin haber confirmado el anticipo y cobrado el saldo pendiente.</span></p>
+
+        <div class="c-clause">CLÁUSULA SÉPTIMA. – <span class="c-u">POLÍTICA DE CANCELACIÓN</span></div>
+        <p class="c-p"><span class="c-b">7.1.</span> En caso de cancelación por parte del cliente, se le reembolsará el valor del anticipo pagado <span class="c-b">menos un cargo por cancelación del 10% del valor total del servicio</span>.</p>
+        <p class="c-p"><span class="c-b">7.2.</span> El cargo por cancelación (10%) se distribuirá en proporción igual a la establecida para el tipo de servicio (en plataforma o en sede física).</p>
+        <p class="c-p"><span class="c-b">7.3.</span> En caso de cancelación por parte de EL PROFESIONAL, éste deberá gestionar directamente con el cliente la devolución íntegra del anticipo.</p>
+
+        <div class="c-clause">CLÁUSULA OCTAVA. – <span class="c-u">AUTORIZACIÓN DE USO DE IMAGEN</span></div>
+        <p class="c-p"><span class="c-b">8.1.</span> EL PROFESIONAL otorga a KONEKSI <span class="c-b">autorización expresa, gratuita y no exclusiva</span> para el uso de su imagen (fotografías, videos y grabaciones audiovisuales) con fines publicitarios, dentro del portal <em>koneksiespa.com</em> y en los canales de redes sociales oficiales de KONEKSI.</p>
+        <p class="c-p"><span class="c-b">8.2.</span> Esta autorización tiene una vigencia de <span class="c-b">cinco (5) años</span> contados a partir de la fecha de suscripción del presente acuerdo.</p>
+        <p class="c-p"><span class="c-b">8.3.</span> KONEKSI se compromete a utilizar la imagen de EL PROFESIONAL de forma <span class="c-b">respetuosa, digna y acorde con la ética profesional</span>. En ningún caso la imagen se utilizará en contextos que atenten contra la honra o la reputación de EL PROFESIONAL.</p>
+        <p class="c-p"><span class="c-b">8.4.</span> Esta autorización no implica cesión de derechos morales sobre la imagen ni sobre la identidad profesional de EL PROFESIONAL.</p>
+
+        <div class="c-clause">CLÁUSULA NOVENA. – <span class="c-u">PROCEDIMIENTO DE DESVINCULACIÓN</span></div>
+        <p class="c-p"><span class="c-b">9.1.</span> EL PROFESIONAL podrá solicitar su desvinculación en cualquier momento, de forma <span class="c-b">libre y voluntaria</span>, sin penalidad, siempre que no existan servicios o pagos pendientes.</p>
+        <p class="c-p"><span class="c-b">9.2.</span> Para formalizar la baja, EL PROFESIONAL deberá enviar un correo a <span class="c-b"><em>koneksiespa@gmail.com</em></span> con el asunto exacto: <span class="c-b">"Darme de baja del panel de profesionales"</span>, solicitando en el cuerpo la eliminación completa del perfil.</p>
+        <p class="c-p"><span class="c-b">9.3.</span> KONEKSI tendrá <span class="c-b">cinco (5) días hábiles</span> para efectuar la eliminación del perfil, contados desde la recepción del correo.</p>
+        <p class="c-p"><span class="c-b">9.4.</span> Los materiales audiovisuales ya publicados en redes sociales antes de la solicitud de baja no serán obligatoriamente eliminados, salvo solicitud expresa de EL PROFESIONAL, que se atenderá en el mismo plazo.</p>
+        <p class="c-p"><span class="c-b">9.5.</span> KONEKSI también podrá solicitar la desvinculación en casos de incumplimiento, conductas que afecten la reputación de la plataforma, o por causas de fuerza mayor, con un aviso previo de al menos tres (3) días hábiles.</p>
+
+        <div class="c-clause">CLÁUSULA DÉCIMA. – <span class="c-u">OBLIGACIONES DE EL PROFESIONAL</span></div>
+        <ul class="c-ul">
+          <li>Mantener actualizados sus datos personales, bancarios y de contacto en el perfil de la plataforma.</li>
+          <li>Garantizar la veracidad de la información sobre su formación, experiencia y especialidades publicadas.</li>
+          <li>Prestar sus servicios con altos estándares de calidad, higiene y ética profesional.</li>
+          <li>Atender con diligencia los servicios agendados y notificar con antelación razonable cualquier cancelación.</li>
+          <li>Respetar la información confidencial de los clientes y de la plataforma.</li>
+          <li>Cumplir con la normatividad sanitaria y de salud pública aplicable a su actividad.</li>
+        </ul>
+
+        <div class="c-clause">CLÁUSULA DÉCIMA PRIMERA. – <span class="c-u">OBLIGACIONES DE KONEKSI</span></div>
+        <ul class="c-ul">
+          <li>Mantener en funcionamiento la plataforma <em>koneksiespa.com</em> de manera continua y segura.</li>
+          <li>Realizar los pagos en los plazos establecidos en este acuerdo.</li>
+          <li>Garantizar que el perfil del profesional sea publicado con la información exacta proporcionada.</li>
+          <li>Notificar con suficiente anticipación cualquier cambio en las condiciones comerciales.</li>
+          <li>Proteger la información personal de EL PROFESIONAL conforme a la legislación de datos.</li>
+        </ul>
+
+        <div class="c-clause">CLÁUSULA DÉCIMA SEGUNDA. – <span class="c-u">PROTECCIÓN DE DATOS PERSONALES – HABEAS DATA</span></div>
+        <p class="c-p"><span class="c-b">12.1.</span> En cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013, EL PROFESIONAL autoriza a KONEKSI para recolectar, almacenar, usar y suprimir sus datos personales con la finalidad de gestionar su perfil, realizar pagos, contactarlo por asuntos operativos y hacer uso publicitario de su imagen conforme a la Cláusula Octava.</p>
+        <p class="c-p"><span class="c-b">12.2.</span> KONEKSI no venderá ni compartirá los datos personales de EL PROFESIONAL con terceros ajenos a la operación de la plataforma sin su consentimiento expreso.</p>
+        <p class="c-p"><span class="c-b">12.3.</span> EL PROFESIONAL podrá ejercer sus derechos de acceso, corrección, actualización y supresión enviando su solicitud a <em>koneksiespa@gmail.com</em>.</p>
+
+        <div class="c-clause">CLÁUSULA DÉCIMA TERCERA. – <span class="c-u">PROPIEDAD INTELECTUAL Y CONFIDENCIALIDAD</span></div>
+        <p class="c-p"><span class="c-b">13.1.</span> Todos los elementos que conforman la plataforma <em>koneksiespa.com</em> son propiedad exclusiva de KONEKSI. EL PROFESIONAL no adquiere ningún derecho sobre dichos elementos.</p>
+        <p class="c-p"><span class="c-b">13.2.</span> EL PROFESIONAL se compromete a mantener la confidencialidad de la información comercial y técnica de KONEKSI por un período de <span class="c-b">dos (2) años</span> después de terminada la vinculación.</p>
+
+        <div class="c-clause">CLÁUSULA DÉCIMA CUARTA. – <span class="c-u">MODIFICACIÓN DE CONDICIONES</span></div>
+        <p class="c-p">KONEKSI podrá modificar las condiciones comerciales del presente acuerdo notificando a EL PROFESIONAL con un mínimo de <span class="c-b">treinta (30) días calendario</span> de anticipación. Si EL PROFESIONAL no manifiesta su desacuerdo dentro de los quince (15) días siguientes, se entenderá aceptación. En caso de desacuerdo, podrá solicitar su desvinculación.</p>
+
+        <div class="c-clause">CLÁUSULA DÉCIMA QUINTA. – <span class="c-u">VIGENCIA</span></div>
+        <p class="c-p">El presente acuerdo entra en vigencia a partir de la fecha de su suscripción y se mantendrá vigente de manera <span class="c-b">indefinida</span>, hasta tanto alguna de las partes solicite su terminación.</p>
+
+        <div class="c-clause">CLÁUSULA DÉCIMA SEXTA. – <span class="c-u">LEGISLACIÓN APLICABLE Y RESOLUCIÓN DE CONFLICTOS</span></div>
+        <p class="c-p"><span class="c-b">16.1.</span> El presente acuerdo se rige por las leyes de la <span class="c-b">República de Colombia</span>.</p>
+        <p class="c-p"><span class="c-b">16.2.</span> En caso de controversia, las partes procurarán resolverla amigablemente. De no lograrse, podrán acudir a mecanismos alternativos de solución de conflictos o a los jueces competentes de <span class="c-b">Santiago de Cali, Colombia</span>.</p>
+      </div><!-- end contract-box -->
+
+      <div class="check-row" style="margin-top:20px;">
+        <input type="checkbox" id="chkRead">
+        <label for="chkRead">He leído detenidamente el acuerdo completo y lo comprendo en su totalidad.</label>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn1" disabled onclick="goStep(2)">
+          Continuar con mis datos →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PASO 2: DATOS ───────────────────────────────── -->
+  <section class="step-section" id="section2">
+    <div class="card">
+      <div class="card-title">Tus datos como profesional</div>
+      <div class="card-subtitle">Esta información aparecerá en tu perfil de Koneksi y se usará para los pagos.</div>
+
+      <form id="dataForm" novalidate>
+        <div class="form-grid">
+
+          <div class="form-group full">
+            <label for="nombre">Nombre completo <span class="req">*</span></label>
+            <input type="text" id="nombre" placeholder="Como aparece en la cédula" autocomplete="name">
+            <span class="field-error" id="err-nombre">Por favor ingresa tu nombre completo.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="cedula">Número de cédula <span class="req">*</span></label>
+            <input type="text" id="cedula" placeholder="Ej. 1234567890" inputmode="numeric">
+            <span class="field-error" id="err-cedula">Ingresa un número de cédula válido.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="especialidad">Especialidad / Servicio principal <span class="req">*</span></label>
+            <input type="text" id="especialidad" placeholder="Ej. Masajes terapéuticos, Faciales…">
+            <span class="field-error" id="err-especialidad">Ingresa tu especialidad.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">Teléfono / WhatsApp <span class="req">*</span></label>
+            <input type="tel" id="telefono" placeholder="Ej. 318 809 7131" inputmode="tel" autocomplete="tel">
+            <span class="field-error" id="err-telefono">Ingresa un número de teléfono válido.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Correo electrónico <span class="req">*</span></label>
+            <input type="email" id="email" placeholder="tu@correo.com" autocomplete="email">
+            <span class="field-error" id="err-email">Ingresa un correo electrónico válido.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="banco">Banco <span class="req">*</span></label>
+            <select id="banco">
+              <option value="">— Selecciona tu banco —</option>
+              <option>Bancolombia</option>
+              <option>Davivienda</option>
+              <option>Banco de Bogotá</option>
+              <option>BBVA Colombia</option>
+              <option>Banco de Occidente</option>
+              <option>Colpatria / Scotiabank</option>
+              <option>Banco Popular</option>
+              <option>Itaú</option>
+              <option>Banco Caja Social</option>
+              <option>Banco Agrario</option>
+              <option>Banco Pichincha</option>
+              <option>Bancamía</option>
+              <option>Banco Falabella</option>
+              <option>Nequi (Bancolombia)</option>
+              <option>Daviplata (Davivienda)</option>
+              <option>Otro</option>
+            </select>
+            <span class="field-error" id="err-banco">Selecciona tu banco.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="tipoCuenta">Tipo de cuenta <span class="req">*</span></label>
+            <select id="tipoCuenta">
+              <option value="">— Selecciona —</option>
+              <option>Cuenta de Ahorros</option>
+              <option>Cuenta Corriente</option>
+              <option>Cuenta de Nómina</option>
+              <option>Billetera Digital</option>
+            </select>
+            <span class="field-error" id="err-tipoCuenta">Selecciona el tipo de cuenta.</span>
+          </div>
+
+          <div class="form-group full">
+            <label for="numeroCuenta">Número de cuenta <span class="req">*</span></label>
+            <input type="text" id="numeroCuenta" placeholder="Número completo sin espacios" inputmode="numeric">
+            <span class="field-error" id="err-numeroCuenta">Ingresa el número de cuenta.</span>
+          </div>
+
+        </div><!-- form-grid -->
+      </form>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goStep(1)">← Volver</button>
+        <button class="btn btn-primary" onclick="validateStep2()">Continuar a la firma →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PASO 3: FIRMA ───────────────────────────────── -->
+  <section class="step-section" id="section3">
+    <div class="card">
+      <div class="card-title">Firma digital</div>
+      <div class="card-subtitle">Dibuja tu firma con el dedo (en celular) o con el mouse. Asegúrate de que sea tu firma habitual.</div>
+
+      <div class="info-box">
+        🔒 Al firmar y enviar, quedará registro de tu nombre, cédula, firma, dirección IP y la fecha/hora exacta de aceptación del acuerdo.
+      </div>
+
+      <div class="sign-meta">
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="text" id="signDate" readonly>
+        </div>
+        <div class="form-group">
+          <label>Ciudad</label>
+          <input type="text" id="signCity" value="Santiago de Cali">
+        </div>
+      </div>
+
+      <div class="sig-wrapper" id="sigWrapper">
+        <canvas id="signatureCanvas"></canvas>
+        <div class="sig-placeholder" id="sigPlaceholder">
+          <div class="sig-icon">✍️</div>
+          <p>Dibuja tu firma aquí</p>
+        </div>
+        <button class="sig-clear" id="sigClear" onclick="clearSignature()">✕ Limpiar</button>
+      </div>
+
+      <div class="check-row" style="margin-top:20px;">
+        <input type="checkbox" id="chkAccept">
+        <label for="chkAccept" id="chkAcceptLabel">Confirmo que soy <strong id="confirmName">el profesional</strong> e identificado con cédula <strong id="confirmCC">—</strong>. He leído y acepto en su totalidad el Acuerdo de Vinculación de Koneksi.</label>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goStep(2)">← Volver</button>
+        <button class="btn btn-primary" id="btnSubmit" onclick="submitForm()">
+          ✔ Firmar y enviar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PASO 4: ÉXITO ───────────────────────────────── -->
+  <section class="step-section" id="section4">
+    <div class="card success-card">
+      <div class="success-icon">✓</div>
+      <h2>¡Vinculación completada!</h2>
+      <p>Tu acuerdo ha sido firmado y registrado correctamente.</p>
+
+      <div class="success-detail">
+        <p><span class="detail-icon">📧</span> Se ha enviado una copia firmada a <strong id="successEmail"></strong></p>
+        <p><span class="detail-icon">📋</span> Tu información ha sido guardada en el registro de profesionales de Koneksi.</p>
+        <p><span class="detail-icon">⏱️</span> Tu perfil será activado en las próximas 24 horas hábiles.</p>
+        <p><span class="detail-icon">❓</span> ¿Dudas? Escríbenos a <strong>koneksiespa@gmail.com</strong></p>
+      </div>
+
+      <a href="https://koneksiespa.com" class="btn btn-primary" style="text-decoration:none;display:inline-flex;">
+        Ir a koneksiespa.com
+      </a>
+    </div>
+  </section>
+
+</div><!-- /container -->
+
+<footer>
+  <p>© 2024 Koneksi Spa &amp; Wellness · koneksiespa.com · koneksiespa@gmail.com</p>
+  <p style="margin-top:4px;">Este formulario tiene validez legal en Colombia (Ley 527 de 1999 — Firma Electrónica)</p>
+</footer>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONFIGURACIÓN — CAMBIA ESTA URL DESPUÉS DE DESPLEGAR
+// ════════════════════════════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/TU_ID_AQUI/exec';
+
+// ────────────────────────────────────────────────────────────
+//  STEP NAVIGATION
+// ────────────────────────────────────────────────────────────
+function goStep(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.toggle('active', i + 1 === n);
+    s.classList.toggle('done', i + 1 < n);
+  });
+  document.getElementById('section' + n).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (n === 3) {
+    initCanvas();
+    setSignDate();
+    updateConfirmLabel();
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+//  STEP 1 — unlock button on checkbox
+// ────────────────────────────────────────────────────────────
+document.getElementById('chkRead').addEventListener('change', function () {
+  document.getElementById('btn1').disabled = !this.checked;
+});
+
+// ────────────────────────────────────────────────────────────
+//  STEP 2 — validation
+// ────────────────────────────────────────────────────────────
+function validateStep2() {
+  const fields = [
+    { id: 'nombre',       err: 'err-nombre',       test: v => v.trim().length >= 3 },
+    { id: 'cedula',       err: 'err-cedula',        test: v => /^\d{6,12}$/.test(v.replace(/\s/g,'')) },
+    { id: 'especialidad', err: 'err-especialidad',  test: v => v.trim().length >= 3 },
+    { id: 'telefono',     err: 'err-telefono',      test: v => v.replace(/\s/g,'').length >= 7 },
+    { id: 'email',        err: 'err-email',         test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+    { id: 'banco',        err: 'err-banco',         test: v => v !== '' },
+    { id: 'tipoCuenta',   err: 'err-tipoCuenta',    test: v => v !== '' },
+    { id: 'numeroCuenta', err: 'err-numeroCuenta',  test: v => v.trim().length >= 6 },
+  ];
+  let valid = true;
+  fields.forEach(f => {
+    const el  = document.getElementById(f.id);
+    const err = document.getElementById(f.err);
+    const ok  = f.test(el.value);
+    el.classList.toggle('error', !ok);
+    err.classList.toggle('show', !ok);
+    if (!ok) valid = false;
+  });
+  if (valid) goStep(3);
+}
+
+// ────────────────────────────────────────────────────────────
+//  STEP 3 — date and confirm label
+// ────────────────────────────────────────────────────────────
+function setSignDate() {
+  const now = new Date();
+  const opts = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Bogota' };
+  document.getElementById('signDate').value = now.toLocaleDateString('es-CO', opts);
+}
+
+function updateConfirmLabel() {
+  const nombre = document.getElementById('nombre').value || 'el profesional';
+  const cedula = document.getElementById('cedula').value || '—';
+  document.getElementById('confirmName').textContent = nombre;
+  document.getElementById('confirmCC').textContent = cedula;
+}
+
+// ────────────────────────────────────────────────────────────
+//  SIGNATURE CANVAS
+// ────────────────────────────────────────────────────────────
+let canvas, ctx, drawing = false, lx = 0, ly = 0, hasSignature = false;
+
+function initCanvas() {
+  canvas = document.getElementById('signatureCanvas');
+  ctx    = canvas.getContext('2d');
+  resizeCanvas();
+  ctx.strokeStyle = '#1A3A5C';
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup',   endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0]); }, { passive: false });
+  canvas.addEventListener('touchmove',  e => { e.preventDefault(); draw(e.touches[0]);      }, { passive: false });
+  canvas.addEventListener('touchend',   endDraw);
+}
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = rect.width  * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+  ctx = canvas.getContext('2d');
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  ctx.strokeStyle = '#1A3A5C';
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+}
+
+function getPos(e) {
+  const rect   = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left),
+    y: (e.clientY - rect.top)
+  };
+}
+
+function startDraw(e) {
+  drawing = true;
+  const p = getPos(e);
+  lx = p.x; ly = p.y;
+  ctx.beginPath();
+  ctx.arc(lx, ly, 1, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function draw(e) {
+  if (!drawing) return;
+  const p = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lx, ly);
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+  lx = p.x; ly = p.y;
+  if (!hasSignature) {
+    hasSignature = true;
+    document.getElementById('sigPlaceholder').style.opacity = '0';
+    document.getElementById('sigClear').style.display = 'block';
+    document.getElementById('sigWrapper').classList.add('signed');
+  }
+}
+
+function endDraw() { drawing = false; }
+
+function clearSignature() {
+  const rect = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, rect.width, rect.height);
+  hasSignature = false;
+  document.getElementById('sigPlaceholder').style.opacity = '1';
+  document.getElementById('sigClear').style.display = 'none';
+  document.getElementById('sigWrapper').classList.remove('signed');
+}
+
+function isCanvasBlank() {
+  const pxData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  return !Array.from(pxData).some(v => v !== 0);
+}
+
+// ────────────────────────────────────────────────────────────
+//  SUBMIT
+// ────────────────────────────────────────────────────────────
+async function submitForm() {
+  if (isCanvasBlank()) {
+    alert('Por favor dibuja tu firma antes de continuar.');
+    return;
+  }
+  if (!document.getElementById('chkAccept').checked) {
+    alert('Debes marcar la casilla de confirmación para continuar.');
+    return;
+  }
+
+  document.getElementById('loadingOverlay').classList.add('show');
+
+  // Capture IP
+  let ip = 'No disponible';
+  try {
+    const r = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(4000) });
+    const j = await r.json();
+    ip = j.ip || ip;
+  } catch {}
+
+  const signature = canvas.toDataURL('image/png');
+  const payload = {
+    nombre:       document.getElementById('nombre').value.trim(),
+    cedula:       document.getElementById('cedula').value.trim(),
+    especialidad: document.getElementById('especialidad').value.trim(),
+    telefono:     document.getElementById('telefono').value.trim(),
+    email:        document.getElementById('email').value.trim(),
+    banco:        document.getElementById('banco').value,
+    tipoCuenta:   document.getElementById('tipoCuenta').value,
+    numeroCuenta: document.getElementById('numeroCuenta').value.trim(),
+    ciudad:       document.getElementById('signCity').value.trim(),
+    fecha:        document.getElementById('signDate').value,
+    ip:           ip,
+    timestamp:    new Date().toISOString(),
+    signature:    signature,
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode:   'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body:   JSON.stringify(payload),
+    });
+    // no-cors means we can't read the response, but it was sent
+    document.getElementById('successEmail').textContent = payload.email;
+    document.getElementById('loadingOverlay').classList.remove('show');
+    goStep(4);
+  } catch (err) {
+    document.getElementById('loadingOverlay').classList.remove('show');
+    alert('Error al enviar. Verifica tu conexión e intenta de nuevo.\n\n' + err.message);
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+//  RESTORE FORM FROM LOCALSTORAGE (optional persistence)
+// ────────────────────────────────────────────────────────────
+const FIELDS = ['nombre','cedula','especialidad','telefono','email','banco','tipoCuenta','numeroCuenta'];
+FIELDS.forEach(id => {
+  const el = document.getElementById(id);
+  const saved = localStorage.getItem('koneksi_' + id);
+  if (saved) el.value = saved;
+  el.addEventListener('input', () => localStorage.setItem('koneksi_' + id, el.value));
+});
+
+// Clear storage on success
+function clearStorage() { FIELDS.forEach(id => localStorage.removeItem('koneksi_' + id)); }
+</script>
+</body>
+</html>
