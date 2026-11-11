@@ -319,6 +319,36 @@ footer a:hover{text-decoration:underline}
       </div>
     </div>
 
+    <!-- ═══ SECCIÓN 3b — Foto de perfil ═══ -->
+    <div class="form-section">
+      <div class="form-section-hdr">
+        <div class="fs-icon">📸</div>
+        <div>
+          <div class="fs-title">Foto de perfil</div>
+          <div class="fs-sub">Foto del profesional o imagen del negocio</div>
+        </div>
+      </div>
+
+      <div class="notice-box" style="margin-bottom:1.1rem">
+        <span class="notice-box-icon">💡</span>
+        <p class="notice-box-text">
+          <strong>Si es foto del profesional:</strong> fondo blanco, medio cuerpo, de frente y buena iluminación.<br>
+          <strong>Si es imagen del negocio:</strong> logo o foto del espacio con fondo blanco o claro.
+        </p>
+      </div>
+
+      <div class="file-drop" id="fotoDrop" role="button" tabindex="0" aria-label="Cargar foto de perfil">
+        <input type="file" id="fotoInput" accept="image/jpeg,image/png,image/webp,image/*" aria-hidden="true">
+        <div class="file-drop-icon">📷</div>
+        <div class="file-drop-label">Arrastra tu foto aquí</div>
+        <div class="file-drop-hint">JPG · PNG · WEBP · Máximo 5 MB</div>
+        <button type="button" class="file-drop-btn" onclick="document.getElementById('fotoInput').click()">
+          Seleccionar foto
+        </button>
+      </div>
+      <div id="fotoPreview" style="margin-top:1rem"></div>
+    </div>
+
     <!-- ═══ SECCIÓN 4 — Certificados ═══ -->
     <div class="form-section">
       <div class="form-section-hdr">
@@ -474,6 +504,55 @@ fileDrop.addEventListener('drop', e => {
 });
 fileDrop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') certInput.click(); });
 
+/* ── FOTO UPLOAD ── */
+let fotoFile = null;
+
+function renderFotoPreview() {
+  const prev = document.getElementById('fotoPreview');
+  if (!fotoFile) { prev.innerHTML = ''; return; }
+  const url = URL.createObjectURL(fotoFile);
+  prev.innerHTML =
+    '<div class="file-item" style="align-items:center;gap:.85rem;padding:.8rem 1rem">' +
+    '<img src="' + url + '" alt="Vista previa" style="width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border)">' +
+    '<div style="flex:1;min-width:0">' +
+    '<div class="file-item-name">' + fotoFile.name + '</div>' +
+    '<div class="file-item-size" style="margin-top:.2rem">' + fmtSize(fotoFile.size) + '</div>' +
+    '</div>' +
+    '<button type="button" class="file-item-rm" onclick="removeFoto()" aria-label="Quitar foto">✕</button>' +
+    '</div>';
+}
+
+function removeFoto() {
+  fotoFile = null;
+  renderFotoPreview();
+  document.getElementById('fotoInput').value = '';
+}
+
+const fotoInputEl = document.getElementById('fotoInput');
+fotoInputEl.addEventListener('change', () => {
+  const f = fotoInputEl.files[0];
+  if (!f) return;
+  if (!f.type.startsWith('image/')) { showMsg('Solo se aceptan imágenes (JPG, PNG, WEBP).', 'err'); return; }
+  if (f.size > 5 * 1024 * 1024) { showMsg('La foto supera el límite de 5 MB.', 'err'); return; }
+  fotoFile = f;
+  renderFotoPreview();
+  fotoInputEl.value = '';
+});
+
+const fotoDropEl = document.getElementById('fotoDrop');
+fotoDropEl.addEventListener('dragover', e => { e.preventDefault(); fotoDropEl.classList.add('drag'); });
+fotoDropEl.addEventListener('dragleave', () => fotoDropEl.classList.remove('drag'));
+fotoDropEl.addEventListener('drop', e => {
+  e.preventDefault(); fotoDropEl.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  if (!f.type.startsWith('image/')) { showMsg('Solo se aceptan imágenes (JPG, PNG, WEBP).', 'err'); return; }
+  if (f.size > 5 * 1024 * 1024) { showMsg('La foto supera el límite de 5 MB.', 'err'); return; }
+  fotoFile = f;
+  renderFotoPreview();
+});
+fotoDropEl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fotoInputEl.click(); });
+
 /* ── HELPERS ── */
 function showMsg(msg, type) {
   const el = document.getElementById('formMsg');
@@ -526,6 +605,18 @@ document.getElementById('joinForm').addEventListener('submit', async function(e)
     if (handle) sociales.push({ red: sel.value, handle });
   });
 
+  /* Leer foto como base64 */
+  let fotoPayload = null;
+  if (fotoFile) {
+    try {
+      const fb = await readFileB64(fotoFile);
+      fotoPayload = { name: fotoFile.name, b64: fb.b64, mimeType: fotoFile.type };
+    } catch (err) {
+      showMsg('Error al leer la foto. Intenta de nuevo.', 'err');
+      return;
+    }
+  }
+
   /* Leer archivos como base64 */
   let certs = [];
   try {
@@ -557,6 +648,7 @@ document.getElementById('joinForm').addEventListener('submit', async function(e)
     sociales,
     observaciones:    document.getElementById('observaciones').value.trim(),
     certificados:     certs,
+    foto:             fotoPayload,
     fechaEnvio:       new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })
   };
 
