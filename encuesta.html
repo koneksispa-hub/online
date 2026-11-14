@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Encuesta de Satisfacción – Koneksi</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:wght@400;500;600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap">
+
+  <style>
+    /* ── Variables de marca (igual que index.html) ── */
+    :root {
+      --bg:        #FAF4EC;
+      --bg-alt:    #EDE0CC;
+      --purple:    #6B2F7F;
+      --caramel:   #C9956A;
+      --text:      #1A0F08;
+      --text-mid:  #5C3A2A;
+      --text-muted:#9A7060;
+      --border:    rgba(191,155,111,.22);
+      --sh:        0 6px 32px rgba(45,26,16,.13);
+      --fd:        'Cormorant Garant', Georgia, serif;
+      --fb:        'DM Sans', system-ui, sans-serif;
+      --r:         20px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--fb);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 10px 64px;
+    }
+
+    /* ── Contenedor principal ── */
+    .wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      border-radius: var(--r);
+      overflow: hidden;
+      box-shadow: var(--sh);
+    }
+
+    /* ── Cabecera ── */
+    .enc-hdr {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--caramel) 100%);
+      padding: 36px 28px 28px;
+      text-align: center;
+      color: #fff;
+    }
+    .enc-hdr .ico { font-size: 50px; display: block; margin-bottom: 10px; line-height: 1; }
+    .enc-hdr h1  {
+      font-family: var(--fd);
+      font-size: 26px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: .3px;
+    }
+    .enc-hdr p   { margin: 8px 0 0; font-size: 14px; opacity: .9; line-height: 1.5; }
+
+    /* ── Secciones ── */
+    .enc-sec {
+      background: #fff;
+      padding: 24px 28px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sec-title {
+      font-family: var(--fd);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--purple);
+      margin: 0 0 20px;
+      padding-bottom: 9px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    /* ── Caja de información de la cita ── */
+    .info-box {
+      background: #FDF6F0;
+      border-radius: 14px;
+      padding: 15px 18px;
+      border-left: 4px solid var(--caramel);
+    }
+    .info-box p { margin: 5px 0; font-size: 14px; color: var(--text-mid); }
+    .info-box p strong { color: var(--text); }
+
+    /* ── Pregunta ── */
+    .question { margin-bottom: 28px; }
+    .question:last-child { margin-bottom: 0; }
+
+    .qlabel {
+      font-size: 14.5px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 14px;
+      line-height: 1.55;
+    }
+    .req { color: var(--caramel); }
+    .opt { color: var(--text-muted); font-weight: 400; font-size: 13px; }
+
+    /* ── Separador entre preguntas ── */
+    .div { border: none; border-top: 1px solid var(--border); margin: 0 0 28px; }
+
+    /* ── Escala emoji (Q1, Q4, Q8) ── */
+    .esc-emoji { display: flex; gap: 6px; }
+    .esc-emoji label { flex: 1; cursor: pointer; }
+    .esc-emoji input[type=radio] {
+      position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;
+    }
+    .ebtn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 2px 8px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      transition: border-color .15s, background .15s;
+    }
+    .ebtn .e { font-size: 22px; line-height: 1; }
+    .ebtn .t { font-size: 10px; color: var(--text-muted); text-align: center; line-height: 1.25; }
+
+    /* Seleccionado — funciona con :has() o con la clase .sel añadida por JS */
+    .esc-emoji input[type=radio]:checked ~ .ebtn,
+    .esc-emoji label.sel .ebtn {
+      border-color: var(--caramel);
+      background: linear-gradient(135deg, rgba(107,47,127,.07), rgba(201,149,106,.12));
+    }
+
+    /* ── Escala numérica (Q2, Q7) ── */
+    .esc-num { display: flex; align-items: center; gap: 10px; }
+    .esc-num-lbl { font-size: 12px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+    .esc-num-nums { display: flex; gap: 8px; flex: 1; justify-content: center; }
+    .esc-num-nums label { cursor: pointer; }
+    .esc-num-nums input[type=radio] {
+      position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;
+    }
+    .nbtn {
+      display: flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-mid);
+      background: #fff;
+      transition: all .15s;
+    }
+    .esc-num-nums input[type=radio]:checked ~ .nbtn,
+    .esc-num-nums label.sel .nbtn {
+      background: linear-gradient(135deg, var(--purple), var(--caramel));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* ── Píldoras (Q5, Q6, Q9) ── */
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pills label { cursor: pointer; }
+    .pills input[type=radio] {
+      position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;
+    }
+    .pill {
+      display: inline-block;
+      padding: 9px 16px;
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      font-size: 13.5px;
+      color: var(--text-mid);
+      background: #fff;
+      transition: all .15s;
+      white-space: nowrap;
+      line-height: 1.3;
+    }
+    .pills input[type=radio]:checked ~ .pill,
+    .pills label.sel .pill {
+      background: linear-gradient(135deg, var(--purple), var(--caramel));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* ── Textarea ── */
+    textarea {
+      width: 100%;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: var(--fb);
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      resize: vertical;
+      min-height: 76px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    textarea:focus { border-color: var(--caramel); }
+    textarea::placeholder { color: var(--text-muted); }
+
+    /* ── Botón enviar ── */
+    .submit-sec {
+      background: #fff;
+      padding: 20px 28px 32px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .btn-send {
+      background: linear-gradient(135deg, var(--purple), var(--caramel));
+      color: #fff;
+      border: none;
+      padding: 16px 52px;
+      border-radius: 50px;
+      font-family: var(--fb);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(107,47,127,.32);
+      transition: opacity .15s, transform .1s;
+    }
+    .btn-send:hover  { opacity: .92; transform: translateY(-1px); }
+    .btn-send:active { transform: translateY(0); }
+    .btn-send:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .err-msg {
+      display: none;
+      margin-top: 14px;
+      background: #fff0ee;
+      border: 1px solid #ffb3a3;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #c0392b;
+    }
+
+    /* ── Pie de página ── */
+    .enc-footer {
+      background: var(--bg-alt);
+      padding: 18px 28px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .enc-footer p { margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.9; }
+
+    /* ── Pantallas especiales (ya enviado / gracias) ── */
+    .special {
+      background: #fff;
+      padding: 56px 28px 40px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    .special .big { font-size: 70px; display: block; margin-bottom: 14px; }
+    .special h2   { font-family: var(--fd); font-size: 26px; color: var(--purple); margin: 0 0 12px; }
+    .special p    { font-size: 15px; color: var(--text-mid); line-height: 1.65; margin: 0; }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      body { padding: 10px 4px 50px; }
+      .enc-hdr { padding: 26px 16px; }
+      .enc-hdr h1 { font-size: 22px; }
+      .enc-sec { padding: 20px 14px; }
+      .submit-sec { padding: 18px 14px 28px; }
+      .ebtn .e { font-size: 18px; }
+      .ebtn .t { font-size: 9px; }
+      .nbtn { width: 38px; height: 38px; font-size: 14px; }
+      .esc-num-nums { gap: 5px; }
+      .esc-num-lbl { font-size: 11px; }
+      .btn-send { padding: 14px 36px; font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap" id="wrap">
+
+  <!-- ── CABECERA ── -->
+  <div class="enc-hdr">
+    <span class="ico">💆‍♀️</span>
+    <h1>Encuesta de Satisfacción</h1>
+    <p id="hdr-sub">Koneksi · Tu opinión nos ayuda a seguir mejorando</p>
+  </div>
+
+  <!-- ── PANTALLA: ya enviada ── -->
+  <div id="screen-ya" style="display:none">
+    <div class="special">
+      <span class="big">✅</span>
+      <h2>¡Ya enviaste tu encuesta!</h2>
+      <p>Gracias por tu tiempo y retroalimentación.<br>Tu opinión es parte de nuestra comunidad Koneksi. 🌿</p>
+    </div>
+    <div class="enc-footer">
+      <p>Koneksi · koneksispa@gmail.com · 320 256 1705</p>
+    </div>
+  </div>
+
+  <!-- ── PANTALLA: gracias ── -->
+  <div id="screen-ok" style="display:none">
+    <div class="special">
+      <span class="big">🌸</span>
+      <h2>¡Muchas gracias!</h2>
+      <p>Tu respuesta fue enviada correctamente.<br>Seguiremos conectando personas con el bienestar gracias a ti. 💆‍♀️💆‍♂️</p>
+    </div>
+    <div class="enc-footer">
+      <p>Koneksi · koneksispa@gmail.com · 320 256 1705</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FORMULARIO
+  ══════════════════════════════════════════════════════════════ -->
+  <form id="survey" style="display:none" novalidate>
+
+    <!-- ── Información de la cita ── -->
+    <div class="enc-sec">
+      <div class="info-box" id="info-box">
+        <p style="color:var(--text-muted)">Cargando información de tu cita…</p>
+      </div>
+      <p style="margin:12px 0 0; font-size:13px; color:var(--text-muted); line-height:1.5">
+        Tu respuesta es confidencial y no tomará más de 3 minutos. ¡Gracias! 🙏
+      </p>
+    </div>
+
+    <!-- ══════════════════
+         SECCIÓN 1 — Profesional
+    ══════════════════ -->
+    <div class="enc-sec">
+      <div class="sec-title">👩‍⚕️ Sobre el profesional</div>
+
+      <!-- P1: Satisfacción general -->
+      <div class="question">
+        <div class="qlabel">1. ¿Qué tan satisfecho(a) está con la experiencia en general? <span class="req">*</span></div>
+        <div class="esc-emoji">
+          <label><input type="radio" name="q1" value="Muy insatisfecho(a)"><div class="ebtn"><span class="e">😤</span><span class="t">Muy insatisfecho(a)</span></div></label>
+          <label><input type="radio" name="q1" value="Insatisfecho(a)"    ><div class="ebtn"><span class="e">😕</span><span class="t">Insatisfecho(a)</span></div></label>
+          <label><input type="radio" name="q1" value="Neutral"            ><div class="ebtn"><span class="e">😐</span><span class="t">Neutral</span></div></label>
+          <label><input type="radio" name="q1" value="Satisfecho(a)"      ><div class="ebtn"><span class="e">🙂</span><span class="t">Satisfecho(a)</span></div></label>
+          <label><input type="radio" name="q1" value="Muy satisfecho(a)"  ><div class="ebtn"><span class="e">😍</span><span class="t">Muy satisfecho(a)</span></div></label>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- P2: Calificación 1-5 (va a VALORACIONES) -->
+      <div class="question">
+        <div class="qlabel">2. ¿Cómo calificaría la atención en general del profesional que lo atendió? <span class="req">*</span></div>
+        <div class="esc-num">
+          <span class="esc-num-lbl">😞 Muy mala</span>
+          <div class="esc-num-nums">
+            <label><input type="radio" name="q2" value="1"><span class="nbtn">1</span></label>
+            <label><input type="radio" name="q2" value="2"><span class="nbtn">2</span></label>
+            <label><input type="radio" name="q2" value="3"><span class="nbtn">3</span></label>
+            <label><input type="radio" name="q2" value="4"><span class="nbtn">4</span></label>
+            <label><input type="radio" name="q2" value="5"><span class="nbtn">5</span></label>
+          </div>
+          <span class="esc-num-lbl">⭐ Excelente</span>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- P3: Comentario público (va a COMENTARIOS) -->
+      <div class="question">
+        <div class="qlabel">3. Puede dejar un comentario para el profesional, visible en su perfil público <span class="opt">(opcional)</span></div>
+        <textarea name="q3" placeholder="Ej: Excelente técnica, muy relajante, muy puntual…" rows="3"></textarea>
+      </div>
+    </div>
+
+    <!-- ══════════════════
+         SECCIÓN 2 — Servicio (se adapta por modalidad)
+    ══════════════════ -->
+    <div class="enc-sec">
+      <div class="sec-title" id="sec2-title">✨ Sobre el servicio</div>
+
+      <!-- P4: Contexto (instalaciones / domicilio / virtual / producto) -->
+      <div class="question">
+        <div class="qlabel" id="q4-lbl">4. ¿Qué tan satisfecho(a) está con la limpieza y comodidad de las instalaciones? <span class="req">*</span></div>
+        <div class="esc-emoji">
+          <label><input type="radio" name="q4" value="Muy insatisfecho(a)"><div class="ebtn"><span class="e">😤</span><span class="t">Muy insatisfecho(a)</span></div></label>
+          <label><input type="radio" name="q4" value="Insatisfecho(a)"    ><div class="ebtn"><span class="e">😕</span><span class="t">Insatisfecho(a)</span></div></label>
+          <label><input type="radio" name="q4" value="Neutral"            ><div class="ebtn"><span class="e">😐</span><span class="t">Neutral</span></div></label>
+          <label><input type="radio" name="q4" value="Satisfecho(a)"      ><div class="ebtn"><span class="e">🙂</span><span class="t">Satisfecho(a)</span></div></label>
+          <label><input type="radio" name="q4" value="Muy satisfecho(a)"  ><div class="ebtn"><span class="e">😍</span><span class="t">Muy satisfecho(a)</span></div></label>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- P5: Expectativas -->
+      <div class="question">
+        <div class="qlabel" id="q5-lbl">5. ¿El procedimiento que recibió cumplió con sus expectativas? <span class="req">*</span></div>
+        <div class="pills">
+          <label><input type="radio" name="q5" value="Sí, totalmente"             ><span class="pill">✅ Sí, totalmente</span></label>
+          <label><input type="radio" name="q5" value="Parcialmente"               ><span class="pill">🤔 Parcialmente</span></label>
+          <label><input type="radio" name="q5" value="No cumplió mis expectativas"><span class="pill">😔 No cumplió mis expectativas</span></label>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- P6: Puntualidad -->
+      <div class="question">
+        <div class="qlabel" id="q6-lbl">6. ¿El servicio inició en el horario acordado? <span class="req">*</span></div>
+        <div class="pills">
+          <label><input type="radio" name="q6" value="Sí"><span class="pill">✅ Sí</span></label>
+          <label><input type="radio" name="q6" value="No"><span class="pill">❌ No</span></label>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- P7: Precio / calidad -->
+      <div class="question">
+        <div class="qlabel">7. ¿Cómo califica la relación entre el precio y la calidad del servicio? <span class="req">*</span></div>
+        <div class="esc-num">
+          <span class="esc-num-lbl">😞 Muy mala</span>
+          <div class="esc-num-nums">
+            <label><input type="radio" name="q7" value="1"><span class="nbtn">1</span></label>
+            <label><input type="radio" name="q7" value="2"><span class="nbtn">2</span></label>
+            <label><input type="radio" name="q7" value="3"><span class="nbtn">3</span></label>
+            <label><input type="radio" name="q7" value="4"><span class="nbtn">4</span></label>
+            <label><input type="radio" name="q7" value="5"><span class="nbtn">5</span></label>
+          </div>
+          <span class="esc-num-lbl">⭐ Excelente</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════
+         SECCIÓN 3 — Opinión
+    ══════════════════ -->
+    <div class="enc-sec">
+      <div class="sec-title">💬 Tu opinión</div>
+
+      <!-- P8: Facilidad reserva / compra -->
+      <div class="question">
+        <div class="qlabel" id="q8-lbl">8. ¿Qué tan fácil le resultó realizar la reserva? <span class="req">*</span></div>
+        <div class="esc-emoji">
+          <label><input type="radio" name="q8" value="Muy difícil"><div class="ebtn"><span class="e">😤</span><span class="t">Muy difícil</span></div></label>
+          <label><input type="radio" name="q8" value="Difícil"    ><div class="ebtn"><span class="e">😕</span><span class="t">Difícil</span></div></label>
+          <label><input type="radio" name="q8" value="Neutral"    ><div class="ebtn"><span class="e">😐</span><span class="t">Neutral</span></div></label>
+          <label><input type="radio" name="q8" value="Fácil"      ><div class="ebtn"><span class="e">🙂</span><span class="t">Fácil</span></div></label>
+          <label><input type="radio" name="q8" value="Muy fácil"  ><div class="ebtn"><span class="e">😍</span><span class="t">Muy fácil</span></div></label>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- P9: Recomendaría -->
+      <div class="question">
+        <div class="qlabel">9. ¿Recomendaría al profesional a familiares o amigos? <span class="req">*</span></div>
+        <div class="pills">
+          <label><input type="radio" name="q9" value="Definitivamente no"  ><span class="pill">❌ Definitivamente no</span></label>
+          <label><input type="radio" name="q9" value="Probablemente no"    ><span class="pill">🤔 Probablemente no</span></label>
+          <label><input type="radio" name="q9" value="No estoy seguro(a)"  ><span class="pill">😐 No estoy seguro(a)</span></label>
+          <label><input type="radio" name="q9" value="Probablemente sí"    ><span class="pill">🙂 Probablemente sí</span></label>
+          <label><input type="radio" name="q9" value="Definitivamente sí"  ><span class="pill">❤️ Definitivamente sí</span></label>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- P10: Lo que más gustó -->
+      <div class="question">
+        <div class="qlabel" id="q10-lbl">10. ¿Qué es lo que más le gustó de su experiencia? <span class="opt">(opcional)</span></div>
+        <textarea name="q10" placeholder="Ej: La música, el ambiente, la técnica del profesional…" rows="2"></textarea>
+      </div>
+
+      <hr class="div">
+
+      <!-- P11: Mejoras -->
+      <div class="question">
+        <div class="qlabel">11. ¿Qué aspectos considera que deberíamos mejorar? <span class="opt">(opcional)</span></div>
+        <textarea name="q11" placeholder="Tu sugerencia nos ayuda a mejorar el servicio…" rows="2"></textarea>
+      </div>
+    </div>
+
+    <!-- ── Botón enviar ── -->
+    <div class="submit-sec">
+      <button type="submit" id="btn-send" class="btn-send">✨ Enviar encuesta</button>
+      <div id="err-msg" class="err-msg"></div>
+      <p style="margin:14px 0 0; font-size:12px; color:var(--text-muted)">
+        Al enviar confirmas que tu respuesta es auténtica y voluntaria.
+      </p>
+    </div>
+
+  </form>
+
+  <!-- ── Pie de página (formulario visible) ── -->
+  <div class="enc-footer" id="main-footer" style="display:none">
+    <p>Koneksi — Conecta contigo y transforma tu vida 🌿<br>
+       koneksispa@gmail.com · 320 256 1705</p>
+  </div>
+
+</div><!-- /.wrap -->
+
+<!-- ════════════════════════════════════════════════════════════
+     SCRIPT
+════════════════════════════════════════════════════════════ -->
+<script>
+// ⚠️  REEMPLAZA esta URL con la URL de implementación de encuesta_gas.gs
+const GAS_URL = 'https://script.google.com/macros/s/REEMPLAZA_CON_TU_URL_GAS/exec';
+
+// ── Leer parámetros de la URL ─────────────────────────────────────────────────
+const sp = new URLSearchParams(window.location.search);
+const P  = {
+  codigo:    (sp.get('codigo')    || '').trim(),
+  prof:      (sp.get('prof')      || '').trim(),
+  cliente:   (sp.get('cliente')   || '').trim(),
+  proc:      (sp.get('proc')      || '').trim(),
+  modalidad: (sp.get('modalidad') || 'Sede').trim(),
+  dir:       (sp.get('dir')       || '').trim(),
+  fecha:     (sp.get('fecha')     || '').trim()
+};
+
+// Normalizar modalidad para las condiciones
+const mod   = P.modalidad.toLowerCase();
+const esDom  = mod === 'domicilio';
+const esVirt = mod === 'virtual' || mod === 'videoconferencia';
+const esProd = mod === 'producto';
+
+// ── Clave localStorage (anti-duplicado) ───────────────────────────────────────
+const LSK = 'knk_enc_'
+  + (P.codigo || 'x') + '_'
+  + (P.fecha  || new Date().toISOString().slice(0, 10));
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function init() {
+  if (localStorage.getItem(LSK) === '1') {
+    show('screen-ya');
+    return;
+  }
+  buildInfoBox();
+  adaptQuestions();
+  setupRadioFallback();
+  show('survey');
+  show('main-footer');
+})();
+
+// ── Mostrar / ocultar ─────────────────────────────────────────────────────────
+function show(id) { var el=document.getElementById(id); if(el) el.style.display=''; }
+function hide(id) { var el=document.getElementById(id); if(el) el.style.display='none'; }
+
+// ── Construir caja de información ─────────────────────────────────────────────
+function buildInfoBox() {
+  var ib = document.getElementById('info-box');
+  var rows = [];
+
+  if (P.cliente) rows.push('👤 <strong>Cliente:</strong> ' + esc(P.cliente));
+  if (P.prof)    rows.push('👩‍⚕️ <strong>Profesional:</strong> ' + esc(P.prof));
+  if (P.proc) {
+    var lbl = esProd ? 'Producto' : 'Procedimiento';
+    rows.push('✨ <strong>' + lbl + ':</strong> ' + esc(P.proc));
+  }
+  if (P.fecha)   rows.push('📅 <strong>Fecha:</strong> ' + esc(P.fecha));
+
+  if (esProd) {
+    rows.push('📦 <strong>Modalidad:</strong> Compra de producto');
+  } else if (esVirt && !P.dir) {
+    rows.push('💻 <strong>Modalidad:</strong> Sesión virtual / Videoconferencia');
+  } else if (P.dir) {
+    var icon = esDom ? '🏠' : (esVirt ? '💻' : '📍');
+    var lugarLbl = esDom ? 'Domicilio' : (esVirt ? 'Virtual' : 'Sede');
+    rows.push(icon + ' <strong>' + lugarLbl + ':</strong> ' + esc(P.dir));
+  }
+
+  if (rows.length === 0) {
+    ib.innerHTML = '<p style="margin:0;font-size:14px;color:var(--text-muted)">Gracias por tomarte el tiempo de responder. 🌸</p>';
+    return;
+  }
+  ib.innerHTML = rows.map(function(r) {
+    return '<p style="margin:5px 0;font-size:14px;color:var(--text-mid)">' + r + '</p>';
+  }).join('');
+}
+
+// ── Adaptar preguntas según modalidad ─────────────────────────────────────────
+function adaptQuestions() {
+  // Subtítulo del header
+  var sub = document.getElementById('hdr-sub');
+  if (P.prof) sub.textContent = 'Tu opinión sobre ' + P.prof + ' nos ayuda a seguir mejorando';
+
+  // Título sección 2
+  if (esProd)      setText('sec2-title', '📦 Sobre el producto');
+  else if (esVirt) setText('sec2-title', '💻 Sobre la sesión virtual');
+  else if (esDom)  setText('sec2-title', '🏠 Sobre el servicio a domicilio');
+
+  // P4
+  if (esProd)      setHTML('q4-lbl', '4. ¿Cómo califica la presentación y el empaque del producto recibido? <span class="req">*</span>');
+  else if (esDom)  setHTML('q4-lbl', '4. ¿Cómo califica la presentación del profesional y el orden del área de trabajo en su domicilio? <span class="req">*</span>');
+  else if (esVirt) setHTML('q4-lbl', '4. ¿Cómo fue la calidad de la conexión y la experiencia de la sesión virtual? <span class="req">*</span>');
+
+  // P5
+  if (esProd) setHTML('q5-lbl', '5. ¿El producto que recibió cumplió con sus expectativas? <span class="req">*</span>');
+
+  // P6
+  if (esVirt)      setHTML('q6-lbl', '6. ¿La sesión virtual inició en el horario acordado? <span class="req">*</span>');
+  else if (esProd) setHTML('q6-lbl', '6. ¿El producto llegó en el tiempo prometido? <span class="req">*</span>');
+
+  // P8
+  if (esProd) setHTML('q8-lbl', '8. ¿Qué tan fácil le resultó realizar la compra? <span class="req">*</span>');
+
+  // P10
+  if (esProd) setHTML('q10-lbl', '10. ¿Qué es lo que más le gustó del producto o la atención recibida? <span class="opt">(opcional)</span>');
+}
+
+function setText(id, t) { var el=document.getElementById(id); if(el) el.textContent=t; }
+function setHTML(id, h) { var el=document.getElementById(id); if(el) el.innerHTML=h; }
+
+// ── Fallback para navegadores sin :has() ─────────────────────────────────────
+function setupRadioFallback() {
+  document.querySelectorAll('input[type=radio]').forEach(function(r) {
+    r.addEventListener('change', function() {
+      var name = r.getAttribute('name');
+      document.querySelectorAll('input[name="' + name + '"]').forEach(function(o) {
+        o.closest('label').classList.remove('sel');
+      });
+      r.closest('label').classList.add('sel');
+    });
+  });
+}
+
+// ── Validación manual ─────────────────────────────────────────────────────────
+function validate(fd) {
+  var required = ['q1','q2','q4','q5','q6','q7','q8','q9'];
+  for (var i = 0; i < required.length; i++) {
+    if (!fd.get(required[i])) {
+      return 'Por favor responde todas las preguntas marcadas con *.';
+    }
+  }
+  return null;
+}
+
+// ── Envío ──────────────────────────────────────────────────────────────────────
+document.getElementById('survey').addEventListener('submit', async function(ev) {
+  ev.preventDefault();
+
+  var btn    = document.getElementById('btn-send');
+  var errDiv = document.getElementById('err-msg');
+  errDiv.style.display = 'none';
+
+  var fd  = new FormData(this);
+  var err = validate(fd);
+  if (err) {
+    errDiv.textContent = '⚠️ ' + err;
+    errDiv.style.display = 'block';
+    errDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando…';
+
+  var payload = {
+    action:        'submitEncuesta',
+    codigo:        P.codigo,
+    prof:          P.prof,
+    cliente:       P.cliente,
+    procedimiento: P.proc,
+    modalidad:     P.modalidad,
+    direccion:     P.dir,
+    fecha:         P.fecha,
+    q1:  fd.get('q1')  || '',
+    q2:  fd.get('q2')  || '',
+    q3:  (fd.get('q3')  || '').trim(),
+    q4:  fd.get('q4')  || '',
+    q5:  fd.get('q5')  || '',
+    q6:  fd.get('q6')  || '',
+    q7:  fd.get('q7')  || '',
+    q8:  fd.get('q8')  || '',
+    q9:  fd.get('q9')  || '',
+    q10: (fd.get('q10') || '').trim(),
+    q11: (fd.get('q11') || '').trim()
+  };
+
+  try {
+    var res  = await fetch(GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },   // evita preflight CORS
+      body:    JSON.stringify(payload)
+    });
+    var data = await res.json();
+
+    if (data.ok) {
+      try { localStorage.setItem(LSK, '1'); } catch(_) {}
+      hide('survey');
+      hide('main-footer');
+      show('screen-ok');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      throw new Error(data.error || 'Error desconocido del servidor');
+    }
+  } catch (e) {
+    errDiv.textContent = '⚠️ ' + e.message + '. Por favor intenta de nuevo.';
+    errDiv.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '✨ Enviar encuesta';
+  }
+});
+
+// ── Escape HTML ───────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+
+</body>
+</html>
