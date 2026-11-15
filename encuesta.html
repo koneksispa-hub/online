@@ -524,8 +524,9 @@ const esProd = mod === 'producto';
 
 // ── Clave localStorage (anti-duplicado) ───────────────────────────────────────
 const LSK = 'knk_enc_'
-  + (P.codigo || 'x') + '_'
-  + (P.fecha  || new Date().toISOString().slice(0, 10));
+  + (P.codigo  || 'x') + '_'
+  + (P.fecha   || new Date().toISOString().slice(0, 10)) + '_'
+  + (P.proc    || '').replace(/\s+/g, '').slice(0, 20).toLowerCase();
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (function init() {
