@@ -362,13 +362,19 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 
 /* ── SERVICIOS PROPIOS ── */
 .svc-row{
-  display:flex;align-items:center;gap:8px;padding:10px 12px;
+  display:flex;align-items:flex-start;gap:8px;padding:10px 12px;
   background:var(--card);border-radius:8px;border:1px solid var(--border);
   margin-bottom:6px;
 }
-.svc-name{font-weight:600;font-size:.9rem;color:var(--text);flex:1;min-width:0;word-break:break-word}
-.svc-prices{display:flex;gap:8px;flex-wrap:wrap;font-size:.75rem;color:var(--text2);flex-shrink:0}
+.svc-info{flex:1;min-width:0}
+.svc-name{font-weight:600;font-size:.9rem;color:var(--text);word-break:break-word;margin-bottom:3px}
+.svc-prices{display:flex;gap:8px;flex-wrap:wrap;font-size:.75rem;color:var(--text2);align-items:center}
 .svc-price{white-space:nowrap}
+.svc-dim-badge{
+  display:inline-block;padding:2px 7px;border-radius:20px;
+  background:var(--sage-lt);color:var(--sage);font-size:.72rem;font-weight:600;white-space:nowrap
+}
+.svc-obs{font-size:.78rem;color:var(--text2);margin-top:5px;line-height:1.45;word-break:break-word}
 .svc-actions{display:flex;gap:4px;flex-shrink:0}
 .svc-empty{text-align:center;padding:28px 16px;color:var(--text3);font-size:.88rem;line-height:1.6}
 
@@ -655,6 +661,16 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
               <input type="number" id="svcPrecioDom" placeholder="Ej: 60000" min="0" step="1000">
             </div>
           </div>
+          <div class="field">
+            <label>Dimensión de Bienestar</label>
+            <select id="svcDimension">
+              <option value="">— Sin clasificar —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Observación (recomendaciones para el cliente)</label>
+            <textarea id="svcObservacion" rows="3" placeholder="Ej: Recuerda llegar 15 min antes, traer ropa cómoda..." style="width:100%;resize:vertical;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;font-family:inherit;background:var(--surface);color:var(--text1)"></textarea>
+          </div>
           <div style="display:flex;gap:8px">
             <button class="btn btn-primary" onclick="saveService()">💾 Guardar</button>
             <button class="btn btn-secondary" onclick="hideServiceForm()">Cancelar</button>
@@ -865,6 +881,7 @@ let MEDIA    = [];     // array de archivos Drive
 let BULK_PREV = [];    // slots en preview para agenda masiva
 let SERVICES = [];     // servicios propios del profesional
 let SEDES    = [];     // sedes del profesional
+let DIMENSIONES = []; // opciones de Dimensión de Bienestar
 let _editingSvcRow = null; // fila siendo editada en el form de servicios
 
 // ── UTILS ────────────────────────────────────────────────────
@@ -1131,7 +1148,27 @@ function renderAgenda() {
       col.appendChild(emp);
     } else {
       filtered.forEach(function(s) {
-        const isAvail    = s.disponible === 'Sí';
+        // Ajuste 2: slots de Domicilio a menos de 2 horas de ahora → deshabilitados
+        let isAvail = s.disponible === 'Sí';
+        if (isAvail && s.modalidad === 'Domicilio') {
+          // Reconstruir datetime del slot en hora Colombia (UTC-5)
+          var parts = s.fecha.split('/'); // "DD/MM/YYYY"
+          var hm    = (s.hora || '').match(/(\d+):(\d+)\s*(AM|PM)/i);
+          if (parts.length === 3 && hm) {
+            var sh = parseInt(hm[1]), sm = parseInt(hm[2]), sap = hm[3].toUpperCase();
+            if (sap === 'PM' && sh < 12) sh += 12;
+            if (sap === 'AM' && sh === 12) sh = 0;
+            // Construir fecha/hora como UTC equivalente a medianoche Bogotá + horas del slot
+            var slotMs = Date.UTC(
+              parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]),
+              sh + 5, sm, 0  // +5 para convertir de Bogotá (UTC-5) a UTC
+            );
+            // Hora actual en UTC
+            var nowMs  = Date.now();
+            var diffHrs = (slotMs - nowMs) / 3600000;
+            if (diffHrs < 2) isAvail = false;
+          }
+        }
         const isCancelled = !isAvail && !s.cliente;
         const isBooked   = !isAvail && !!s.cliente;
 
@@ -1640,12 +1677,37 @@ function showServicesSubTab(id, btn) {
 }
 
 function loadServices() {
+  // Cargar dimensiones de bienestar si aún no las tenemos
+  if (!DIMENSIONES.length) {
+    runGAS('getDimensiones', [], function(rd) {
+      if (rd && rd.dimensiones) {
+        DIMENSIONES = rd.dimensiones;
+        _populateDimSelect();
+      }
+    });
+  } else {
+    _populateDimSelect();
+  }
   runGAS('getMyServices', [SESSION.correo, SESSION.clave], function(r) {
     if (!r) return;
     SERVICES = r.services || [];
     renderServices();
   });
   loadSedes();
+}
+
+function _populateDimSelect() {
+  const sel = document.getElementById('svcDimension');
+  if (!sel) return;
+  // Mantener valor seleccionado si ya hay uno
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Sin clasificar —</option>';
+  DIMENSIONES.forEach(function(d) {
+    const o = document.createElement('option');
+    o.value = o.textContent = d;
+    if (d === current) o.selected = true;
+    sel.appendChild(o);
+  });
 }
 
 function renderServices() {
@@ -1657,11 +1719,17 @@ function renderServices() {
   wrap.innerHTML = SERVICES.map(function(s) {
     var sede = s.precioSede ? '🏢 $' + Number(s.precioSede).toLocaleString('es-CO') : '';
     var dom  = s.precioDom  ? '🏠 $' + Number(s.precioDom).toLocaleString('es-CO')  : '';
+    var dimBadge = s.dimension ? '<span class="svc-dim-badge">🌿 ' + esc(s.dimension) + '</span>' : '';
+    var obsTxt   = s.observacion ? '<div class="svc-obs">📝 ' + esc(s.observacion) + '</div>' : '';
     return '<div class="svc-row">'
+      + '<div class="svc-info">'
       + '<div class="svc-name">' + esc(s.servicio) + '</div>'
       + '<div class="svc-prices">'
       + (sede ? '<span class="svc-price">' + sede + '</span>' : '')
       + (dom  ? '<span class="svc-price">' + dom  + '</span>' : '')
+      + dimBadge
+      + '</div>'
+      + obsTxt
       + '</div>'
       + '<div class="svc-actions">'
       + '<button class="btn btn-secondary btn-sm btn-icon" title="Editar" onclick="showServiceForm(' + s.row + ')">✏️</button>'
@@ -1673,20 +1741,26 @@ function renderServices() {
 
 function showServiceForm(row) {
   _editingSvcRow = row;
+  // Asegurar que el select de dimensiones esté poblado
+  if (DIMENSIONES.length) _populateDimSelect();
   const title = document.getElementById('serviceFormTitle');
   if (row) {
     var s = null;
     for (var i = 0; i < SERVICES.length; i++) { if (SERVICES[i].row === row) { s = SERVICES[i]; break; } }
     if (s) {
-      document.getElementById('svcNombre').value     = s.servicio   || '';
-      document.getElementById('svcPrecioSede').value = s.precioSede || '';
-      document.getElementById('svcPrecioDom').value  = s.precioDom  || '';
+      document.getElementById('svcNombre').value       = s.servicio    || '';
+      document.getElementById('svcPrecioSede').value   = s.precioSede  || '';
+      document.getElementById('svcPrecioDom').value    = s.precioDom   || '';
+      document.getElementById('svcObservacion').value  = s.observacion || '';
+      document.getElementById('svcDimension').value    = s.dimension   || '';
     }
     title.textContent = 'Editar servicio';
   } else {
-    document.getElementById('svcNombre').value     = '';
-    document.getElementById('svcPrecioSede').value = '';
-    document.getElementById('svcPrecioDom').value  = '';
+    document.getElementById('svcNombre').value       = '';
+    document.getElementById('svcPrecioSede').value   = '';
+    document.getElementById('svcPrecioDom').value    = '';
+    document.getElementById('svcObservacion').value  = '';
+    document.getElementById('svcDimension').value    = '';
     title.textContent = 'Nuevo servicio';
   }
   document.getElementById('serviceFormWrap').classList.remove('hidden');
@@ -1699,14 +1773,16 @@ function hideServiceForm() {
 }
 
 function saveService() {
-  const nombre     = document.getElementById('svcNombre').value.trim();
-  const precioSede = document.getElementById('svcPrecioSede').value.trim();
-  const precioDom  = document.getElementById('svcPrecioDom').value.trim();
+  const nombre      = document.getElementById('svcNombre').value.trim();
+  const precioSede  = document.getElementById('svcPrecioSede').value.trim();
+  const precioDom   = document.getElementById('svcPrecioDom').value.trim();
+  const observacion = document.getElementById('svcObservacion').value.trim();
+  const dimension   = document.getElementById('svcDimension').value.trim();
   if (!nombre) { toast('Ingresa el nombre del servicio', 'err'); return; }
 
   showLoading();
   if (_editingSvcRow) {
-    runGAS('updateService', [SESSION.correo, SESSION.clave, _editingSvcRow, nombre, precioSede, precioDom], function(r) {
+    runGAS('updateService', [SESSION.correo, SESSION.clave, _editingSvcRow, nombre, precioSede, precioDom, observacion, dimension], function(r) {
       hideLoading();
       if (!r) return;
       toast(r.msg || 'Servicio actualizado', 'ok');
@@ -1714,7 +1790,7 @@ function saveService() {
       loadServices();
     });
   } else {
-    runGAS('addService', [SESSION.correo, SESSION.clave, nombre, precioSede, precioDom, (SESSION.codigo||'')], function(r) {
+    runGAS('addService', [SESSION.correo, SESSION.clave, nombre, precioSede, precioDom, (SESSION.codigo||''), observacion, dimension], function(r) {
       hideLoading();
       if (!r) return;
       toast(r.msg || 'Servicio agregado', 'ok');
