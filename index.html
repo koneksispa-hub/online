@@ -1251,6 +1251,15 @@ loadServiceVideos();
 const GID='49445065';
 const CIUDAD_GID='280572099';
 const TEAM_PHOTOS=['img/alex.jpg','img/jensy.jpg','img/francia.jpg','img/sandra.jpg','img/karol.jpg'];
+// Mapa de respaldo por primer nombre (minúsculas) para cuando col W está vacía
+const _PHOTO_FALLBACK={
+  'alex':'img/alex.jpg','alexander':'img/alex.jpg',
+  'jey':'img/jeny.jpg','jensy':'img/jeny.jpg',
+  'francia':'img/francia.jpg',
+  'sandra':'img/sandra.jpg',
+  'karol':'img/karol.jpg',
+  'chris':'img/chris-foto.png'
+};
 let _selectedCity='';
 let _selectedPais='';
 let _allCiudades=[];
@@ -1273,7 +1282,7 @@ function renderTeamCards(){
   }
   teamGrid.innerHTML='';
   filtered.forEach(t=>{
-    const ph=t.fotoPerfil||null;
+    const ph=t.fotoPerfil||_PHOTO_FALLBACK[t.name.split(' ')[0].toLowerCase()]||null;
     const card=document.createElement('div');
     card.className='team-card reveal';
     let banner=ph?'<div class="team-card-banner"><img src="'+ph+'" alt="'+t.name+'" loading="lazy"></div>':'';
@@ -1407,7 +1416,7 @@ async function loadTeam(){
       window._profToOpen=null;
       const found=teamData.find(t=>t.name.toLowerCase().includes(pname));
       if(found){
-        setTimeout(()=>openTeamModal(found,TEAM_PHOTOS[found.rowIdx]||null),450);
+        setTimeout(()=>openTeamModal(found,found.fotoPerfil||_PHOTO_FALLBACK[found.name.split(' ')[0].toLowerCase()]||null),450);
       }
     }
   }catch(e){
