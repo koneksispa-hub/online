@@ -598,6 +598,13 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 .find-filters{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin-bottom:2rem}
 .find-filters select{font-family:var(--fb);font-size:.88rem;padding:.55rem 1.1rem;border:1.5px solid var(--border-s);border-radius:50px;background:var(--surface);color:var(--text);cursor:pointer;outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;padding-right:2.2rem;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23BF9B6F' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center}
 .find-filters select:focus{border-color:var(--caramel);box-shadow:0 0 0 3px rgba(191,155,111,.2)}
+.find-filters input[type="text"]{font-family:var(--fb);font-size:.88rem;padding:.55rem 1.1rem;border:1.5px solid var(--border-s);border-radius:50px;background:var(--surface);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;min-width:170px}
+.find-filters input[type="text"]:focus{border-color:var(--caramel);box-shadow:0 0 0 3px rgba(191,155,111,.2)}
+.find-filters input[type="text"]::placeholder{color:var(--text-s,#9e8e7e);opacity:.8}
+/* Badges de versión en tarjetas de equipo */
+.version-badge{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.06em;padding:.18rem .55rem;border-radius:20px;text-transform:uppercase;margin-bottom:.35rem}
+.version-badge--pro{background:linear-gradient(135deg,#b8860b,#daa520);color:#fff}
+.version-badge--plus{background:linear-gradient(135deg,#4a90a4,#2e7090);color:#fff}
 
 /* Layout grid: tarjetas izquierda, mapa derecha */
 .find-grid{display:grid;grid-template-columns:380px 1fr;gap:1.5rem;align-items:start}
@@ -884,12 +891,14 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       </div>
       <!-- Filtros -->
       <div class="find-filters" id="findFilters">
-        <select id="filterCiudad" aria-label="Filtrar por ciudad">
-          <option value="">Todas las ciudades</option>
-        </select>
-        <select id="filterServicio" aria-label="Filtrar por servicio">
-          <option value="">Todos los servicios</option>
-        </select>
+        <input type="text" id="filterPais"      list="dlPais"      placeholder="País"                   autocomplete="off" aria-label="Filtrar por país">
+        <datalist id="dlPais"></datalist>
+        <input type="text" id="filterCiudad"    list="dlCiudad"    placeholder="Ciudad"                 autocomplete="off" aria-label="Filtrar por ciudad">
+        <datalist id="dlCiudad"></datalist>
+        <input type="text" id="filterDimension" list="dlDimension" placeholder="Dimensión de Bienestar" autocomplete="off" aria-label="Filtrar por dimensión">
+        <datalist id="dlDimension"></datalist>
+        <input type="text" id="filterCategoria" list="dlCategoria" placeholder="Categoría"              autocomplete="off" aria-label="Filtrar por categoría">
+        <datalist id="dlCategoria"></datalist>
       </div>
       <!-- Grid tarjetas + mapa -->
       <div class="find-grid">
@@ -1260,7 +1269,8 @@ function renderTeamCards(){
     if(t.sched)sched+='<div class="team-sched">&#x23F0; '+t.sched+'</div>';
     if(t.days)sched+='<div class="team-sched">&#x1F4C5; '+t.days+'</div>';
     const rHtml=t.rating>0?'<div class="team-rating">'+starsHtml(t.rating)+'<span class="team-rating-val">'+t.rating.toFixed(1)+'</span></div>':'';
-    card.innerHTML=banner+'<div class="team-card-body"><div class="team-name">'+t.name+'</div>'+rHtml+'<div class="team-svcs">'+t.svcs+'</div>'+sched+'<div class="team-cta">Ver perfil &#x2192;</div></div>';
+    const vBadge=(t.version==='PRO'||t.version==='PLUS')?'<span class="version-badge version-badge--'+t.version.toLowerCase()+'">'+t.version+'</span>':'';
+    card.innerHTML=banner+'<div class="team-card-body">'+vBadge+'<div class="team-name">'+t.name+'</div>'+rHtml+'<div class="team-svcs">'+t.svcs+'</div>'+sched+'<div class="team-cta">Ver perfil &#x2192;</div></div>';
     card.addEventListener('click',()=>openTeamModal(t,ph));
     teamGrid.appendChild(card);
   });
@@ -1314,8 +1324,10 @@ async function loadTeam(){
       bio:(r.c[8]?.v||'').trim(),
       ciudad:(r.c[11]?.v||'').trim(),
       rating:parseFloat(r.c[17]?.v)||0,
-      link_servicios:(r.c[18]?.v||'').trim()
-    })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs);
+      link_servicios:(r.c[18]?.v||'').trim(),
+      visible:(r.c[19]?.v||'').toString().trim(),
+      version:(r.c[20]?.v||'').toString().trim().toUpperCase()
+    })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs&&t.visible.toLowerCase()!=='no');
     teamGrid.innerHTML='';
     if(!teamData.length){teamGrid.innerHTML='<p class="team-loading">Equipo disponible próximamente.</p>';return;}
     renderTeamCards();
@@ -2516,40 +2528,102 @@ document.getElementById('ks-input').addEventListener('input', function() {
     }
   }
 
-  /* ---- Filtros ---- */
-  function populateFilters(profs) {
-    const ciudades = [...new Set(profs.map(p => p.ciudad).filter(Boolean))].sort();
-    const servicios = [...new Set(profs.flatMap(p => p.servicios))].sort();
+  /* ---- Datos de cascada (cargados desde getCiudadesData) ---- */
+  let _ciudadesData = null; // { paises, ciudadePorPais, dimensiones, categoriasPorDimension }
 
-    const selC = document.getElementById('filterCiudad');
-    const selS = document.getElementById('filterServicio');
+  /* ---- Helpers de datalist ---- */
+  function _fillDatalist(id, items) {
+    const dl = document.getElementById(id);
+    if (!dl) return;
+    dl.innerHTML = items.map(v => '<option value="' + v.replace(/"/g,'&quot;') + '">').join('');
+  }
 
-    // Mantener opción "Todas"
-    selC.innerHTML = '<option value="">Todas las ciudades</option>';
-    ciudades.forEach(c => {
-      const o = document.createElement('option');
-      o.value = c; o.textContent = c;
-      selC.appendChild(o);
-    });
+  /* ---- Cascada País → Ciudad ---- */
+  function _onPaisChange() {
+    if (!_ciudadesData) return;
+    const pais = document.getElementById('filterPais').value.trim();
+    const ciudades = pais && _ciudadesData.ciudadePorPais[pais]
+      ? _ciudadesData.ciudadePorPais[pais]
+      : Object.values(_ciudadesData.ciudadePorPais).flat()
+              .filter((v,i,a)=>a.indexOf(v)===i).sort();
+    _fillDatalist('dlCiudad', ciudades);
+    // Reset ciudad si ya no pertenece al nuevo país seleccionado
+    const inputCiudad = document.getElementById('filterCiudad');
+    if (pais && inputCiudad.value && !ciudades.includes(inputCiudad.value)) {
+      inputCiudad.value = '';
+    }
+    applyFilters();
+  }
 
-    selS.innerHTML = '<option value="">Todos los servicios</option>';
-    servicios.forEach(s => {
-      const o = document.createElement('option');
-      o.value = s; o.textContent = s;
-      selS.appendChild(o);
-    });
+  /* ---- Cascada Dimensión → Categoría ---- */
+  function _onDimensionChange() {
+    if (!_ciudadesData) return;
+    const dim = document.getElementById('filterDimension').value.trim();
+    const cats = dim && _ciudadesData.categoriasPorDimension[dim]
+      ? _ciudadesData.categoriasPorDimension[dim]
+      : Object.values(_ciudadesData.categoriasPorDimension).flat()
+              .filter((v,i,a)=>a.indexOf(v)===i).sort();
+    _fillDatalist('dlCategoria', cats);
+    // Reset categoría si ya no pertenece a la nueva dimensión seleccionada
+    const inputCat = document.getElementById('filterCategoria');
+    if (dim && inputCat.value && !cats.includes(inputCat.value)) {
+      inputCat.value = '';
+    }
+    applyFilters();
+  }
 
-    selC.addEventListener('change', applyFilters);
-    selS.addEventListener('change', applyFilters);
+  /* ---- Poblar filtros desde GAS getCiudadesData ---- */
+  async function populateFilters() {
+    try {
+      const ctrl = new AbortController();
+      const tOut = setTimeout(() => ctrl.abort(), 10000);
+      const resp = await fetch(GAS_CONTACT + '?action=getCiudadesData', { signal: ctrl.signal });
+      clearTimeout(tOut);
+      const data = await resp.json();
+      if (!data.ok) throw new Error(data.error || 'Sin datos');
+      _ciudadesData = data;
+
+      // Poblar datalists iniciales (todos los valores)
+      _fillDatalist('dlPais',      data.paises);
+      const todasCiudades = Object.values(data.ciudadePorPais).flat()
+                              .filter((v,i,a)=>a.indexOf(v)===i).sort();
+      _fillDatalist('dlCiudad',    todasCiudades);
+      _fillDatalist('dlDimension', data.dimensiones);
+      const todasCats = Object.values(data.categoriasPorDimension).flat()
+                          .filter((v,i,a)=>a.indexOf(v)===i).sort();
+      _fillDatalist('dlCategoria', todasCats);
+    } catch(e) {
+      // Fallback: usar datos ya cargados en _profs para ciudades
+      if (_profs && _profs.length) {
+        const ciudades = [...new Set(_profs.map(p=>p.ciudad).filter(Boolean))].sort();
+        _fillDatalist('dlCiudad', ciudades);
+        const paises = [...new Set(_profs.map(p=>p.pais).filter(Boolean))].sort();
+        _fillDatalist('dlPais', paises);
+        const dims = [...new Set(_profs.flatMap(p=>p.dimensiones||[]))].sort();
+        _fillDatalist('dlDimension', dims);
+        const cats = [...new Set(_profs.flatMap(p=>p.categorias||[]))].sort();
+        _fillDatalist('dlCategoria', cats);
+      }
+    }
+
+    // Eventos de cascada y filtrado
+    document.getElementById('filterPais')     ?.addEventListener('input', _onPaisChange);
+    document.getElementById('filterCiudad')   ?.addEventListener('input', applyFilters);
+    document.getElementById('filterDimension')?.addEventListener('input', _onDimensionChange);
+    document.getElementById('filterCategoria')?.addEventListener('input', applyFilters);
   }
 
   function applyFilters() {
-    const ciudad   = document.getElementById('filterCiudad').value;
-    const servicio = document.getElementById('filterServicio').value;
+    const pais      = (document.getElementById('filterPais')     ?.value||'').trim();
+    const ciudad    = (document.getElementById('filterCiudad')   ?.value||'').trim();
+    const dimension = (document.getElementById('filterDimension')?.value||'').trim();
+    const categoria = (document.getElementById('filterCategoria')?.value||'').trim();
 
     const filtered = _profs.filter(p => {
-      if (ciudad   && p.ciudad !== ciudad)              return false;
-      if (servicio && !p.servicios.includes(servicio))  return false;
+      if (pais      && (p.pais||'').toLowerCase()  !== pais.toLowerCase())    return false;
+      if (ciudad    && (p.ciudad||'').toLowerCase() !== ciudad.toLowerCase())  return false;
+      if (dimension && !(p.dimensiones||[]).some(d=>d.toLowerCase()===dimension.toLowerCase())) return false;
+      if (categoria && !(p.categorias||[]).some(c=>c.toLowerCase()===categoria.toLowerCase()))   return false;
       return true;
     });
 
@@ -2602,7 +2676,7 @@ document.getElementById('ks-input').addEventListener('input', function() {
 
     // Renderizar tarjetas
     _profs = data.profesionales;
-    populateFilters(_profs);
+    populateFilters();   // carga cascada desde GAS getCiudadesData
     renderCards(_profs);
 
     // Inicializar mapa y marcadores; invalidateSize un frame después para que
