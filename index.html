@@ -1273,7 +1273,7 @@ function renderTeamCards(){
   }
   teamGrid.innerHTML='';
   filtered.forEach(t=>{
-    const ph=TEAM_PHOTOS[t.rowIdx]||null;  // usa rowIdx para evitar desfase al ocultar profesionales
+    const ph=t.fotoPerfil||null;
     const card=document.createElement('div');
     card.className='team-card reveal';
     let banner=ph?'<div class="team-card-banner"><img src="'+ph+'" alt="'+t.name+'" loading="lazy"></div>':'';
@@ -1373,8 +1373,9 @@ async function loadTeam(){
     const m=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/);
     if(!m)throw new Error('parse');
     const rows=JSON.parse(m[1]).table?.rows||[];
+    const _vOrder={'PLUS':0,'PRO':1};
     teamData=rows.map((r,idx)=>({
-      rowIdx:idx,  // índice original antes del filtro — necesario para TEAM_PHOTOS
+      rowIdx:idx,
       name:(r.c[1]?.v||'').trim(),
       svcs:(r.c[5]?.v||'').trim(),
       sched:(r.c[6]?.v||'').trim(),
@@ -1386,8 +1387,16 @@ async function loadTeam(){
       rating:parseFloat(r.c[17]?.v)||0,
       link_servicios:(r.c[18]?.v||'').trim(),
       visible:(r.c[19]?.v||'').toString().trim(),
-      version:(r.c[20]?.v||'').toString().trim().toUpperCase()
+      version:(r.c[20]?.v||'').toString().trim().toUpperCase(),
+      fotoPerfil:(r.c[22]?.v||'').trim(),
+      urlPersonal:(r.c[23]?.v||'').trim()
     })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs&&t.visible.toLowerCase()!=='no');
+    // Ordenar: PLUS primero, luego PRO, luego los demás; dentro de cada grupo, mayor valoración primero
+    teamData.sort((a,b)=>{
+      const va=_vOrder[a.version]??2, vb=_vOrder[b.version]??2;
+      if(va!==vb)return va-vb;
+      return b.rating-a.rating;
+    });
     teamGrid.innerHTML='';
     if(!teamData.length){teamGrid.innerHTML='<p class="team-loading">Equipo disponible próximamente.</p>';return;}
     renderTeamCards();
@@ -1503,7 +1512,11 @@ function openTeamModal(t,ph){
   if(tmodKsEl){tmodKsEl.style.display='none';tmodKsEl.innerHTML='';}
   const firstName=t.name.split(' ')[0];
   window._bwPresel={profesional:t.name,codigo:t.codigo||'',svcs:t.svcs||'',extraServices:null};
-  document.getElementById('tmodBooking').innerHTML='<button class="btn-booking" onclick="openBookingWizard(window._bwPresel)">Reservar con '+firstName+' &#x2192;</button>';
+  if((t.version==='PRO'||t.version==='PLUS')&&t.urlPersonal){
+    document.getElementById('tmodBooking').innerHTML='<a href="'+t.urlPersonal+'" target="_blank" rel="noopener noreferrer" class="btn-booking">Visita el perfil y reserva con '+firstName+' &#x2192;</a>';
+  }else{
+    document.getElementById('tmodBooking').innerHTML='<button class="btn-booking" onclick="openBookingWizard(window._bwPresel)">Reservar con '+firstName+' &#x2192;</button>';
+  }
   teamModal.hidden=false;teamModal.style.display='flex';
   document.body.style.overflow='hidden';
   teamModal.querySelector('.modal-box').scrollTop=0;
