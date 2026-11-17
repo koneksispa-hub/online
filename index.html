@@ -219,6 +219,10 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .city-btn:hover{border-color:var(--caramel);background:var(--bg-alt)}
 .city-btn.active{border-color:var(--caramel);background:var(--caramel);color:#fff}
 .city-btn.active:hover{background:var(--caramel)}
+.pais-filter{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:0 0 .75rem}
+.pais-btn{padding:.38rem 1rem;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text-s,#7a6a5a);letter-spacing:.03em;transition:border-color .2s,background .2s,color .2s}
+.pais-btn:hover{border-color:var(--caramel);color:var(--caramel)}
+.pais-btn.active{border-color:var(--caramel);background:rgba(191,155,111,.12);color:var(--caramel)}
 
 /* TEAM MODAL */
 #teamModal .modal-box{max-width:540px}
@@ -795,6 +799,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <h2 id="team-h">Profesionales a tu servicio</h2>
         <p>Profesionales certificados con vocación por el bienestar y la excelencia.</p>
       </div>
+      <div id="paisFilter" class="pais-filter" hidden aria-label="Filtrar por país"></div>
       <div id="cityFilter" class="city-filter" hidden aria-label="Filtrar por ciudad"></div>
       <div class="team-grid" id="teamGrid" aria-live="polite">
         <div class="team-loading">Cargando equipo&hellip;</div>
@@ -1246,22 +1251,29 @@ loadServiceVideos();
 const GID='49445065';
 const CIUDAD_GID='280572099';
 const TEAM_PHOTOS=['img/alex.jpg','img/jensy.jpg','img/francia.jpg','img/sandra.jpg','img/karol.jpg'];
-let _selectedCity='Cali';
+let _selectedCity='';
+let _selectedPais='';
 let _allCiudades=[];
+let _allPaises=[];
+let _paisCiudades={};  // { 'Colombia': ['Cali','Bogotá',...], ... }
 function _ncity(s){return(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();}
 
 function renderTeamCards(){
   const teamGrid=document.getElementById('teamGrid');
   if(!teamGrid)return;
-  const filtered=teamData.filter(t=>_ncity(t.ciudad||'Cali')===_ncity(_selectedCity));
+  const filtered=teamData.filter(t=>{
+    if(_selectedPais&&_ncity(t.pais||'')!==_ncity(_selectedPais))return false;
+    if(_selectedCity&&_ncity(t.ciudad||'')!==_ncity(_selectedCity))return false;
+    return true;
+  });
   if(!filtered.length){
-    teamGrid.innerHTML='<p class="team-loading">Aún no contamos con profesionales en '+_selectedCity+'. ¡Próximamente!</p>';
+    const loc=_selectedCity||_selectedPais||'esta región';
+    teamGrid.innerHTML='<p class="team-loading">Aún no contamos con profesionales en '+loc+'. ¡Próximamente!</p>';
     return;
   }
   teamGrid.innerHTML='';
   filtered.forEach(t=>{
-    const origIdx=teamData.indexOf(t);
-    const ph=TEAM_PHOTOS[origIdx]||null;
+    const ph=TEAM_PHOTOS[t.rowIdx]||null;  // usa rowIdx para evitar desfase al ocultar profesionales
     const card=document.createElement('div');
     card.className='team-card reveal';
     let banner=ph?'<div class="team-card-banner"><img src="'+ph+'" alt="'+t.name+'" loading="lazy"></div>':'';
@@ -1277,13 +1289,47 @@ function renderTeamCards(){
   observeReveal();
 }
 
+function renderPaisFilter(){
+  const pf=document.getElementById('paisFilter');
+  if(!pf)return;
+  // Solo países que tienen al menos 1 profesional en teamData
+  const paisesEnEquipo=new Set(teamData.map(t=>t.pais||'').filter(Boolean));
+  const paises=(_allPaises.length?_allPaises:[...(new Set(teamData.map(t=>t.pais||'').filter(Boolean)))]).filter(p=>paisesEnEquipo.has(p));
+  if(paises.length<2){pf.hidden=true;return;}
+  let html='<button class="pais-btn'+(''===_selectedPais?' active':'')+'" onclick="filterTeamByPais(\'\')">🌐 Todos</button>';
+  html+=paises.map(p=>'<button class="pais-btn'+(_ncity(p)===_ncity(_selectedPais)?' active':'')+'" onclick="filterTeamByPais(\''+p.replace(/'/g,"\\'")+'\')">'+(p==='Colombia'?'🇨🇴':p==='Ecuador'?'🇪🇨':p==='Perú'||p==='Peru'?'🇵🇪':p==='Venezuela'?'🇻🇪':'🌍')+' '+p+'</button>').join('');
+  pf.innerHTML=html;
+  pf.hidden=false;
+}
+
 function renderCityFilter(){
   const cf=document.getElementById('cityFilter');
   if(!cf)return;
-  const cities=_allCiudades.length?_allCiudades:[...(new Set(teamData.map(t=>t.ciudad||'Cali').filter(Boolean)))];
+  // Solo ciudades con al menos 1 profesional visible
+  const ciudadesEnEquipo=new Set(
+    teamData.filter(t=>!_selectedPais||_ncity(t.pais||'')===_ncity(_selectedPais)).map(t=>t.ciudad||'').filter(Boolean)
+  );
+  let cities;
+  if(_selectedPais&&_paisCiudades[_selectedPais]&&_paisCiudades[_selectedPais].length){
+    cities=_paisCiudades[_selectedPais].filter(c=>ciudadesEnEquipo.has(c));
+  }else if(_allCiudades.length){
+    cities=_allCiudades.filter(c=>ciudadesEnEquipo.has(c));
+  }else{
+    cities=[...ciudadesEnEquipo];
+  }
   if(!cities.length){cf.hidden=true;return;}
-  cf.innerHTML=cities.map(c=>'<button class="city-btn'+(c===_selectedCity?' active':'')+'" onclick="filterTeamByCity(\''+c+'\')">'+c+'</button>').join('');
+  let html='<button class="city-btn'+(''===_selectedCity?' active':'')+'" onclick="filterTeamByCity(\'\')">Todas</button>';
+  html+=cities.map(c=>'<button class="city-btn'+(c===_selectedCity?' active':'')+'" onclick="filterTeamByCity(\''+c.replace(/'/g,"\\'")+'\')">'+''+c+'</button>').join('');
+  cf.innerHTML=html;
   cf.hidden=false;
+}
+
+function filterTeamByPais(pais){
+  _selectedPais=pais;
+  _selectedCity='';  // reset ciudad al cambiar país
+  renderPaisFilter();
+  renderCityFilter();
+  renderTeamCards();
 }
 
 function filterTeamByCity(ciudad){
@@ -1300,9 +1346,21 @@ async function loadCiudades(){
     const m=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/);
     if(!m)throw new Error('parse');
     const rows=JSON.parse(m[1]).table?.rows||[];
-    const loaded=rows.map(r=>(r.c[0]?.v||'').toString().trim()).filter(v=>v&&_ncity(v)!=='ciudad'&&_ncity(v)!=='ciudades');
+    const loaded=[];
+    rows.forEach(r=>{
+      const ciudad=(r.c[0]?.v||'').toString().trim();
+      const pais  =(r.c[1]?.v||'').toString().trim();
+      if(!ciudad||_ncity(ciudad)==='ciudad'||_ncity(ciudad)==='ciudades')return;
+      loaded.push(ciudad);
+      if(pais){
+        if(!_paisCiudades[pais])_paisCiudades[pais]=[];
+        if(!_paisCiudades[pais].includes(ciudad))_paisCiudades[pais].push(ciudad);
+      }
+    });
     if(loaded.length)_allCiudades=loaded;
+    _allPaises=Object.keys(_paisCiudades).sort();
   }catch(e){/* usa fallback de teamData */}
+  renderPaisFilter();
   renderCityFilter();
 }
 
@@ -1315,7 +1373,8 @@ async function loadTeam(){
     const m=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/);
     if(!m)throw new Error('parse');
     const rows=JSON.parse(m[1]).table?.rows||[];
-    teamData=rows.map(r=>({
+    teamData=rows.map((r,idx)=>({
+      rowIdx:idx,  // índice original antes del filtro — necesario para TEAM_PHOTOS
       name:(r.c[1]?.v||'').trim(),
       svcs:(r.c[5]?.v||'').trim(),
       sched:(r.c[6]?.v||'').trim(),
@@ -1323,6 +1382,7 @@ async function loadTeam(){
       days:(r.c[7]?.v||'').trim(),
       bio:(r.c[8]?.v||'').trim(),
       ciudad:(r.c[11]?.v||'').trim(),
+      pais:(r.c[21]?.v||'').trim(),
       rating:parseFloat(r.c[17]?.v)||0,
       link_servicios:(r.c[18]?.v||'').trim(),
       visible:(r.c[19]?.v||'').toString().trim(),
@@ -1336,9 +1396,9 @@ async function loadTeam(){
     if(window._profToOpen){
       const pname=window._profToOpen.toLowerCase();
       window._profToOpen=null;
-      const idx=teamData.findIndex(t=>t.name.toLowerCase().includes(pname));
-      if(idx>=0){
-        setTimeout(()=>openTeamModal(teamData[idx],TEAM_PHOTOS[idx]||null),450);
+      const found=teamData.find(t=>t.name.toLowerCase().includes(pname));
+      if(found){
+        setTimeout(()=>openTeamModal(found,TEAM_PHOTOS[found.rowIdx]||null),450);
       }
     }
   }catch(e){
