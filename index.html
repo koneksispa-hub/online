@@ -2473,7 +2473,7 @@ document.getElementById('ks-input').addEventListener('input', function() {
     const ctaLink = p.link
       ? `<a class="prof-btn" href="${p.link}" target="_blank" rel="noopener">Ver perfil</a>`
       : '';
-    const ctaWa = p.telefono
+    const ctaWa = (p.telefono && (p.version||'').toUpperCase() === 'PLUS')
       ? `<a class="prof-btn" href="https://wa.me/${p.telefono.replace(/\D/g,'')}?text=Hola%20${encodeURIComponent(p.nombre)}%2C%20vi%20tu%20perfil%20en%20Koneksi%20y%20quer%C3%ADa%20consultar%20disponibilidad." target="_blank" rel="noopener">WhatsApp</a>`
       : '';
 
