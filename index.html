@@ -1428,17 +1428,16 @@ async function loadTeam(){
         // Abrir wizard de inmediato (el usuario ve En sede/A domicilio mientras carga extras)
         setTimeout(()=>openBookingWizard(_bPresel),450);
         // Cargar servicios propios del profesional (SERVICIOS COLA) en paralelo
-        if(found.codigo){
-          fetch(GAS_CONTACT+'?profesional='+encodeURIComponent(found.name)+'&codigo='+encodeURIComponent(found.codigo)+'&action=getProfServices')
-            .then(r=>r.json()).then(d=>{
-              if(d&&d.ok&&d.services&&d.services.length){
-                bwS._extraServices=d.services;
-                if(d.dirSede)bwS._profDirSede=d.dirSede;
-                if(d.trabajaEnKoneksi!==undefined)bwS._trabajaEnKoneksi=d.trabajaEnKoneksi!==false;
-                if(bwS.step===1)bwRender();
-              }
-            }).catch(()=>{});
-        }
+        // Mismo patrón que _loadProfExtras: siempre fetch, codigo opcional
+        fetch(GAS_CONTACT+'?profesional='+encodeURIComponent(found.name)+(found.codigo?'&codigo='+encodeURIComponent(found.codigo):'')+  '&action=getProfServices')
+          .then(r=>r.json()).then(d=>{
+            if(d&&d.ok&&d.services&&d.services.length){
+              bwS._extraServices=d.services;
+              if(d.dirSede)bwS._profDirSede=d.dirSede;
+              if(d.trabajaEnKoneksi!==undefined)bwS._trabajaEnKoneksi=d.trabajaEnKoneksi!==false;
+              if(bwS.step===1)bwRender();
+            }
+          }).catch(()=>{});
       }
     }
   }catch(e){
