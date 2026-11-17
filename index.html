@@ -1254,7 +1254,7 @@ const TEAM_PHOTOS=['img/alex.jpg','img/jensy.jpg','img/francia.jpg','img/sandra.
 // Mapa de respaldo por primer nombre (minúsculas) para cuando col W está vacía
 const _PHOTO_FALLBACK={
   'alex':'img/alex.jpg','alexander':'img/alex.jpg',
-  'jey':'img/jeny.jpg','jensy':'img/jeny.jpg',
+  'jey':'img/jensy.jpg','jensy':'img/jensy.jpg',
   'francia':'img/francia.jpg',
   'sandra':'img/sandra.jpg',
   'karol':'img/karol.jpg',
@@ -1397,7 +1397,7 @@ async function loadTeam(){
       link_servicios:(r.c[18]?.v||'').trim(),
       visible:(r.c[19]?.v||'').toString().trim(),
       version:(r.c[20]?.v||'').toString().trim().toUpperCase(),
-      fotoPerfil:(r.c[22]?.v||'').trim(),
+      fotoPerfil:(()=>{let f=(r.c[22]?.v||'').trim();if(f.includes('github.com')&&f.includes('/blob/'))f=f.replace('https://github.com/','https://raw.githubusercontent.com/').replace('/blob/','/');return f;})(),
       urlPersonal:(r.c[23]?.v||'').trim()
     })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs&&t.visible.toLowerCase()!=='no');
     // Ordenar: PLUS primero, luego PRO, luego los demás; dentro de cada grupo, mayor valoración primero
