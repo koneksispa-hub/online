@@ -1424,11 +1424,18 @@ async function loadTeam(){
       window._bookToOpen=null;
       const found=teamData.find(t=>t.name.toLowerCase().includes(bname));
       if(found){
-        setTimeout(()=>openBookingWizard({
-          profesional:found.name,
-          codigo:found.codigo||'',
-          svcs:found.svcs||''
-        }),450);
+        const _bPresel={profesional:found.name,codigo:found.codigo||'',svcs:found.svcs||''};
+        // Abrir wizard de inmediato (el usuario ve En sede/A domicilio mientras carga extras)
+        setTimeout(()=>openBookingWizard(_bPresel),450);
+        // Cargar servicios propios del profesional (SERVICIOS COLA) en paralelo
+        if(found.codigo){
+          fetch(GAS_CONTACT+'?profesional='+encodeURIComponent(found.name)+'&codigo='+encodeURIComponent(found.codigo))
+            .then(r=>r.json()).then(d=>{
+              if(d&&d.services){bwS._extraServices=d.services;if(bwS.step===1)bwRender();}
+              if(d&&d.dirSede)bwS._profDirSede=d.dirSede;
+              if(d&&d.trabajaEnKoneksi!==undefined)bwS._trabajaEnKoneksi=d.trabajaEnKoneksi!==false;
+            }).catch(()=>{});
+        }
       }
     }
   }catch(e){
