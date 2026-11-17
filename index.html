@@ -1419,6 +1419,18 @@ async function loadTeam(){
         setTimeout(()=>openTeamModal(found,found.fotoPerfil||_PHOTO_FALLBACK[found.name.split(' ')[0].toLowerCase()]||null),450);
       }
     }
+    if(window._bookToOpen){
+      const bname=window._bookToOpen.toLowerCase();
+      window._bookToOpen=null;
+      const found=teamData.find(t=>t.name.toLowerCase().includes(bname));
+      if(found){
+        setTimeout(()=>openBookingWizard({
+          profesional:found.name,
+          codigo:found.codigo||'',
+          svcs:found.svcs||''
+        }),450);
+      }
+    }
   }catch(e){
     teamGrid.innerHTML='<p class="team-error">Consulta nuestro equipo escribiéndonos por <a href="'+WA+'" target="_blank" rel="noopener" style="color:var(--caramel)">WhatsApp</a>.</p>';
   }
@@ -2276,6 +2288,16 @@ function bwStep5(c){
   if(prof){
     history.replaceState(null,'',window.location.pathname+window.location.hash);
     window._profToOpen=decodeURIComponent(prof);
+  }
+})();
+
+/* Detectar ?book=<nombre> y abrir el wizard de reservas directamente */
+(function(){
+  const sp=new URLSearchParams(window.location.search);
+  const book=sp.get('book');
+  if(book){
+    history.replaceState(null,'',window.location.pathname+window.location.hash);
+    window._bookToOpen=decodeURIComponent(book);
   }
 })();
 
