@@ -147,9 +147,9 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .hero-text{max-width:560px}
 .hero-img-col{border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(45,26,16,.5);position:relative}
 .hero-img-col::before{content:'';position:absolute;inset:0;border-radius:24px;border:1px solid rgba(191,155,111,.25);pointer-events:none;z-index:2}
-/* Hero slideshow */
-.hero-slides{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:24px}
-.hero-slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity 1s ease}
+/* Hero show */
+.hero-s{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:24px}
+.hero-{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity 1s ease}
 .hero-slide.active{opacity:1}
 /* Dots */
 .hero-dots{position:absolute;bottom:.8rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:3}
@@ -713,11 +713,13 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <div class="hero-slides" id="heroSlides">
           <img src="img/slide-masaje.jpg"      alt="Masaje terapéutico Koneksi"           class="hero-slide active" loading="eager">
           <img src="img/slide-manicura.jpg"    alt="Manicura profesional Koneksi"          class="hero-slide" loading="lazy">
+          <img src="img/slide-Chris1.jpg" alt="Consultoría de bienestar Koneksi"      class="hero-slide" loading="lazy">
           <img src="img/slide-peluqueria.jpg"  alt="Peluquería y estilismo Koneksi"        class="hero-slide" loading="lazy">
           <img src="img/slide-cuidado.jpg"     alt="Cuidado integral y acompañamiento"     class="hero-slide" loading="lazy">
           <img src="img/slide-fitness.jpg"     alt="Entrenamiento personalizado Koneksi"   class="hero-slide" loading="lazy">
           <img src="img/slide-facial.jpg"      alt="Tratamiento facial Koneksi"            class="hero-slide" loading="lazy">
           <img src="img/slide-consultoria.jpg" alt="Consultoría de bienestar Koneksi"      class="hero-slide" loading="lazy">
+          <img src="img/slide-Chris2.jpg" alt="Consultoría de bienestar Koneksi"      class="hero-slide" loading="lazy">
         </div>
         <div class="hero-dots" id="heroDots" role="tablist" aria-label="Diapositivas del hero"></div>
         <a href="#profesionales" class="hero-find-link" aria-label="Ir a Nuestra red · Encuentra tu profesional">
