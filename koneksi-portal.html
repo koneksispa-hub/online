@@ -426,6 +426,19 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+/* ── PASSWORD TOGGLE ── */
+.pass-wrap{position:relative;display:flex;align-items:center}
+.pass-wrap input{padding-right:42px;width:100%}
+.toggle-pass{
+  position:absolute;right:0;top:0;bottom:0;
+  background:none;border:none;cursor:pointer;
+  padding:0 12px;color:var(--text3);
+  display:flex;align-items:center;justify-content:center;
+  transition:color .2s;border-radius:0 8px 8px 0;
+}
+.toggle-pass:hover{color:var(--rose-dk)}
+.toggle-pass svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 </style>
 </head>
 <body>
@@ -482,7 +495,12 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
       </div>
       <div class="field">
         <label>Contraseña</label>
-        <input type="password" id="loginPass" placeholder="••••••" required autocomplete="current-password">
+        <div class="pass-wrap">
+          <input type="password" id="loginPass" placeholder="••••••" required autocomplete="current-password">
+          <button type="button" class="toggle-pass" onclick="togglePass('loginPass')" tabindex="-1" aria-label="Mostrar contraseña">
+            <svg id="eye-loginPass" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
       </div>
       <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Ingresar</button>
     </form>
@@ -765,15 +783,30 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
         <form id="cpForm" onsubmit="doChangePass(event)">
           <div class="field">
             <label>Contraseña actual</label>
-            <input type="password" id="cpCurrent" placeholder="••••••" required autocomplete="current-password">
+            <div class="pass-wrap">
+              <input type="password" id="cpCurrent" placeholder="••••••" required autocomplete="current-password">
+              <button type="button" class="toggle-pass" onclick="togglePass('cpCurrent')" tabindex="-1" aria-label="Mostrar contraseña">
+                <svg id="eye-cpCurrent" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
           </div>
           <div class="field">
             <label>Nueva contraseña</label>
-            <input type="password" id="cpNew" placeholder="Mínimo 4 caracteres" required minlength="4" autocomplete="new-password">
+            <div class="pass-wrap">
+              <input type="password" id="cpNew" placeholder="Mínimo 4 caracteres" required minlength="4" autocomplete="new-password">
+              <button type="button" class="toggle-pass" onclick="togglePass('cpNew')" tabindex="-1" aria-label="Mostrar contraseña">
+                <svg id="eye-cpNew" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
           </div>
           <div class="field">
             <label>Confirmar nueva contraseña</label>
-            <input type="password" id="cpConfirm" placeholder="Repite la contraseña" required autocomplete="new-password">
+            <div class="pass-wrap">
+              <input type="password" id="cpConfirm" placeholder="Repite la contraseña" required autocomplete="new-password">
+              <button type="button" class="toggle-pass" onclick="togglePass('cpConfirm')" tabindex="-1" aria-label="Mostrar contraseña">
+                <svg id="eye-cpConfirm" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
           </div>
           <button type="submit" class="btn btn-secondary">🔑 Cambiar contraseña</button>
         </form>
@@ -2035,6 +2068,20 @@ function renderIngresoReport(r) {
       + '<td class="rpt-valor">' + _fmt$$(r.total) + '</td>'
       + '</tr>'
       + '</tbody></table></div>';
+  }
+}
+
+// ── PASSWORD TOGGLE ──────────────────────────────────────────
+function togglePass(id) {
+  const inp = document.getElementById(id);
+  const svg = document.getElementById('eye-' + id);
+  if (!inp || !svg) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    inp.type = 'password';
+    svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
   }
 }
 
