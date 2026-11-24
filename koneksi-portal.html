@@ -2276,6 +2276,134 @@ function selectTallerTipo(btn) {
   _tallerTipoSeleccionado = btn.dataset.tipo;
 }
 
+/** Modo edición: guarda la fila que se está editando (null = crear nuevo) */
+let _tallerEditandoRow = null;
+
+/** Pre-llena el formulario con los datos de un taller existente para editarlo */
+function editarTaller(idx) {
+  const t = TALLERES[idx];
+  if (!t) return;
+
+  _tallerEditandoRow = t.row;
+
+  // Pre-llenar tipo
+  _tallerTipoSeleccionado = t.tipo || 'Taller';
+  document.querySelectorAll('.taller-type-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.tipo === _tallerTipoSeleccionado);
+  });
+
+  // Pre-llenar campos
+  document.getElementById('tallerNombre').value    = t.nombre    || '';
+  document.getElementById('tallerDesc').value      = t.descripcion || '';
+  document.getElementById('tallerDireccion').value = t.direccion  || '';
+  document.getElementById('tallerCupo').value      = t.cupoMax    || 10;
+
+  // Fecha: convertir dd/MM/yyyy → yyyy-MM-dd para el input date
+  if (t.fecha) {
+    var parts = t.fecha.split('/');
+    if (parts.length === 3) {
+      document.getElementById('tallerFecha').value = parts[2] + '-' + parts[1] + '-' + parts[0];
+    }
+  }
+
+  // Hora: seleccionar la opción correspondiente
+  var horaSelect = document.getElementById('tallerHora');
+  for (var i = 0; i < horaSelect.options.length; i++) {
+    if (horaSelect.options[i].value === t.hora) {
+      horaSelect.selectedIndex = i;
+      break;
+    }
+  }
+
+  // Cambiar el título y botón del formulario
+  var btnCrear = document.querySelector('#addTaller .btn.btn-primary');
+  if (btnCrear) {
+    btnCrear.textContent = '💾 Guardar cambios';
+    btnCrear.onclick = function() { updateTallerEvento(); };
+  }
+
+  // Agregar botón cancelar edición si no existe
+  if (!document.getElementById('btnCancelarEdicion')) {
+    var cancelBtn = document.createElement('button');
+    cancelBtn.id        = 'btnCancelarEdicion';
+    cancelBtn.className = 'btn btn-secondary';
+    cancelBtn.style.marginLeft = '8px';
+    cancelBtn.textContent = 'Cancelar';
+    cancelBtn.onclick = function() { cancelarEdicionTaller(); };
+    btnCrear.parentNode.insertBefore(cancelBtn, btnCrear.nextSibling);
+  }
+
+  // Ir al formulario
+  var subTabs = document.querySelectorAll('.sub-tab');
+  showSubTab('addAgenda', subTabs[1]);
+  showAddMode('taller', document.querySelectorAll('.mode-btn')[2]);
+
+  // Scroll al formulario
+  document.getElementById('addTaller').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/** Restaura el formulario a modo creación */
+function cancelarEdicionTaller() {
+  _tallerEditandoRow = null;
+  document.getElementById('tallerNombre').value    = '';
+  document.getElementById('tallerDesc').value      = '';
+  document.getElementById('tallerDireccion').value = '';
+  document.getElementById('tallerCupo').value      = '10';
+  document.getElementById('tallerFecha').value     = new Date().toISOString().split('T')[0];
+
+  var btnCrear = document.querySelector('#addTaller .btn.btn-primary');
+  if (btnCrear) {
+    btnCrear.textContent = '🎓 Crear evento';
+    btnCrear.onclick = function() { addTallerEvento(); };
+  }
+  var cancelBtn = document.getElementById('btnCancelarEdicion');
+  if (cancelBtn) cancelBtn.remove();
+
+  var subTabs = document.querySelectorAll('.sub-tab');
+  showSubTab('verTalleres', subTabs[2]);
+}
+
+/** Guardar cambios de un taller editado */
+function updateTallerEvento() {
+  if (!_tallerEditandoRow) { addTallerEvento(); return; }
+
+  const nombre    = (document.getElementById('tallerNombre').value || '').trim();
+  const desc      = (document.getElementById('tallerDesc').value   || '').trim();
+  const fecha     = document.getElementById('tallerFecha').value;
+  const hora      = document.getElementById('tallerHora').value;
+  const direccion = (document.getElementById('tallerDireccion').value || '').trim();
+  const cupoRaw   = parseInt(document.getElementById('tallerCupo').value, 10);
+
+  if (!nombre)    { toast('Ingresa el nombre del evento', 'err'); return; }
+  if (!fecha)     { toast('Selecciona la fecha del evento', 'err'); return; }
+  if (!direccion) { toast('Ingresa la dirección del lugar', 'err'); return; }
+  if (!cupoRaw || cupoRaw < 2) { toast('El cupo mínimo es 2 personas', 'err'); return; }
+
+  const [y, m, d] = fecha.split('-');
+  const fechaFmt  = d + '/' + m + '/' + y;
+  const profCodigo = (SESSION && SESSION.codigo) ? SESSION.codigo : '';
+
+  const tallerSlot = {
+    fecha:       fechaFmt,
+    hora:        hora,
+    tipo:        _tallerTipoSeleccionado,
+    nombre:      nombre,
+    descripcion: desc,
+    direccion:   direccion,
+    cupoMax:     cupoRaw,
+    codigo:      profCodigo
+  };
+
+  showLoading();
+  runGAS('updateTaller', [SESSION.correo, SESSION.clave, _tallerEditandoRow, tallerSlot], function(r) {
+    hideLoading();
+    if (!r) return;
+    toast(r.msg || 'Evento actualizado correctamente', 'ok');
+    cancelarEdicionTaller();
+    loadTalleres();
+  });
+}
+
 /** Crear un evento taller/seminario */
 function addTallerEvento() {
   const nombre    = (document.getElementById('tallerNombre').value || '').trim();
@@ -2374,6 +2502,7 @@ function renderTalleres() {
       + '</div>'
       + '<div style="display:flex;gap:6px;align-items:flex-start;flex-shrink:0">'
       + '<span class="taller-badge ' + badgeClass + '">' + badgeText + '</span>'
+      + '<button class="btn btn-secondary btn-sm btn-icon" title="Editar evento" onclick="editarTaller(' + idx + ')">✏️</button>'
       + '<button class="btn btn-danger btn-sm btn-icon" title="Eliminar evento" onclick="confirmarEliminarTaller(' + (t.row || idx) + ',\'' + esc(t.nombre || t.tipo).replace(/'/g,'&#39;') + '\')">🗑️</button>'
       + '</div>'
       + '</div>'
