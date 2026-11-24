@@ -282,6 +282,40 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .tmod-link-item a{color:var(--caramel);text-decoration:none;font-weight:500;word-break:break-word}
 .tmod-link-item a:hover{color:var(--caramel-dk);text-decoration:underline}
 .tmod-link-item::before{content:'🔗';font-size:.8rem;flex-shrink:0}
+/* ── Sección de Eventos / Talleres en modal del profesional ── */
+#tmodTalleres{margin:1.25rem 0 0}
+.tmod-talleres-title{font-family:var(--fd);font-size:.78rem;font-weight:600;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.7rem}
+.tmod-taller-card{background:var(--surface-el);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.7rem;position:relative;overflow:hidden}
+.tmod-taller-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--caramel);border-radius:3px 0 0 3px}
+.tmod-taller-tipo{display:inline-block;font-size:.7rem;font-weight:600;color:var(--caramel-dk);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+.tmod-taller-nombre{font-family:var(--fd);font-size:1.08rem;font-weight:600;color:var(--text);margin-bottom:.35rem;line-height:1.3}
+.tmod-taller-desc{font-size:.83rem;color:var(--text-mid);margin-bottom:.6rem;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tmod-taller-meta{display:flex;flex-wrap:wrap;gap:.5rem .9rem;font-size:.8rem;color:var(--text-muted);margin-bottom:.7rem}
+.tmod-taller-meta span{display:flex;align-items:center;gap:.25rem}
+.tmod-taller-cupo{font-size:.77rem;font-weight:600}
+.tmod-taller-cupo.lleno{color:#c0392b}
+.tmod-taller-cupo.libre{color:#27ae60}
+.tmod-taller-cupo.casi{color:#e67e22}
+.btn-inscribirse{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.82rem;font-weight:500;border:none;cursor:pointer;font-family:inherit;transition:background .18s,transform .12s;box-shadow:0 2px 8px rgba(191,155,111,.35)}
+.btn-inscribirse:hover{background:var(--caramel-dk);transform:translateY(-1px)}
+.btn-inscribirse:disabled{background:var(--text-muted);cursor:not-allowed;transform:none;box-shadow:none}
+/* Mini-wizard de inscripción a taller */
+.tmod-ins-overlay{position:fixed;inset:0;z-index:400;background:rgba(45,26,16,.78);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.tmod-ins-box{background:var(--surface);border-radius:18px;width:100%;max-width:420px;padding:2rem;box-shadow:0 20px 60px rgba(45,26,16,.3);position:relative}
+.tmod-ins-close{position:absolute;top:.8rem;right:.9rem;width:30px;height:30px;border-radius:50%;background:var(--bg-alt);border:none;cursor:pointer;font-size:1rem;color:var(--text-muted);display:flex;align-items:center;justify-content:center}
+.tmod-ins-titulo{font-family:var(--fd);font-size:1.4rem;font-weight:600;color:var(--text);margin-bottom:.25rem}
+.tmod-ins-subtitulo{font-size:.82rem;color:var(--text-muted);margin-bottom:1.2rem}
+.tmod-ins-field{margin-bottom:.9rem}
+.tmod-ins-field label{display:block;font-size:.8rem;font-weight:500;color:var(--text-mid);margin-bottom:.35rem}
+.tmod-ins-field input{width:100%;padding:.6rem .85rem;border:1px solid var(--border-s);border-radius:10px;font-family:inherit;font-size:.9rem;color:var(--text);background:var(--bg);box-sizing:border-box;outline:none;transition:border .15s}
+.tmod-ins-field input:focus{border-color:var(--caramel)}
+.tmod-ins-submit{width:100%;padding:.75rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.93rem;font-weight:500;border:none;cursor:pointer;font-family:inherit;margin-top:.5rem;transition:background .18s}
+.tmod-ins-submit:hover{background:var(--caramel-dk)}
+.tmod-ins-submit:disabled{background:var(--text-muted);cursor:not-allowed}
+.tmod-ins-msg{margin-top:.7rem;font-size:.85rem;text-align:center;color:var(--text-mid)}
+.tmod-ins-ok{text-align:center;padding:1rem 0}
+.tmod-ins-ok .ins-check{font-size:2.5rem;margin-bottom:.5rem}
+.tmod-ins-ok p{color:var(--text-mid);font-size:.9rem;line-height:1.6}
 /* Sección de reviews y formulario de calificación */
 #tmodReviewsSection{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
 .tmod-rev-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
@@ -1054,6 +1088,8 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
     <div id="tmodMedia"></div>
     <!-- Servicios adicionales del profesional (SERVICIOS COLA) -->
     <div id="tmodExtraSvcs"></div>
+    <!-- Eventos grupales: Talleres, Seminarios, Clases, Caminatas… -->
+    <div id="tmodTalleres"></div>
     <p class="tmod-bio" id="tmodBio"></p>
     <!-- Valoraciones y opiniones -->
     <div id="tmodReviewsSection"></div>
@@ -1617,6 +1653,42 @@ async function _loadProfExtras(profName,codigo){
     const el=document.getElementById('tmodExtraSvcs');
     if(el)el.innerHTML='';
   }
+  // Eventos grupales (Talleres, Seminarios, Clases, Caminatas…)
+  try{
+    const rt=await fetch(base+'&action=getTalleresPublicos');
+    const dt=await rt.json();
+    const elt=document.getElementById('tmodTalleres');
+    if(elt){
+      if(dt.ok&&dt.talleres&&dt.talleres.length){
+        let th='<div class="tmod-talleres-title">🎓 Próximos eventos</div>';
+        dt.talleres.forEach(ev=>{
+          const libres=ev.cupoMax-ev.inscritos;
+          const pct=ev.cupoMax>0?Math.round(ev.inscritos/ev.cupoMax*100):0;
+          let cupoClass='libre',cupoTxt=libres+' cupos libres';
+          if(libres<=0){cupoClass='lleno';cupoTxt='Sin cupos';}
+          else if(pct>=70){cupoClass='casi';cupoTxt=libres+' cupos';}
+          const lleno=libres<=0;
+          th+=`<div class="tmod-taller-card">
+            <div class="tmod-taller-tipo">${_esc(ev.tipo||'Evento')}</div>
+            <div class="tmod-taller-nombre">${_esc(ev.nombre)}</div>
+            ${ev.descripcion?`<div class="tmod-taller-desc">${_esc(ev.descripcion)}</div>`:''}
+            <div class="tmod-taller-meta">
+              <span>📅 ${_esc(ev.fecha)}</span>
+              <span>🕐 ${_esc(ev.hora)}</span>
+              ${ev.direccion?`<span>📍 ${_esc(ev.direccion)}</span>`:''}
+              <span class="tmod-taller-cupo ${cupoClass}">${cupoTxt}</span>
+            </div>
+            <button class="btn-inscribirse" ${lleno?'disabled':''} onclick="abrirInscripcionTaller(${JSON.stringify(ev).replace(/"/g,'&quot;')})">
+              ${lleno?'Sin cupos disponibles':'Inscribirse →'}
+            </button>
+          </div>`;
+        });
+        elt.innerHTML=th;
+      }else{
+        elt.innerHTML='';
+      }
+    }
+  }catch(e){const elt=document.getElementById('tmodTalleres');if(elt)elt.innerHTML='';}
   // Media de Drive
   try{
     const r=await fetch(base+'&action=getProfMedia');
@@ -1658,6 +1730,94 @@ function _tmodLightbox(src,alt){
   document.getElementById('tmodLbImg').src=src;
   document.getElementById('tmodLbImg').alt=alt||'';
   lb.hidden=false;
+}
+// ── INSCRIPCIÓN A EVENTOS / TALLERES ─────────────────────────────
+function _esc(str){
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let _insEvento=null;
+function abrirInscripcionTaller(ev){
+  _insEvento=ev;
+  // Crear overlay si no existe
+  let ol=document.getElementById('tallerInsOverlay');
+  if(!ol){
+    ol=document.createElement('div');
+    ol.id='tallerInsOverlay';
+    ol.className='tmod-ins-overlay';
+    document.body.appendChild(ol);
+  }
+  ol.innerHTML=`<div class="tmod-ins-box">
+    <button class="tmod-ins-close" onclick="cerrarInscripcionTaller()">✕</button>
+    <div class="tmod-ins-titulo">Inscribirse</div>
+    <div class="tmod-ins-subtitulo">${_esc(ev.tipo||'Evento')}: <strong>${_esc(ev.nombre)}</strong><br>📅 ${_esc(ev.fecha)} &nbsp;🕐 ${_esc(ev.hora)}</div>
+    <form id="insForm" onsubmit="enviarInscripcion(event)">
+      <div class="tmod-ins-field">
+        <label for="insNombre">Nombre completo *</label>
+        <input id="insNombre" type="text" required placeholder="Tu nombre" autocomplete="name">
+      </div>
+      <div class="tmod-ins-field">
+        <label for="insTelefono">Teléfono / WhatsApp *</label>
+        <input id="insTelefono" type="tel" required placeholder="3001234567" autocomplete="tel">
+      </div>
+      <div class="tmod-ins-field">
+        <label for="insEmail">Email (opcional)</label>
+        <input id="insEmail" type="email" placeholder="tucorreo@email.com" autocomplete="email">
+      </div>
+      <button class="tmod-ins-submit" id="insSubmitBtn" type="submit">Confirmar inscripción →</button>
+    </form>
+    <div class="tmod-ins-msg" id="insMsg"></div>
+  </div>`;
+  ol.style.display='flex';
+  document.body.style.overflow='hidden';
+  ol.addEventListener('click',function(e){if(e.target===ol)cerrarInscripcionTaller();});
+  document.getElementById('insNombre').focus();
+}
+function cerrarInscripcionTaller(){
+  const ol=document.getElementById('tallerInsOverlay');
+  if(ol){ol.style.display='none';ol.innerHTML='';}
+  document.body.style.overflow='';
+  _insEvento=null;
+}
+async function enviarInscripcion(e){
+  e.preventDefault();
+  if(!_insEvento)return;
+  const nombre=document.getElementById('insNombre').value.trim();
+  const telefono=document.getElementById('insTelefono').value.trim();
+  const email=(document.getElementById('insEmail')||{}).value||'';
+  const btn=document.getElementById('insSubmitBtn');
+  const msg=document.getElementById('insMsg');
+  btn.disabled=true;btn.textContent='Enviando…';
+  try{
+    const params=new URLSearchParams({
+      action:'inscribirTaller',
+      row:String(_insEvento.row||''),
+      nombre:nombre,
+      telefono:telefono,
+      email:email,
+      colaborador:_insEvento.colaborador||'',
+      codigo:_insEvento.codigo||'',
+      tallerNombre:_insEvento.nombre||'',
+      tallerFecha:_insEvento.fecha||'',
+      tallerHora:_insEvento.hora||''
+    });
+    const r=await fetch(GAS_CONTACT+'?'+params.toString());
+    const d=await r.json();
+    if(d.ok){
+      const box=document.querySelector('#tallerInsOverlay .tmod-ins-box');
+      if(box)box.innerHTML=`<button class="tmod-ins-close" onclick="cerrarInscripcionTaller()">✕</button>
+        <div class="tmod-ins-ok">
+          <div class="ins-check">🎉</div>
+          <div class="tmod-ins-titulo">¡Inscripción confirmada!</div>
+          <p>${_esc(nombre)}, tu lugar en <strong>${_esc(_insEvento.nombre)}</strong> el <strong>${_esc(_insEvento.fecha)}</strong> a las <strong>${_esc(_insEvento.hora)}</strong> está reservado.<br><br>El profesional se pondrá en contacto contigo pronto.</p>
+        </div>`;
+    }else{
+      msg.innerHTML=`<span style="color:#c0392b">${d.error||'Error al inscribirse. Intenta de nuevo.'}</span>`;
+      btn.disabled=false;btn.textContent='Confirmar inscripción →';
+    }
+  }catch(err){
+    msg.innerHTML='<span style="color:#c0392b">No se pudo conectar. Intenta más tarde.</span>';
+    btn.disabled=false;btn.textContent='Confirmar inscripción →';
+  }
 }
 // ── SISTEMA DE VALORACIONES ──────────────────────────────────────
 function starsHtml(rating){
