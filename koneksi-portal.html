@@ -235,13 +235,46 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 .legend-item{font-size:.72rem;color:var(--text2);display:flex;align-items:center}
 
 /* ── ADD SLOTS ── */
-.add-mode-bar{display:flex;gap:8px;margin:12px 0}
+.add-mode-bar{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
 .mode-btn{
-  flex:1;padding:10px 8px;border-radius:8px;border:1.5px solid var(--border);
+  flex:1;min-width:0;padding:10px 8px;border-radius:8px;border:1.5px solid var(--border);
   font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;
   background:transparent;color:var(--text2);transition:all .2s;
 }
 .mode-btn.active{background:var(--rose-lt);border-color:var(--rose);color:var(--rose-dk)}
+
+/* ── TALLER/SEMINARIO ── */
+.taller-type-bar{display:flex;gap:8px;margin-bottom:14px}
+.taller-type-btn{
+  flex:1;padding:8px 6px;border-radius:8px;border:1.5px solid var(--border);
+  font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;
+  background:transparent;color:var(--text2);transition:all .2s;text-align:center;
+}
+.taller-type-btn.active{background:var(--sage-lt);border-color:var(--sage);color:#3a6855}
+.cupo-row{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.cupo-row input{width:120px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:.9rem;background:var(--bg);color:var(--text);transition:border-color .2s;outline:none;}
+.cupo-row input:focus{border-color:var(--rose)}
+.taller-badge{
+  display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:12px;
+  background:var(--sage-lt);color:#3a6855;font-size:.7rem;font-weight:700;
+}
+.taller-badge.lleno{background:#fce8e8;color:#7a1a1a}
+.taller-badge.casi{background:#fff3e0;color:#8a5a0a}
+.slot-pill.taller{background:#e8f2ff;color:#1a3f7a}
+.slot-pill.taller-lleno{background:#fce8e8;color:#7a1a1a;cursor:default}
+.slot-pill.taller-lleno:hover{opacity:1;transform:none}
+.pill-cupo{font-size:.59rem;opacity:.85;margin-top:1px}
+.taller-list-item{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:8px;
+}
+.taller-list-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.taller-list-title{font-size:.9rem;font-weight:700;color:var(--text);line-height:1.3}
+.taller-list-meta{font-size:.78rem;color:var(--text2);display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}
+.taller-list-desc{font-size:.8rem;color:var(--text2);line-height:1.45;margin-bottom:8px}
+.taller-list-dir{font-size:.78rem;color:var(--text3);display:flex;align-items:center;gap:5px}
+.taller-progress-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px}
+.taller-progress-fill{height:100%;border-radius:3px;transition:width .4s}
 
 .add-panel{background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);margin-bottom:16px}
 .add-panel.hidden{display:none}
@@ -536,6 +569,7 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
       <div class="sub-tab-bar">
         <button class="sub-tab active" onclick="showSubTab('verAgenda',this)">📋 Mi Agenda</button>
         <button class="sub-tab" onclick="showSubTab('addAgenda',this)">➕ Agregar Horarios</button>
+        <button class="sub-tab" onclick="showSubTab('verTalleres',this)">🎓 Talleres</button>
       </div>
 
       <!-- Ver Agenda — Vista semanal -->
@@ -558,6 +592,8 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
           <span class="legend-item"><span class="legend-dot" style="background:#e6f7ee;border:1px solid #a8d5be"></span>Disponible</span>
           <span class="legend-item"><span class="legend-dot" style="background:#fff3e0;border:1px solid #f5cc8c"></span>Reservado</span>
           <span class="legend-item"><span class="legend-dot" style="background:var(--bg2);border:1px solid var(--border)"></span>Cancelado</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#e8f2ff;border:1px solid #90b8f0"></span>Taller/Evento</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#fce8e8;border:1px solid #f5b0b0"></span>Evento lleno</span>
         </div>
       </div>
 
@@ -566,6 +602,7 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
         <div class="add-mode-bar">
           <button class="mode-btn active" onclick="showAddMode('especifico',this)">📌 Específico</button>
           <button class="mode-btn" onclick="showAddMode('masivo',this)">📆 Agenda masiva</button>
+          <button class="mode-btn" onclick="showAddMode('taller',this)">🎓 Taller/Seminario</button>
         </div>
 
         <!-- Específico -->
@@ -641,8 +678,78 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
               <button class="btn btn-secondary" onclick="clearBulkPreview()">Limpiar</button>
             </div>
           </div>
+        <!-- Taller/Seminario -->
+        <div id="addTaller" class="add-panel hidden">
+          <p style="font-size:.82rem;color:var(--text2);margin-bottom:12px;line-height:1.5">
+            Crea un evento grupal con cupo limitado. Cuando se alcance el número máximo de personas, las reservas se bloquearán automáticamente.
+          </p>
+
+          <!-- Tipo de evento -->
+          <div class="field">
+            <label>Tipo de evento</label>
+            <div class="taller-type-bar">
+              <button type="button" class="taller-type-btn active" data-tipo="Taller" onclick="selectTallerTipo(this)">🛠️ Taller</button>
+              <button type="button" class="taller-type-btn" data-tipo="Seminario" onclick="selectTallerTipo(this)">📚 Seminario</button>
+              <button type="button" class="taller-type-btn" data-tipo="Clase grupal" onclick="selectTallerTipo(this)">👥 Clase grupal</button>
+              <button type="button" class="taller-type-btn" data-tipo="Retiro" onclick="selectTallerTipo(this)">🌿 Retiro</button>
+            </div>
+          </div>
+
+          <!-- Nombre del evento -->
+          <div class="field">
+            <label>Nombre del evento</label>
+            <input type="text" id="tallerNombre" placeholder="Ej: Taller de relajación profunda">
+          </div>
+
+          <!-- Descripción -->
+          <div class="field">
+            <label>Descripción</label>
+            <textarea id="tallerDesc" rows="3" placeholder="Describe el evento: qué se hará, qué incluye, qué deben llevar los asistentes…"></textarea>
+          </div>
+
+          <!-- Fecha y hora -->
+          <div class="time-row">
+            <div class="field">
+              <label>Fecha</label>
+              <input type="date" id="tallerFecha">
+            </div>
+            <div class="field">
+              <label>Hora</label>
+              <select id="tallerHora"></select>
+            </div>
+          </div>
+
+          <!-- Dirección de la sede -->
+          <div class="field">
+            <label>Dirección del lugar</label>
+            <input type="text" id="tallerDireccion" placeholder="Ej: Cra 5 # 20-10, Centro Holístico El Remanso, Cali">
+            <small>Puedes ingresar una dirección específica para este evento, diferente a tu sede habitual.</small>
+          </div>
+
+          <!-- Cupo máximo -->
+          <div class="field">
+            <label>Cupo máximo de personas</label>
+            <div class="cupo-row">
+              <input type="number" id="tallerCupo" min="2" max="500" step="1" value="10" placeholder="10">
+              <span style="font-size:.82rem;color:var(--text2)">personas como máximo</span>
+            </div>
+            <small>Cuando se complete el cupo, las reservas se cerrarán automáticamente.</small>
+          </div>
+
+          <button class="btn btn-primary" onclick="addTallerEvento()">🎓 Crear evento</button>
+        </div>
+
         </div>
       </div><!-- /addAgenda -->
+
+      <!-- Ver Talleres -->
+      <div id="verTalleres" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 8px">
+          <p class="section-title" style="padding:0;margin:0">Eventos grupales creados</p>
+          <button class="btn btn-primary btn-sm" onclick="showSubTab('addAgenda', document.querySelectorAll('.sub-tab')[1]); showAddMode('taller', document.querySelectorAll('.mode-btn')[2])">➕ Nuevo evento</button>
+        </div>
+        <div id="talleresListWrap"></div>
+      </div>
 
     </div><!-- /tabAgenda -->
 
@@ -916,6 +1023,8 @@ let SERVICES = [];     // servicios propios del profesional
 let SEDES    = [];     // sedes del profesional
 let DIMENSIONES = []; // opciones de Dimensión de Bienestar
 let _editingSvcRow = null; // fila siendo editada en el form de servicios
+let TALLERES = [];     // eventos tipo taller/seminario
+let _tallerTipoSeleccionado = 'Taller'; // tipo seleccionado en el form
 
 // ── UTILS ────────────────────────────────────────────────────
 
@@ -983,8 +1092,9 @@ function buildTimes() {
 
 function populateTimeSelects() {
   const times = buildTimes();
-  ['espHora','bulkHoraIni','bulkHoraFin'].forEach(id => {
+  ['espHora','bulkHoraIni','bulkHoraFin','tallerHora'].forEach(id => {
     const sel = document.getElementById(id);
+    if (!sel) return;
     sel.innerHTML = '';
     times.forEach(t => {
       const o = document.createElement('option');
@@ -1068,15 +1178,19 @@ function showTab(tab, btn) {
 }
 
 function showSubTab(id, btn) {
-  ['verAgenda','addAgenda'].forEach(x =>
-    document.getElementById(x).style.display = (x === id ? '' : 'none'));
+  ['verAgenda','addAgenda','verTalleres'].forEach(x => {
+    const el = document.getElementById(x);
+    if (el) el.style.display = (x === id ? '' : 'none');
+  });
   document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  if (id === 'verTalleres') loadTalleres();
 }
 
 function showAddMode(mode, btn) {
   document.getElementById('addEspecifico').classList.toggle('hidden', mode !== 'especifico');
   document.getElementById('addMasivo').classList.toggle('hidden', mode !== 'masivo');
+  document.getElementById('addTaller').classList.toggle('hidden', mode !== 'taller');
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
 }
@@ -1181,7 +1295,28 @@ function renderAgenda() {
       col.appendChild(emp);
     } else {
       filtered.forEach(function(s) {
-        // Ajuste 2: slots de Domicilio a menos de 2 horas de ahora → deshabilitados
+        // ── Slot tipo Taller/Seminario ──────────────────────
+        if (s.modalidad === 'Taller') {
+          const inscritos = parseInt(s.inscritos || 0, 10);
+          const cupoMax   = parseInt(s.cupoMax   || 1, 10);
+          const lleno     = inscritos >= cupoMax;
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          pill.className = 'slot-pill ' + (lleno ? 'taller-lleno' : 'taller');
+          pill.title = esc(s.nombre || s.tipo || 'Taller');
+          pill.innerHTML = '<div class="pill-hora">' + esc(s.hora) + '</div>'
+            + '<div class="pill-mod">🎓 ' + esc((s.tipo || 'Taller').substring(0,5)) + '</div>'
+            + '<div class="pill-cupo">' + inscritos + '/' + cupoMax + (lleno ? ' 🔒' : '') + '</div>';
+          if (lleno) {
+            pill.disabled = true;
+          } else {
+            pill.onclick = (function(slot){ return function() { showTallerDetails(slot); }; })(s);
+          }
+          col.appendChild(pill);
+          return;
+        }
+
+        // ── Slot normal ──────────────────────────────────────
         let isAvail = s.disponible === 'Sí';
         if (isAvail && s.modalidad === 'Domicilio') {
           // Reconstruir datetime del slot en hora Colombia (UTC-5)
@@ -1191,12 +1326,10 @@ function renderAgenda() {
             var sh = parseInt(hm[1]), sm = parseInt(hm[2]), sap = hm[3].toUpperCase();
             if (sap === 'PM' && sh < 12) sh += 12;
             if (sap === 'AM' && sh === 12) sh = 0;
-            // Construir fecha/hora como UTC equivalente a medianoche Bogotá + horas del slot
             var slotMs = Date.UTC(
               parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]),
-              sh + 5, sm, 0  // +5 para convertir de Bogotá (UTC-5) a UTC
+              sh + 5, sm, 0
             );
-            // Hora actual en UTC
             var nowMs  = Date.now();
             var diffHrs = (slotMs - nowMs) / 3600000;
             if (diffHrs < 2) isAvail = false;
@@ -1285,6 +1418,50 @@ function cancelFromModal() {
   if (!_clientSlot) return;
   closeClientModal();
   cancelSlot(_clientSlot.row, _clientSlot.fecha + ' ' + _clientSlot.hora);
+}
+
+/** Muestra detalle de un slot tipo taller en el modal genérico */
+function showTallerDetails(s) {
+  _clientSlot = s;
+  const modal   = document.getElementById('clientModal');
+  const title   = document.getElementById('clientModalTitle');
+  const sub     = document.getElementById('clientModalSub');
+  const badges  = document.getElementById('clientModalBadges');
+  const body    = document.getElementById('clientModalBody');
+  const cancelBtn = document.getElementById('clientCancelBtn');
+
+  const inscritos = parseInt(s.inscritos || 0, 10);
+  const cupoMax   = parseInt(s.cupoMax   || 0, 10);
+  const libre     = cupoMax - inscritos;
+  const lleno     = libre <= 0;
+
+  title.textContent = esc(s.nombre || s.tipo || 'Taller') + '  ·  ' + esc(s.fecha);
+  sub.textContent   = esc(s.hora) + (s.dia ? '  ·  ' + s.dia : '');
+
+  badges.innerHTML =
+    '<span class="taller-badge">' + esc(s.tipo || 'Taller') + '</span>'
+    + '&nbsp;<span class="taller-badge ' + (lleno ? 'lleno' : (libre <= cupoMax * 0.2 ? 'casi' : '')) + '">'
+    + (lleno ? '🔒 Cupo lleno' : '👥 ' + inscritos + '/' + cupoMax + ' inscritos') + '</span>';
+
+  function field(icon, lbl, val) {
+    if (!val && val !== 0) return '';
+    return '<div class="client-field">'
+      + '<div class="client-field-icon">' + icon + '</div>'
+      + '<div><div class="client-field-label">' + lbl + '</div>'
+      + '<div class="client-field-val">' + esc(String(val)) + '</div></div></div>';
+  }
+
+  body.innerHTML =
+    field('📅', 'Fecha',       s.fecha)
+    + field('🕐', 'Hora',      s.hora)
+    + field('📍', 'Dirección', s.direccion)
+    + field('📝', 'Descripción', s.descripcion)
+    + field('👥', 'Inscritos',  inscritos + ' de ' + cupoMax + ' personas')
+    + field('✅', 'Cupos libres', lleno ? 'Ninguno — cupo lleno' : libre + ' cupos disponibles');
+
+  cancelBtn.style.display = 'inline-flex';
+  cancelBtn.textContent   = 'Cancelar evento';
+  modal.classList.remove('hidden');
 }
 
 function cancelSlot(row, label) {
@@ -2086,6 +2263,154 @@ function togglePass(id) {
 }
 
 // ════════════════════════════════════════════════════════════
+//  TALLERES / SEMINARIOS
+// ════════════════════════════════════════════════════════════
+
+/** Selección del tipo de evento en el formulario */
+function selectTallerTipo(btn) {
+  document.querySelectorAll('.taller-type-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  _tallerTipoSeleccionado = btn.dataset.tipo;
+}
+
+/** Crear un evento taller/seminario */
+function addTallerEvento() {
+  const nombre    = (document.getElementById('tallerNombre').value || '').trim();
+  const desc      = (document.getElementById('tallerDesc').value   || '').trim();
+  const fecha     = document.getElementById('tallerFecha').value;
+  const hora      = document.getElementById('tallerHora').value;
+  const direccion = (document.getElementById('tallerDireccion').value || '').trim();
+  const cupoRaw   = parseInt(document.getElementById('tallerCupo').value, 10);
+
+  if (!nombre)    { toast('Ingresa el nombre del evento', 'err'); return; }
+  if (!fecha)     { toast('Selecciona la fecha del evento', 'err'); return; }
+  if (!direccion) { toast('Ingresa la dirección del lugar', 'err'); return; }
+  if (!cupoRaw || cupoRaw < 2) { toast('El cupo mínimo es 2 personas', 'err'); return; }
+
+  const [y, m, d] = fecha.split('-');
+  const fechaFmt  = d + '/' + m + '/' + y;
+  const profCodigo = (SESSION && SESSION.codigo) ? SESSION.codigo : '';
+
+  const tallerSlot = {
+    fecha:     fechaFmt,
+    hora:      hora,
+    modalidad: 'Taller',
+    tipo:      _tallerTipoSeleccionado,
+    nombre:    nombre,
+    descripcion: desc,
+    direccion: direccion,
+    cupoMax:   cupoRaw,
+    inscritos: 0,
+    codigo:    profCodigo
+  };
+
+  showLoading();
+  runGAS('addTallerSlot', [SESSION.correo, SESSION.clave, tallerSlot], function(r) {
+    hideLoading();
+    if (!r) return;
+    toast(r.msg || (_tallerTipoSeleccionado + ' creado correctamente'), 'ok');
+    // Limpiar formulario
+    document.getElementById('tallerNombre').value    = '';
+    document.getElementById('tallerDesc').value      = '';
+    document.getElementById('tallerFecha').value     = new Date().toISOString().split('T')[0];
+    document.getElementById('tallerDireccion').value = '';
+    document.getElementById('tallerCupo').value      = '10';
+    // Ir a la vista de talleres
+    var subTabs = document.querySelectorAll('.sub-tab');
+    showSubTab('verTalleres', subTabs[2]);
+  });
+}
+
+/** Cargar talleres del profesional */
+function loadTalleres() {
+  showLoading();
+  runGAS('getMyTalleres', [SESSION.correo, SESSION.clave], function(r) {
+    hideLoading();
+    if (!r) return;
+    TALLERES = r.talleres || [];
+    renderTalleres();
+  });
+}
+
+/** Renderizar lista de talleres */
+function renderTalleres() {
+  const wrap = document.getElementById('talleresListWrap');
+  if (!wrap) return;
+
+  if (!TALLERES.length) {
+    wrap.innerHTML = '<div class="svc-empty" style="padding:32px 16px;text-align:center;color:var(--text3)">'
+      + '🎓 Aún no has creado ningún taller o seminario.<br>'
+      + '<span style="font-size:.8rem">Usa el botón ➕ para crear tu primer evento grupal.</span>'
+      + '</div>';
+    return;
+  }
+
+  wrap.innerHTML = TALLERES.map(function(t, idx) {
+    const inscritos = parseInt(t.inscritos || 0, 10);
+    const cupoMax   = parseInt(t.cupoMax   || 1, 10);
+    const pct       = Math.min(100, Math.round((inscritos / cupoMax) * 100));
+    const libre     = cupoMax - inscritos;
+    const lleno     = libre <= 0;
+    const casilleno = !lleno && pct >= 80;
+
+    // Color de la barra de progreso
+    var fillColor = 'var(--ok)';
+    if (pct >= 100) fillColor = 'var(--danger)';
+    else if (pct >= 80) fillColor = 'var(--warn)';
+
+    // Badge de estado
+    var badgeClass = lleno ? 'lleno' : (casilleno ? 'casi' : '');
+    var badgeText  = lleno
+      ? '🔒 Cupo lleno'
+      : (casilleno ? '⚠️ Casi lleno · ' + libre + ' libres' : '✅ ' + libre + ' cupos libres');
+
+    return '<div class="taller-list-item">'
+      + '<div class="taller-list-header">'
+      + '<div>'
+      + '<div class="taller-list-title">' + esc(t.nombre || t.tipo) + '</div>'
+      + '</div>'
+      + '<div style="display:flex;gap:6px;align-items:flex-start;flex-shrink:0">'
+      + '<span class="taller-badge ' + badgeClass + '">' + badgeText + '</span>'
+      + '<button class="btn btn-danger btn-sm btn-icon" title="Eliminar evento" onclick="confirmarEliminarTaller(' + (t.row || idx) + ',\'' + esc(t.nombre || t.tipo).replace(/'/g,'&#39;') + '\')">🗑️</button>'
+      + '</div>'
+      + '</div>'
+      + '<div class="taller-list-meta">'
+      + '<span>🏷️ ' + esc(t.tipo || 'Taller') + '</span>'
+      + '<span>📅 ' + esc(t.fecha) + '</span>'
+      + '<span>🕐 ' + esc(t.hora) + '</span>'
+      + '<span>👥 ' + inscritos + ' / ' + cupoMax + ' personas</span>'
+      + '</div>'
+      + (t.descripcion ? '<div class="taller-list-desc">' + esc(t.descripcion) + '</div>' : '')
+      + '<div class="taller-list-dir">📍 ' + esc(t.direccion || '—') + '</div>'
+      + '<div class="taller-progress-bar" title="' + pct + '% ocupado">'
+      + '<div class="taller-progress-fill" style="width:' + pct + '%;background:' + fillColor + '"></div>'
+      + '</div>'
+      + '<div style="font-size:.7rem;color:var(--text3);margin-top:3px;text-align:right">' + pct + '% de ocupación</div>'
+      + '</div>';
+  }).join('');
+}
+
+/** Confirmar eliminación de taller */
+function confirmarEliminarTaller(row, nombre) {
+  confirmAction(
+    'Eliminar evento',
+    '¿Deseas eliminar el evento "' + nombre + '"? Las personas inscritas ya no podrán verlo.',
+    'Eliminar', 'btn-danger',
+    function() {
+      showLoading();
+      runGAS('deleteTaller', [SESSION.correo, SESSION.clave, row], function(r) {
+        hideLoading();
+        if (!r) return;
+        toast('Evento eliminado', 'ok');
+        loadTalleres();
+      });
+    }
+  );
+}
+
+// ════════════════════════════════════════════════════════════
 //  HTML ESCAPE
 // ════════════════════════════════════════════════════════════
 function esc(s) {
@@ -2103,10 +2428,12 @@ buildDaysGrid();
 // Set min date for date pickers to today
 (function() {
   const today = new Date().toISOString().split('T')[0];
-  document.getElementById('espFecha').min  = today;
-  document.getElementById('bulkIni').min   = today;
-  document.getElementById('bulkFin').min   = today;
-  document.getElementById('espFecha').value = today;
+  document.getElementById('espFecha').min    = today;
+  document.getElementById('bulkIni').min     = today;
+  document.getElementById('bulkFin').min     = today;
+  document.getElementById('tallerFecha').min = today;
+  document.getElementById('espFecha').value    = today;
+  document.getElementById('tallerFecha').value = today;
 })();
 
 hideLoading();
