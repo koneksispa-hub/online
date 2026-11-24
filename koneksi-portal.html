@@ -275,6 +275,22 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
 .taller-list-dir{font-size:.78rem;color:var(--text3);display:flex;align-items:center;gap:5px}
 .taller-progress-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px}
 .taller-progress-fill{height:100%;border-radius:3px;transition:width .4s}
+.ins-resumen{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:14px}
+.ins-kpi{background:var(--bg2);border-radius:10px;padding:10px 12px}
+.ins-kpi b{display:block;font-size:1.05rem;color:var(--text)}
+.ins-kpi span{font-size:.72rem;color:var(--text2)}
+.ins-item{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
+.ins-item-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:6px}
+.ins-item-nombre{font-weight:700;font-size:.9rem}
+.ins-item-datos{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:.78rem;color:var(--text2)}
+.ins-item-datos a{color:var(--rose-dk)}
+.ins-estado{font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.ins-estado.pagado{background:#e3f4ea;color:#1e6b3e}
+.ins-estado.anticipo{background:#e8f2ff;color:#1a3f7a}
+.ins-estado.pendiente{background:#fff3e0;color:#8a5a0a}
+.ins-estado.gratis{background:var(--bg2);color:var(--text2)}
+.ins-filtros{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+@media(max-width:520px){.ins-item-datos{grid-template-columns:1fr}}
 
 .add-panel{background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);margin-bottom:16px}
 .add-panel.hidden{display:none}
@@ -509,6 +525,26 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
     <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
       <button class="btn btn-secondary" onclick="closeClientModal()">Cerrar</button>
       <button class="btn btn-danger btn-sm" id="clientCancelBtn" style="display:none" onclick="cancelFromModal()">Cancelar horario</button>
+    </div>
+  </div>
+</div>
+
+<!-- Informe de inscritos a un evento -->
+<div class="modal-backdrop hidden" id="inscritosModal" onclick="if(event.target===this)cerrarInscritos()">
+  <div class="modal-box" style="max-width:760px;max-height:90vh;overflow:auto">
+    <div class="client-modal-header">
+      <div>
+        <div class="client-modal-title" id="insModalTitle">Inscritos</div>
+        <div class="client-modal-sub" id="insModalSub"></div>
+      </div>
+      <button class="btn btn-secondary btn-sm btn-icon" onclick="cerrarInscritos()">✕</button>
+    </div>
+    <div id="insModalResumen" class="ins-resumen"></div>
+    <div class="ins-filtros" id="insFiltros"></div>
+    <div id="insModalLista"></div>
+    <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="descargarInscritosCSV()">⬇️ Descargar Excel (CSV)</button>
+      <button class="btn btn-primary" onclick="cerrarInscritos()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -2573,6 +2609,7 @@ function renderTalleres() {
       + '</div>'
       + '<div style="display:flex;gap:6px;align-items:flex-start;flex-shrink:0">'
       + '<span class="taller-badge ' + badgeClass + '">' + badgeText + '</span>'
+      + '<button class="btn btn-secondary btn-sm" title="Ver inscritos" onclick="verInscritos(' + idx + ')">👥 Inscritos</button>'
       + '<button class="btn btn-secondary btn-sm btn-icon" title="Editar evento" onclick="editarTaller(' + idx + ')">✏️</button>'
       + '<button class="btn btn-danger btn-sm btn-icon" title="Eliminar evento" onclick="confirmarEliminarTaller(' + (t.row || idx) + ',\'' + esc(t.nombre || t.tipo).replace(/'/g,'&#39;') + '\')">🗑️</button>'
       + '</div>'
@@ -2581,7 +2618,8 @@ function renderTalleres() {
       + '<span>🏷️ ' + esc(t.tipo || 'Taller') + '</span>'
       + '<span>📅 ' + esc(t.fecha) + '</span>'
       + '<span>🕐 ' + esc(t.hora) + '</span>'
-      + '<span>👥 ' + inscritos + ' / ' + cupoMax + ' personas</span>'
+      + '<span>👥 ' + inscritos + ' / ' + cupoMax + ' personas'
+          + (parseInt(t.precio || 0, 10) > 0 ? ' · ' + (t.pagados || 0) + ' con pago' : '') + '</span>'
       + '<span>💳 ' + (parseInt(t.precio || 0, 10) > 0
           ? '$' + parseInt(t.precio, 10).toLocaleString('es-CO') + ' · cobra ' + (parseInt(t.anticipoPct, 10) === 100 ? '100 %' : '50 % anticipo')
           : 'Gratuito') + '</span>'
@@ -2594,6 +2632,91 @@ function renderTalleres() {
       + '<div style="font-size:.7rem;color:var(--text3);margin-top:3px;text-align:right">' + pct + '% de ocupación</div>'
       + '</div>';
   }).join('');
+}
+
+/* ── INFORME DE INSCRITOS ───────────────────────────────── */
+let _insData = null, _insFiltro = 'todos';
+const _cop = function(n) { return '$' + Number(n || 0).toLocaleString('es-CO'); };
+
+function verInscritos(idx) {
+  const t = TALLERES[idx];
+  if (!t) return;
+  showLoading();
+  runGAS('getInscritosTaller', [SESSION.correo, SESSION.clave, t.row], function(r) {
+    hideLoading();
+    if (!r) return;
+    _insData = r; _insFiltro = 'todos';
+    pintarInscritos();
+    document.getElementById('inscritosModal').classList.remove('hidden');
+  });
+}
+function cerrarInscritos() {
+  document.getElementById('inscritosModal').classList.add('hidden');
+}
+function filtrarInscritos(f) { _insFiltro = f; pintarInscritos(); }
+
+function pintarInscritos() {
+  const d = _insData, ev = d.evento, rs = d.resumen;
+  const cobra = ev.precio > 0;
+  document.getElementById('insModalTitle').textContent = '👥 Inscritos · ' + ev.nombre;
+  document.getElementById('insModalSub').textContent = (ev.tipo || 'Evento') + ' · ' + ev.fecha + ' · ' + ev.hora
+    + (cobra ? ' · ' + _cop(ev.precio) + (ev.anticipoPct === 100 ? ' (pago total)' : ' (anticipo 50 %)') : ' · Gratuito');
+
+  const kpi = function(v, l) { return '<div class="ins-kpi"><b>' + v + '</b><span>' + l + '</span></div>'; };
+  document.getElementById('insModalResumen').innerHTML =
+    kpi(rs.total + (ev.cupoMax ? ' / ' + ev.cupoMax : ''), 'Inscritos')
+    + (cobra ? kpi(rs.pagados, 'Con pago') + kpi(rs.pendientes, 'Pendientes de pago')
+             + kpi(_cop(rs.recaudado), 'Recaudado en Wompi') + kpi(_cop(rs.porCobrar), 'Saldo por cobrar') : '');
+
+  const filtros = cobra ? [['todos','Todos'],['pagados','Con pago'],['pendientes','Pendientes']] : [];
+  document.getElementById('insFiltros').innerHTML = filtros.map(function(f) {
+    return '<button class="btn btn-sm ' + (_insFiltro === f[0] ? 'btn-primary' : 'btn-secondary') + '" onclick="filtrarInscritos(\'' + f[0] + '\')">' + f[1] + '</button>';
+  }).join('');
+
+  const lista = d.inscritos.filter(function(p) {
+    if (_insFiltro === 'pagados')    return p.pagado > 0;
+    if (_insFiltro === 'pendientes') return p.valor > 0 && p.pagado <= 0;
+    return true;
+  });
+  const wrap = document.getElementById('insModalLista');
+  if (!lista.length) {
+    wrap.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text3)">'
+      + (d.inscritos.length ? 'No hay inscritos con este filtro.' : 'Aún no hay personas inscritas en este evento.') + '</div>';
+    return;
+  }
+  wrap.innerHTML = lista.map(function(p) {
+    const cls = p.estado === 'Pagado total' ? 'pagado' : p.estado === 'Anticipo pagado' ? 'anticipo'
+              : p.estado === 'Gratuito' ? 'gratis' : 'pendiente';
+    const tel = String(p.telefono || '').replace(/\D/g, '');
+    const wa  = tel ? 'https://wa.me/57' + tel + '?text=' + encodeURIComponent('Hola ' + p.nombre + ', te escribo por tu inscripción en "' + ev.nombre + '".') : '';
+    return '<div class="ins-item">'
+      + '<div class="ins-item-top"><div class="ins-item-nombre">' + esc(p.nombre) + '</div>'
+      + '<span class="ins-estado ' + cls + '">' + esc(p.estado) + '</span></div>'
+      + '<div class="ins-item-datos">'
+      + '<span>🪪 ' + esc((p.tipoDoc ? p.tipoDoc + ' ' : '') + (p.documento || '—')) + '</span>'
+      + '<span>📞 ' + (wa ? '<a href="' + wa + '" target="_blank" rel="noopener">' + esc(p.telefono) + ' (WhatsApp)</a>' : '—') + '</span>'
+      + '<span>✉️ ' + (p.email ? '<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + '</a>' : '—') + '</span>'
+      + '<span>🏠 ' + esc((p.direccion || '—') + (p.ciudad ? ', ' + p.ciudad : '')) + '</span>'
+      + (p.valor ? '<span>💳 Pagado ' + _cop(p.pagado) + ' de ' + _cop(p.valor) + (p.saldo ? ' · saldo ' + _cop(p.saldo) : '') + '</span>' : '')
+      + (p.fechaInscripcion ? '<span>🕒 Inscrito: ' + esc(p.fechaInscripcion) + '</span>' : '')
+      + '</div></div>';
+  }).join('');
+}
+
+function descargarInscritosCSV() {
+  if (!_insData) return;
+  const ev = _insData.evento;
+  const cols = ['Nombre','Tipo doc','Documento','Teléfono','Correo','Dirección','Ciudad','Valor','Pagado','Saldo','Estado','Fecha inscripción'];
+  const q = function(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+  const filas = _insData.inscritos.map(function(p) {
+    return [p.nombre, p.tipoDoc, p.documento, p.telefono, p.email, p.direccion, p.ciudad,
+            p.valor, p.pagado, p.saldo, p.estado, p.fechaInscripcion].map(q).join(';');
+  });
+  const csv = '\ufeff' + cols.map(q).join(';') + '\n' + filas.join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'Inscritos_' + (ev.nombre || 'evento').replace(/[^\w\-]+/g, '_') + '_' + (ev.fecha || '').replace(/\//g, '-') + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
 }
 
 /** Confirmar eliminación de taller */

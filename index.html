@@ -313,6 +313,16 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .tmod-ins-field label{display:block;font-size:.8rem;font-weight:500;color:var(--text-mid);margin-bottom:.35rem}
 .tmod-ins-field input{width:100%;padding:.6rem .85rem;border:1px solid var(--border-s);border-radius:10px;font-family:inherit;font-size:.9rem;color:var(--text);background:var(--bg);box-sizing:border-box;outline:none;transition:border .15s}
 .tmod-ins-field input:focus{border-color:var(--caramel)}
+.tmod-ins-field select{width:100%;padding:.6rem .7rem;border:1px solid var(--border-s);border-radius:10px;font-family:inherit;font-size:.9rem;color:var(--text);background:var(--bg);box-sizing:border-box;outline:none}
+.tmod-ins-field select:focus{border-color:var(--caramel)}
+.tmod-ins-row{display:grid;grid-template-columns:110px 1fr;gap:.6rem}
+.tmod-ins-row2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.tmod-ins-box{max-height:92vh;overflow-y:auto}
+.tmod-ins-consent{display:flex;gap:.5rem;align-items:flex-start;font-size:.76rem;color:var(--text-muted);line-height:1.45;margin:.2rem 0 1rem}
+.tmod-ins-consent input{margin-top:.15rem;flex-shrink:0}
+.tmod-ins-consent a{color:var(--caramel-dk)}
+.tmod-ins-nota{font-size:.74rem;color:var(--text-muted);margin:-.3rem 0 .9rem}
+@media(max-width:420px){.tmod-ins-row2{grid-template-columns:1fr}}
 .tmod-ins-submit{width:100%;padding:.75rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.93rem;font-weight:500;border:none;cursor:pointer;font-family:inherit;margin-top:.5rem;transition:background .18s}
 .tmod-ins-submit:hover{background:var(--caramel-dk)}
 .tmod-ins-submit:disabled{background:var(--text-muted);cursor:not-allowed}
@@ -1768,13 +1778,40 @@ function abrirInscripcionTaller(ev){
         <input id="insNombre" type="text" required placeholder="Tu nombre" autocomplete="name">
       </div>
       <div class="tmod-ins-field">
-        <label for="insTelefono">Teléfono / WhatsApp *</label>
-        <input id="insTelefono" type="tel" required placeholder="3001234567" autocomplete="tel">
+        <label for="insDocumento">Documento de identidad *</label>
+        <div class="tmod-ins-row">
+          <select id="insTipoDoc" aria-label="Tipo de documento">
+            <option value="CC">CC</option><option value="CE">CE</option><option value="TI">TI</option>
+            <option value="PAS">Pasaporte</option><option value="PPT">PPT</option><option value="NIT">NIT</option>
+          </select>
+          <input id="insDocumento" type="text" inputmode="numeric" required minlength="5" maxlength="20" placeholder="Número de documento">
+        </div>
       </div>
-      <div class="tmod-ins-field">
-        <label for="insEmail">Email (opcional)</label>
-        <input id="insEmail" type="email" placeholder="tucorreo@email.com" autocomplete="email">
+      <div class="tmod-ins-row2">
+        <div class="tmod-ins-field">
+          <label for="insTelefono">Teléfono / WhatsApp *</label>
+          <input id="insTelefono" type="tel" required placeholder="3001234567" autocomplete="tel">
+        </div>
+        <div class="tmod-ins-field">
+          <label for="insEmail">Correo electrónico *</label>
+          <input id="insEmail" type="email" required placeholder="tucorreo@email.com" autocomplete="email">
+        </div>
       </div>
+      <div class="tmod-ins-row2">
+        <div class="tmod-ins-field">
+          <label for="insDireccion">Dirección *</label>
+          <input id="insDireccion" type="text" required minlength="5" placeholder="Cra 5 # 20-10, apto 301" autocomplete="street-address">
+        </div>
+        <div class="tmod-ins-field">
+          <label for="insCiudad">Ciudad *</label>
+          <input id="insCiudad" type="text" required value="Cali" autocomplete="address-level2">
+        </div>
+      </div>
+      <p class="tmod-ins-nota">Usamos estos datos para tu factura y para contactarte sobre el evento.</p>
+      <label class="tmod-ins-consent">
+        <input type="checkbox" id="insAcepta" required>
+        <span>Autorizo a Koneksi y al profesional a tratar mis datos personales para gestionar mi inscripción y facturación, según la <a href="politica-privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a> (Ley 1581 de 2012).</span>
+      </label>
       ${ev.montoPagar>0?`<div class="tmod-ins-pago">
         <div><span>Valor del evento</span><strong>${_cop(ev.precio)}</strong></div>
         <div><span>${ev.anticipoPct===100?'Pagas hoy (100 %)':'Pagas hoy (anticipo 50 %)'}</span><strong>${_cop(ev.montoPagar)}</strong></div>
@@ -1801,7 +1838,12 @@ async function enviarInscripcion(e){
   if(!_insEvento)return;
   const nombre=document.getElementById('insNombre').value.trim();
   const telefono=document.getElementById('insTelefono').value.trim();
-  const email=(document.getElementById('insEmail')||{}).value||'';
+  const email=(document.getElementById('insEmail').value||'').trim();
+  const tipoDoc=document.getElementById('insTipoDoc').value;
+  const documento=(document.getElementById('insDocumento').value||'').trim();
+  const direccion=(document.getElementById('insDireccion').value||'').trim();
+  const ciudad=(document.getElementById('insCiudad').value||'').trim();
+  const acepta=document.getElementById('insAcepta').checked;
   const btn=document.getElementById('insSubmitBtn');
   const msg=document.getElementById('insMsg');
   btn.disabled=true;btn.textContent='Enviando…';
@@ -1812,6 +1854,11 @@ async function enviarInscripcion(e){
       nombre:nombre,
       telefono:telefono,
       email:email,
+      tipoDoc:tipoDoc,
+      documento:documento,
+      direccion:direccion,
+      ciudad:ciudad,
+      acepta:acepta?'1':'0',
       colaborador:_insEvento.colaborador||'',
       codigo:_insEvento.codigo||'',
       tallerNombre:_insEvento.nombre||'',
