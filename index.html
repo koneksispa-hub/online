@@ -299,6 +299,10 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .btn-inscribirse{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.82rem;font-weight:500;border:none;cursor:pointer;font-family:inherit;transition:background .18s,transform .12s;box-shadow:0 2px 8px rgba(191,155,111,.35)}
 .btn-inscribirse:hover{background:var(--caramel-dk);transform:translateY(-1px)}
 .btn-inscribirse:disabled{background:var(--text-muted);cursor:not-allowed;transform:none;box-shadow:none}
+.tmod-taller-precio{font-size:.82rem;color:var(--text-mid);margin:-.3rem 0 .7rem}
+.tmod-ins-pago{background:var(--surface-el);border:1px solid var(--border);border-radius:12px;padding:.8rem 1rem;margin:.2rem 0 1rem;font-size:.85rem}
+.tmod-ins-pago div{display:flex;justify-content:space-between;gap:.5rem;padding:.18rem 0}
+.tmod-ins-pago p{margin:.5rem 0 0;font-size:.78rem;color:var(--text-muted);line-height:1.45}
 /* Mini-wizard de inscripción a taller */
 .tmod-ins-overlay{position:fixed;inset:0;z-index:400;background:rgba(45,26,16,.78);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1.5rem}
 .tmod-ins-box{background:var(--surface);border-radius:18px;width:100%;max-width:420px;padding:2rem;box-shadow:0 20px 60px rgba(45,26,16,.3);position:relative}
@@ -1678,8 +1682,9 @@ async function _loadProfExtras(profName,codigo){
               ${ev.direccion?`<span>📍 ${_esc(ev.direccion)}</span>`:''}
               <span class="tmod-taller-cupo ${cupoClass}">${cupoTxt}</span>
             </div>
+            <div class="tmod-taller-precio">${_tallerPrecioTxt(ev)}</div>
             <button class="btn-inscribirse" ${lleno?'disabled':''} onclick="abrirInscripcionTaller(${JSON.stringify(ev).replace(/"/g,'&quot;')})">
-              ${lleno?'Sin cupos disponibles':'Inscribirse →'}
+              ${lleno?'Sin cupos disponibles':(ev.montoPagar>0?'Inscribirse y pagar →':'Inscribirse →')}
             </button>
           </div>`;
         });
@@ -1735,6 +1740,13 @@ function _tmodLightbox(src,alt){
 function _esc(str){
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+function _cop(n){return '$'+Number(n||0).toLocaleString('es-CO');}
+function _tallerPrecioTxt(ev){
+  if(!(ev.precio>0))return '🎁 <strong>Gratuito</strong>';
+  return ev.anticipoPct===100
+    ? '💳 <strong>'+_cop(ev.precio)+'</strong> · pago total al inscribirte'
+    : '💳 <strong>'+_cop(ev.precio)+'</strong> · anticipo '+_cop(ev.montoPagar)+' (50 %) al inscribirte';
+}
 let _insEvento=null;
 function abrirInscripcionTaller(ev){
   _insEvento=ev;
@@ -1763,7 +1775,13 @@ function abrirInscripcionTaller(ev){
         <label for="insEmail">Email (opcional)</label>
         <input id="insEmail" type="email" placeholder="tucorreo@email.com" autocomplete="email">
       </div>
-      <button class="tmod-ins-submit" id="insSubmitBtn" type="submit">Confirmar inscripción →</button>
+      ${ev.montoPagar>0?`<div class="tmod-ins-pago">
+        <div><span>Valor del evento</span><strong>${_cop(ev.precio)}</strong></div>
+        <div><span>${ev.anticipoPct===100?'Pagas hoy (100 %)':'Pagas hoy (anticipo 50 %)'}</span><strong>${_cop(ev.montoPagar)}</strong></div>
+        ${ev.anticipoPct===100?'':`<div><span>Saldo el día del evento</span><strong>${_cop(ev.precio-ev.montoPagar)}</strong></div>`}
+        <p>Tu cupo queda apartado y te llevamos a la pasarela segura de <strong>Wompi</strong> para pagar.</p>
+      </div>`:''}
+      <button class="tmod-ins-submit" id="insSubmitBtn" type="submit">${ev.montoPagar>0?'Continuar al pago '+_cop(ev.montoPagar)+' →':'Confirmar inscripción →'}</button>
     </form>
     <div class="tmod-ins-msg" id="insMsg"></div>
   </div>`;
@@ -1802,6 +1820,17 @@ async function enviarInscripcion(e){
     });
     const r=await fetch(GAS_CONTACT+'?'+params.toString());
     const d=await r.json();
+    if(d.ok&&d.pagoUrl){
+      const box=document.querySelector('#tallerInsOverlay .tmod-ins-box');
+      if(box)box.innerHTML=`<div class="tmod-ins-ok">
+          <div class="ins-check">💳</div>
+          <div class="tmod-ins-titulo">${d.pendientePago?'Ya tienes un cupo apartado':'¡Cupo apartado!'}</div>
+          <p>Te estamos llevando a Wompi para pagar <strong>${_cop(d.montoPagar)}</strong>.<br>Tu inscripción queda confirmada cuando el pago sea aprobado.</p>
+          <p style="font-size:.8rem;margin-top:.8rem">¿No te redirige? <a href="${d.pagoUrl}">Pagar ahora</a></p>
+        </div>`;
+      setTimeout(()=>{window.location.href=d.pagoUrl;},1200);
+      return;
+    }
     if(d.ok){
       const box=document.querySelector('#tallerInsOverlay .tmod-ins-box');
       if(box)box.innerHTML=`<button class="tmod-ins-close" onclick="cerrarInscripcionTaller()">✕</button>
@@ -1812,7 +1841,7 @@ async function enviarInscripcion(e){
         </div>`;
     }else{
       msg.innerHTML=`<span style="color:#c0392b">${d.error||'Error al inscribirse. Intenta de nuevo.'}</span>`;
-      btn.disabled=false;btn.textContent='Confirmar inscripción →';
+      btn.disabled=false;btn.textContent=_insEvento&&_insEvento.montoPagar>0?'Continuar al pago →':'Confirmar inscripción →';
     }
   }catch(err){
     msg.innerHTML='<span style="color:#c0392b">No se pudo conectar. Intenta más tarde.</span>';

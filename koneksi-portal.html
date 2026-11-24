@@ -738,6 +738,23 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
             <small>Cuando se complete el cupo, las reservas se cerrarán automáticamente.</small>
           </div>
 
+          <!-- Precio y forma de cobro -->
+          <div class="field">
+            <label>Precio por persona (COP)</label>
+            <div class="cupo-row">
+              <input type="text" id="tallerPrecio" inputmode="numeric" placeholder="0" value="0" oninput="tallerPrecioInput(this)" style="width:160px">
+              <span style="font-size:.82rem;color:var(--text2)">0 = evento gratuito</span>
+            </div>
+          </div>
+          <div class="field" id="tallerPctField">
+            <label>¿Cuánto se cobra al inscribirse?</label>
+            <div class="taller-type-bar">
+              <button type="button" class="taller-type-btn pct-btn active" data-pct="50" onclick="selectTallerPct(this)">💳 Anticipo 50 %</button>
+              <button type="button" class="taller-type-btn pct-btn" data-pct="100" onclick="selectTallerPct(this)">✅ Pago total 100 %</button>
+            </div>
+            <small id="tallerPagoResumen">El evento es gratuito: las personas se inscriben sin pagar.</small>
+          </div>
+
           <button class="btn btn-primary" onclick="addTallerEvento()">🎓 Crear evento</button>
         </div><!-- /addTaller -->
 
@@ -2269,11 +2286,54 @@ function togglePass(id) {
 
 /** Selección del tipo de evento en el formulario */
 function selectTallerTipo(btn) {
-  document.querySelectorAll('.taller-type-btn').forEach(function(b) {
+  document.querySelectorAll('.taller-type-btn:not(.pct-btn)').forEach(function(b) {
     b.classList.remove('active');
   });
   btn.classList.add('active');
   _tallerTipoSeleccionado = btn.dataset.tipo;
+}
+
+/** Precio y % de anticipo del evento */
+let _tallerPctSeleccionado = 50;
+function _tallerPrecioNum() {
+  return parseInt((document.getElementById('tallerPrecio').value || '').replace(/[^\d]/g, ''), 10) || 0;
+}
+function tallerPrecioInput(el) {
+  const n = parseInt((el.value || '').replace(/[^\d]/g, ''), 10) || 0;
+  el.value = n ? n.toLocaleString('es-CO') : '';
+  actualizarResumenPago();
+}
+function selectTallerPct(btn) {
+  document.querySelectorAll('.pct-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  _tallerPctSeleccionado = parseInt(btn.dataset.pct, 10) === 100 ? 100 : 50;
+  actualizarResumenPago();
+}
+function setTallerPago(precio, pct) {
+  const el = document.getElementById('tallerPrecio');
+  el.value = precio ? Number(precio).toLocaleString('es-CO') : '0';
+  _tallerPctSeleccionado = parseInt(pct, 10) === 100 ? 100 : 50;
+  document.querySelectorAll('.pct-btn').forEach(function(b) {
+    b.classList.toggle('active', parseInt(b.dataset.pct, 10) === _tallerPctSeleccionado);
+  });
+  actualizarResumenPago();
+}
+function actualizarResumenPago() {
+  const precio = _tallerPrecioNum();
+  const res    = document.getElementById('tallerPagoResumen');
+  document.querySelectorAll('.pct-btn').forEach(function(b) { b.disabled = !precio; b.style.opacity = precio ? '' : '.5'; });
+  if (!precio) { res.textContent = 'El evento es gratuito: las personas se inscriben sin pagar.'; return; }
+  const monto = Math.round(precio * _tallerPctSeleccionado / 100);
+  res.textContent = _tallerPctSeleccionado === 100
+    ? 'Cada persona pagará $' + monto.toLocaleString('es-CO') + ' (valor total) en Wompi al inscribirse.'
+    : 'Cada persona pagará $' + monto.toLocaleString('es-CO') + ' de anticipo en Wompi al inscribirse y $'
+      + (precio - monto).toLocaleString('es-CO') + ' el día del evento.';
+}
+/** Valida el precio; devuelve null si hay error */
+function _leerPagoTaller() {
+  const precio = _tallerPrecioNum();
+  if (precio > 0 && precio < 3000) { toast('El precio mínimo para cobrar en línea es $3.000 (o deja 0 si es gratuito)', 'err'); return null; }
+  return { precio: precio, anticipoPct: precio ? _tallerPctSeleccionado : 100 };
 }
 
 /** Modo edición: guarda la fila que se está editando (null = crear nuevo) */
@@ -2288,7 +2348,7 @@ function editarTaller(idx) {
 
   // Pre-llenar tipo
   _tallerTipoSeleccionado = t.tipo || 'Taller';
-  document.querySelectorAll('.taller-type-btn').forEach(function(b) {
+  document.querySelectorAll('.taller-type-btn:not(.pct-btn)').forEach(function(b) {
     b.classList.toggle('active', b.dataset.tipo === _tallerTipoSeleccionado);
   });
 
@@ -2297,6 +2357,7 @@ function editarTaller(idx) {
   document.getElementById('tallerDesc').value      = t.descripcion || '';
   document.getElementById('tallerDireccion').value = t.direccion  || '';
   document.getElementById('tallerCupo').value      = t.cupoMax    || 10;
+  setTallerPago(t.precio || 0, t.anticipoPct || 50);
 
   // Fecha: convertir dd/MM/yyyy → yyyy-MM-dd para el input date
   if (t.fecha) {
@@ -2350,6 +2411,7 @@ function cancelarEdicionTaller() {
   document.getElementById('tallerDireccion').value = '';
   document.getElementById('tallerCupo').value      = '10';
   document.getElementById('tallerFecha').value     = new Date().toISOString().split('T')[0];
+  setTallerPago(0, 50);
 
   var btnCrear = document.querySelector('#addTaller .btn.btn-primary');
   if (btnCrear) {
@@ -2378,6 +2440,8 @@ function updateTallerEvento() {
   if (!fecha)     { toast('Selecciona la fecha del evento', 'err'); return; }
   if (!direccion) { toast('Ingresa la dirección del lugar', 'err'); return; }
   if (!cupoRaw || cupoRaw < 2) { toast('El cupo mínimo es 2 personas', 'err'); return; }
+  const pago = _leerPagoTaller();
+  if (!pago) return;
 
   const [y, m, d] = fecha.split('-');
   const fechaFmt  = d + '/' + m + '/' + y;
@@ -2391,6 +2455,8 @@ function updateTallerEvento() {
     descripcion: desc,
     direccion:   direccion,
     cupoMax:     cupoRaw,
+    precio:      pago.precio,
+    anticipoPct: pago.anticipoPct,
     codigo:      profCodigo
   };
 
@@ -2417,6 +2483,8 @@ function addTallerEvento() {
   if (!fecha)     { toast('Selecciona la fecha del evento', 'err'); return; }
   if (!direccion) { toast('Ingresa la dirección del lugar', 'err'); return; }
   if (!cupoRaw || cupoRaw < 2) { toast('El cupo mínimo es 2 personas', 'err'); return; }
+  const pago = _leerPagoTaller();
+  if (!pago) return;
 
   const [y, m, d] = fecha.split('-');
   const fechaFmt  = d + '/' + m + '/' + y;
@@ -2432,6 +2500,8 @@ function addTallerEvento() {
     direccion: direccion,
     cupoMax:   cupoRaw,
     inscritos: 0,
+    precio:      pago.precio,
+    anticipoPct: pago.anticipoPct,
     codigo:    profCodigo
   };
 
@@ -2446,6 +2516,7 @@ function addTallerEvento() {
     document.getElementById('tallerFecha').value     = new Date().toISOString().split('T')[0];
     document.getElementById('tallerDireccion').value = '';
     document.getElementById('tallerCupo').value      = '10';
+    setTallerPago(0, 50);
     // Ir a la vista de talleres
     var subTabs = document.querySelectorAll('.sub-tab');
     showSubTab('verTalleres', subTabs[2]);
@@ -2511,6 +2582,9 @@ function renderTalleres() {
       + '<span>📅 ' + esc(t.fecha) + '</span>'
       + '<span>🕐 ' + esc(t.hora) + '</span>'
       + '<span>👥 ' + inscritos + ' / ' + cupoMax + ' personas</span>'
+      + '<span>💳 ' + (parseInt(t.precio || 0, 10) > 0
+          ? '$' + parseInt(t.precio, 10).toLocaleString('es-CO') + ' · cobra ' + (parseInt(t.anticipoPct, 10) === 100 ? '100 %' : '50 % anticipo')
+          : 'Gratuito') + '</span>'
       + '</div>'
       + (t.descripcion ? '<div class="taller-list-desc">' + esc(t.descripcion) + '</div>' : '')
       + '<div class="taller-list-dir">📍 ' + esc(t.direccion || '—') + '</div>'
@@ -2568,5 +2642,6 @@ buildDaysGrid();
 
 hideLoading();
 </script>
+<script>try{actualizarResumenPago();}catch(e){}</script>
 </body>
 </html>
