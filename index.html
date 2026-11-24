@@ -299,6 +299,8 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .btn-inscribirse{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:50px;background:var(--caramel);color:#fff;font-size:.82rem;font-weight:500;border:none;cursor:pointer;font-family:inherit;transition:background .18s,transform .12s;box-shadow:0 2px 8px rgba(191,155,111,.35)}
 .btn-inscribirse:hover{background:var(--caramel-dk);transform:translateY(-1px)}
 .btn-inscribirse:disabled{background:var(--text-muted);cursor:not-allowed;transform:none;box-shadow:none}
+.pago-limite{background:#fff3e0;color:#8a5a0a;border-radius:10px;padding:.7rem .9rem;font-size:.82rem;line-height:1.5;margin:.8rem 0;text-align:left}
+.pago-limite-reloj{display:block;font-weight:700;margin-top:.2rem}
 .tmod-taller-precio{font-size:.82rem;color:var(--text-mid);margin:-.3rem 0 .7rem}
 .tmod-ins-pago{background:var(--surface-el);border:1px solid var(--border);border-radius:12px;padding:.8rem 1rem;margin:.2rem 0 1rem;font-size:.85rem}
 .tmod-ins-pago div{display:flex;justify-content:space-between;gap:.5rem;padding:.18rem 0}
@@ -1816,7 +1818,7 @@ function abrirInscripcionTaller(ev){
         <div><span>Valor del evento</span><strong>${_cop(ev.precio)}</strong></div>
         <div><span>${ev.anticipoPct===100?'Pagas hoy (100 %)':'Pagas hoy (anticipo 50 %)'}</span><strong>${_cop(ev.montoPagar)}</strong></div>
         ${ev.anticipoPct===100?'':`<div><span>Saldo el día del evento</span><strong>${_cop(ev.precio-ev.montoPagar)}</strong></div>`}
-        <p>Tu cupo queda apartado y te llevamos a la pasarela segura de <strong>Wompi</strong> para pagar.</p>
+        <p>Tu cupo queda apartado por <strong>45 minutos</strong> y te llevamos a la pasarela segura de <strong>Wompi</strong> para pagar. Si no se registra el pago en ese tiempo, el cupo se libera automáticamente.</p>
       </div>`:''}
       <button class="tmod-ins-submit" id="insSubmitBtn" type="submit">${ev.montoPagar>0?'Continuar al pago '+_cop(ev.montoPagar)+' →':'Confirmar inscripción →'}</button>
     </form>
@@ -1873,9 +1875,10 @@ async function enviarInscripcion(e){
           <div class="ins-check">💳</div>
           <div class="tmod-ins-titulo">${d.pendientePago?'Ya tienes un cupo apartado':'¡Cupo apartado!'}</div>
           <p>Te estamos llevando a Wompi para pagar <strong>${_cop(d.montoPagar)}</strong>.<br>Tu inscripción queda confirmada cuando el pago sea aprobado.</p>
+          ${d.limiteTexto?`<div class="pago-limite">⏳ Tienes hasta las <strong>${d.limiteTexto}</strong> (${d.minutosPago||45} minutos) para pagar; si no, el cupo se liberará.</div>`:''}
           <p style="font-size:.8rem;margin-top:.8rem">¿No te redirige? <a href="${d.pagoUrl}">Pagar ahora</a></p>
         </div>`;
-      setTimeout(()=>{window.location.href=d.pagoUrl;},1200);
+      setTimeout(()=>{window.location.href=d.pagoUrl;},2500);
       return;
     }
     if(d.ok){
@@ -2430,7 +2433,7 @@ async function bwSubmit(e){
     });
     const r=await fetch(GAS_CONTACT+'?'+params.toString());
     const data=await r.json();
-    if(data.ok){bwS._bookedRow=bwS.slot.row;bwS.step=4;bwRender();}
+    if(data.ok){bwS._bookedRow=bwS.slot.row;bwS._limitePago=data.limitePago||'';bwS._limiteTexto=data.limiteTexto||'';bwS._minPago=data.minutosPago||45;bwS.step=4;bwRender();}
     else{
       msg.innerHTML=`<div class="bw-msg err">${data.error||'Ocurrió un error. Intenta de nuevo.'}</div>`;
       btn.disabled=false;btn.textContent='Confirmar reserva';
@@ -2464,9 +2467,29 @@ function bwStep4(c){
       <p>En caso de cancelación <strong>hasta 24 horas antes</strong>, comunícate al <strong>3202561705</strong>; podrás cambiar el horario o solicitar la devolución del dinero con un descuento del <strong>10 % del valor pagado</strong>.</p>
       <p>Si la cancelación ocurre <strong>el mismo día</strong> de la reserva, <strong>no habrá devolución del dinero</strong>.</p>
     </div>
+    ${bwS._limitePago?`<div class="pago-limite" id="bwPagoLimite">⏳ Tu horario queda <strong>apartado por ${bwS._minPago} minutos</strong> (hasta las ${bwS._limiteTexto}). Si no se registra el pago, se liberará automáticamente para otra persona.<span class="pago-limite-reloj" id="bwPagoReloj"></span></div>`:''}
     <div id="bwPayMsg"></div>
     <button class="bw-submit" id="bwPayBtn" onclick="bwPagar()">Pagar ahora →</button>
   </div>`;
+  if(bwS._limitePago)_relojPago(bwS._limitePago,'bwPagoReloj','bwPayBtn');
+}
+/* Cuenta regresiva del tiempo límite de pago */
+let _relojTimer=null;
+function _relojPago(iso,elId,btnId){
+  clearInterval(_relojTimer);
+  const fin=new Date(iso).getTime();
+  const tick=()=>{
+    const el=document.getElementById(elId);if(!el){clearInterval(_relojTimer);return;}
+    const ms=fin-Date.now();
+    if(ms<=0){
+      el.textContent=' Tiempo agotado.';
+      const b=document.getElementById(btnId);if(b){b.disabled=true;b.textContent='Tiempo para pagar agotado';}
+      clearInterval(_relojTimer);return;
+    }
+    const m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000);
+    el.textContent=' Tiempo restante: '+m+':'+String(s).padStart(2,'0');
+  };
+  tick();_relojTimer=setInterval(tick,1000);
 }
 
 async function bwPagar(){
@@ -2490,6 +2513,9 @@ async function bwPagar(){
     const data=await r.json();
     if(data.ok){
       window.location.href=data.url;
+    } else if(data.vencida){
+      msg.innerHTML=`<div class="bw-msg err">${data.error}</div>`;
+      btn.textContent='Tiempo para pagar agotado';
     } else {
       msg.innerHTML=`<div class="bw-msg err">${data.error||'Error al generar el enlace de pago. Intenta de nuevo.'}</div>`;
       btn.disabled=false;btn.textContent='Pagar ahora →';
