@@ -362,6 +362,48 @@ button{cursor:pointer;border:none;background:none;font-family:inherit}
 .tmod-rate-msg.err{color:#c0392b}
 .tmod-rev-loading{font-size:.82rem;color:var(--text-muted);padding:.4rem 0}
 
+/* ── PODCAST / VIDEO YOUTUBE EN PERFIL (col Z "URL PODCAST") ── */
+#tmodPodcast{margin:0 0 1.4rem}
+.tmod-pod{position:relative;overflow:hidden;display:flex;align-items:stretch;gap:1rem;width:100%;text-align:left;padding:.75rem;border-radius:16px;background:linear-gradient(135deg,#2D1A10 0%,#4A2418 55%,#6B3D2E 100%);color:#fff;border:1px solid rgba(191,155,111,.5);box-shadow:0 8px 26px rgba(45,26,16,.28);transition:transform .2s,box-shadow .2s;font-family:var(--fb);cursor:pointer}
+.tmod-pod::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.16),transparent);transform:skewX(-18deg);animation:podshine 3.8s ease-in-out infinite;pointer-events:none}
+@keyframes podshine{0%,55%{left:-60%}100%{left:130%}}
+.tmod-pod:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(45,26,16,.4)}
+.tmod-pod:focus-visible{outline:3px solid var(--caramel);outline-offset:3px}
+.tmod-pod-thumb{position:relative;z-index:1;flex:0 0 46%;max-width:210px;aspect-ratio:16/9;border-radius:11px;overflow:hidden;background:#000}
+.tmod-pod-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.tmod-pod:hover .tmod-pod-thumb img{transform:scale(1.06)}
+.tmod-pod-play{position:absolute;top:50%;left:50%;width:50px;height:35px;margin:-17.5px 0 0 -25px;border-radius:10px;background:#FF0033;display:flex;align-items:center;justify-content:center;animation:podpulse 2s infinite}
+@keyframes podpulse{0%{box-shadow:0 0 0 0 rgba(255,0,51,.6)}70%{box-shadow:0 0 0 14px rgba(255,0,51,0)}100%{box-shadow:0 0 0 0 rgba(255,0,51,0)}}
+.tmod-pod-badge{position:absolute;top:6px;left:6px;display:flex;align-items:center;gap:.3rem;background:rgba(0,0,0,.72);color:#fff;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .45rem;border-radius:5px}
+.tmod-pod-badge i{width:6px;height:6px;border-radius:50%;background:#FF0033;display:inline-block;animation:ks-pulse 1.6s infinite}
+.tmod-pod-body{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;gap:.22rem;min-width:0}
+.tmod-pod-eyebrow{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--caramel)}
+.tmod-pod-title{font-family:var(--fd);font-size:1.4rem;font-weight:600;line-height:1.1;color:#fff}
+.tmod-pod-sub{font-size:.78rem;color:rgba(255,255,255,.78);line-height:1.4}
+.tmod-pod-cta{margin-top:.4rem;align-self:flex-start;display:inline-flex;align-items:center;gap:.35rem;background:var(--caramel);color:#fff;font-size:.76rem;font-weight:600;padding:.34rem .9rem;border-radius:50px;transition:background .2s}
+.tmod-pod:hover .tmod-pod-cta{background:#FF0033}
+@media(max-width:460px){.tmod-pod{flex-direction:column}.tmod-pod-thumb{max-width:none;flex-basis:auto;width:100%}}
+/* Chip "Podcast" en la tarjeta del equipo */
+.team-card-banner{position:relative}
+.team-pod-chip{position:absolute;left:.7rem;bottom:.7rem;display:inline-flex;align-items:center;gap:.4rem;background:rgba(45,26,16,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;font-size:.72rem;font-weight:600;letter-spacing:.02em;padding:.3rem .75rem .3rem .4rem;border-radius:50px;border:1px solid rgba(191,155,111,.55)}
+.team-pod-chip b{width:20px;height:14px;border-radius:4px;background:#FF0033;display:inline-flex;align-items:center;justify-content:center}
+.team-pod-chip--inline{position:static;align-self:flex-start;margin-bottom:.35rem}
+/* Reproductor emergente de YouTube */
+#ytLightbox{position:fixed;inset:0;z-index:10000;background:rgba(20,10,5,.93);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1.25rem}
+.ytlb-box{width:100%;max-width:960px}
+.ytlb-frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.ytlb-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.ytlb-bar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin-top:.9rem}
+.ytlb-title{font-family:var(--fd);font-size:1.35rem;color:#fff}
+.ytlb-actions{display:flex;gap:.55rem;flex-wrap:wrap}
+.ytlb-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:50px;font-size:.82rem;font-weight:500;border:1.5px solid rgba(191,155,111,.6);color:var(--caramel-lt);transition:background .2s,color .2s}
+.ytlb-btn:hover{background:var(--caramel);color:#fff;border-color:var(--caramel)}
+.ytlb-btn--yt{background:#FF0033;border-color:#FF0033;color:#fff}
+.ytlb-btn--yt:hover{background:#cc0029;border-color:#cc0029}
+.ytlb-close{position:absolute;top:1rem;right:1.25rem;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.ytlb-close:hover{background:rgba(255,255,255,.22)}
+@media(prefers-reduced-motion:reduce){.tmod-pod::after,.tmod-pod-play,.tmod-pod-badge i{animation:none}}
+
 /* CONTACT */
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
 @media(max-width:768px){.contact-grid{grid-template-columns:1fr}}
@@ -721,6 +763,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
       <a href="#equipo">Equipo</a>
       <a href="#contacto">Contacto</a>
       <a href="#profesionales">Profesionales</a>
+      <a href="podcast.html">🎙️ Podcast</a>
       <a href="politica-privacidad.html">Privacidad</a>
       <a href="https://koneksiapp.com/unirse" style="font-size:.88rem;letter-spacing:.05em">Únete al equipo</a>
       <a href="https://koneksiapp.com/koneksi-portal" target="_blank" rel="noopener" style="font-size:.88rem;letter-spacing:.05em">Portal Profesionales</a>
@@ -735,6 +778,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
     <a href="#equipo" role="menuitem">Equipo</a>
     <a href="#contacto" role="menuitem">Contacto</a>
     <a href="#profesionales" role="menuitem">Profesionales</a>
+    <a href="podcast.html" role="menuitem">🎙️ Podcast</a>
     <a href="politica-privacidad.html" role="menuitem">Política de Privacidad</a>
     <a href="https://koneksiapp.com/unirse" role="menuitem" style="color:var(--caramel);font-weight:500">Únete al equipo</a>
     <a href="https://koneksiapp.com/koneksi-portal" role="menuitem" target="_blank" rel="noopener" style="color:var(--caramel);font-weight:500">Portal Profesionales</a>
@@ -1053,6 +1097,7 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSenMgxUgk8GWp3Uz3_z1c0hyX98N2-iPRgW3IJ64V62ZrMOfg/viewform" target="_blank" rel="noopener">Reservar cita</a></li>
         <li><a href="#servicios">Ver servicios</a></li>
         <li><a href="#equipo">Nuestro equipo</a></li>
+        <li><a href="podcast.html">Podcast Koneksi</a></li>
         <li><a href="politica-privacidad.html">Política de Privacidad</a></li>
         <li><a href="https://koneksiapp.com/unirse" style="color:var(--caramel)">Únete al equipo</a></li>
       </ul>
@@ -1098,6 +1143,8 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
         <div class="tmod-rating-row" id="tmodRatingRow"></div>
       </div>
     </div>
+    <!-- Video / Podcast de YouTube (col Z "URL PODCAST" de Colaborador) — solo si tiene URL -->
+    <div id="tmodPodcast" hidden></div>
     <!-- Links / Vínculos de servicios del profesional -->
     <div id="tmodLinks"></div>
     <!-- Galería de fotos / videos desde Drive -->
@@ -1117,6 +1164,21 @@ footer{background:var(--espresso);color:rgba(255,255,255,.65);padding-block:3.5r
 <div id="tmodLightbox" hidden onclick="this.hidden=true">
   <button class="tmod-lb-close" aria-label="Cerrar">&#x2715;</button>
   <img id="tmodLbImg" src="" alt="">
+</div>
+
+<!-- Reproductor emergente de YouTube (podcast del profesional) -->
+<div id="ytLightbox" hidden role="dialog" aria-modal="true" aria-label="Video de YouTube">
+  <button class="ytlb-close" type="button" aria-label="Cerrar video" onclick="closeYtLightbox()">&#x2715;</button>
+  <div class="ytlb-box">
+    <div class="ytlb-frame" id="ytlbFrame"></div>
+    <div class="ytlb-bar">
+      <div class="ytlb-title" id="ytlbTitle"></div>
+      <div class="ytlb-actions">
+        <a id="ytlbYt" class="ytlb-btn ytlb-btn--yt" href="#" target="_blank" rel="noopener">&#x25B6; Ver en YouTube</a>
+        <a id="ytlbMore" class="ytlb-btn" href="podcast.html">Más episodios &#x2192;</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ── BOOKING WIZARD ── -->
@@ -1338,13 +1400,15 @@ function renderTeamCards(){
     const ph=t.fotoPerfil||_PHOTO_FALLBACK[t.name.split(' ')[0].toLowerCase()]||null;
     const card=document.createElement('div');
     card.className='team-card reveal';
-    let banner=ph?'<div class="team-card-banner"><img src="'+ph+'" alt="'+t.name+'" loading="lazy"></div>':'';
+    const hasPod=!!_ytId(t.urlPodcast);
+    const podChip=hasPod?'<span class="team-pod-chip'+(ph?'':' team-pod-chip--inline')+'"><b><svg width="8" height="8" viewBox="0 0 24 24" fill="#fff"><path d="M6 4l15 8-15 8z"/></svg></b>Mira su podcast</span>':'';
+    let banner=ph?'<div class="team-card-banner"><img src="'+ph+'" alt="'+t.name+'" loading="lazy">'+podChip+'</div>':'';
     let sched='';
     if(t.sched)sched+='<div class="team-sched">&#x23F0; '+t.sched+'</div>';
     if(t.days)sched+='<div class="team-sched">&#x1F4C5; '+t.days+'</div>';
     const rHtml=t.rating>0?'<div class="team-rating">'+starsHtml(t.rating)+'<span class="team-rating-val">'+t.rating.toFixed(1)+'</span></div>':'';
     const vBadge=(t.version==='PRO'||t.version==='PLUS')?'<span class="version-badge version-badge--'+t.version.toLowerCase()+'">'+t.version+'</span>':'';
-    card.innerHTML=banner+'<div class="team-card-body">'+vBadge+'<div class="team-name">'+t.name+'</div>'+rHtml+'<div class="team-svcs">'+t.svcs+'</div>'+sched+'<div class="team-cta">Ver perfil &#x2192;</div></div>';
+    card.innerHTML=banner+'<div class="team-card-body">'+(ph?'':podChip)+vBadge+'<div class="team-name">'+t.name+'</div>'+rHtml+'<div class="team-svcs">'+t.svcs+'</div>'+sched+'<div class="team-cta">Ver perfil &#x2192;</div></div>';
     card.addEventListener('click',()=>openTeamModal(t,ph));
     teamGrid.appendChild(card);
   });
@@ -1451,7 +1515,8 @@ async function loadTeam(){
       visible:(r.c[19]?.v||'').toString().trim(),
       version:(r.c[20]?.v||'').toString().trim().toUpperCase(),
       fotoPerfil:(()=>{let f=(r.c[22]?.v||'').trim();if(f.includes('github.com')&&f.includes('/blob/'))f=f.replace('https://github.com/','https://raw.githubusercontent.com/').replace('/blob/','/');return f;})(),
-      urlPersonal:(r.c[23]?.v||'').trim()
+      urlPersonal:(r.c[23]?.v||'').trim(),
+      urlPodcast:(r.c[25]?.v||'').toString().trim()   // col Z: URL PODCAST (YouTube)
     })).filter(t=>t.name&&t.name!=='COLABORADOR'&&t.svcs&&t.visible.toLowerCase()!=='no');
     // Ordenar: PLUS primero, luego PRO, luego los demás; dentro de cada grupo, mayor valoración primero
     teamData.sort((a,b)=>{
@@ -1562,6 +1627,32 @@ function openTeamModal(t,ph){
   // Reviews section (formulario de calificación + lista de opiniones)
   const revSecEl=document.getElementById('tmodReviewsSection');
   if(revSecEl){revSecEl.innerHTML=_buildRatingFormHtml(t.codigo||'',t.name.split(' ')[0]);}
+  // Video / Podcast de YouTube (col Z "URL PODCAST") — solo aparece si hay URL válida
+  const podEl=document.getElementById('tmodPodcast');
+  if(podEl){
+    const ytId=_ytId(t.urlPodcast);
+    if(ytId){
+      const pfn=t.name.split(' ')[0];
+      podEl.innerHTML=`<button type="button" class="tmod-pod" aria-label="Ver el video de ${_esc(t.name)} en el podcast de Koneksi">
+        <span class="tmod-pod-thumb">
+          <img src="https://i.ytimg.com/vi/${ytId}/hqdefault.jpg" alt="" loading="lazy">
+          <span class="tmod-pod-badge"><i></i>Podcast</span>
+          <span class="tmod-pod-play" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M6 4l15 8-15 8z"/></svg></span>
+        </span>
+        <span class="tmod-pod-body">
+          <span class="tmod-pod-eyebrow">🎙️ Koneksi Podcast</span>
+          <span class="tmod-pod-title">Conoce a ${_esc(pfn)}</span>
+          <span class="tmod-pod-sub">Su historia, su propósito y cómo puede acompañarte. ¡Dale play!</span>
+          <span class="tmod-pod-cta">&#x25B6; Ver video</span>
+        </span>
+      </button>`;
+      podEl.querySelector('.tmod-pod').addEventListener('click',()=>openYtLightbox(ytId,'Conoce a '+pfn,t.urlPodcast));
+      podEl.hidden=false;
+    }else{
+      podEl.innerHTML='';
+      podEl.hidden=true;
+    }
+  }
   // Links / Vínculos de servicios
   const linksEl=document.getElementById('tmodLinks');
   if(linksEl){
@@ -1748,6 +1839,45 @@ function _tmodLightbox(src,alt){
   document.getElementById('tmodLbImg').alt=alt||'';
   lb.hidden=false;
 }
+// ── VIDEO / PODCAST DE YOUTUBE ───────────────────────────────────
+/** Extrae el ID de 11 caracteres de cualquier URL de YouTube (youtu.be, watch, shorts, live, embed). */
+function _ytId(url){
+  url=String(url||'').trim();
+  if(!url)return '';
+  if(/^[\w-]{11}$/.test(url))return url;
+  try{
+    const u=new URL(/^https?:\/\//i.test(url)?url:'https://'+url);
+    const h=u.hostname.replace(/^(www|m|music)\./,'');
+    let id='';
+    if(h==='youtu.be')id=u.pathname.split('/')[1]||'';
+    else if(h==='youtube.com'||h==='youtube-nocookie.com'){
+      id=u.searchParams.get('v')||'';
+      if(!id){const m=u.pathname.match(/\/(?:embed|shorts|live|v)\/([\w-]{11})/);if(m)id=m[1];}
+    }
+    id=id.slice(0,11);
+    return /^[\w-]{11}$/.test(id)?id:'';
+  }catch(e){return '';}
+}
+function openYtLightbox(id,title,url){
+  if(!id)return;
+  document.getElementById('ytlbFrame').innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0&modestbranding=1&playsinline=1" title="'+_esc(title||'Video Koneksi')+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+  document.getElementById('ytlbTitle').textContent=title||'';
+  document.getElementById('ytlbYt').href=url||('https://www.youtube.com/watch?v='+id);
+  document.getElementById('ytlbMore').href='podcast.html?v='+id;
+  document.getElementById('ytLightbox').hidden=false;
+}
+function closeYtLightbox(){
+  const lb=document.getElementById('ytLightbox');
+  if(!lb||lb.hidden)return;
+  document.getElementById('ytlbFrame').innerHTML=''; // detiene el video
+  lb.hidden=true;
+}
+document.getElementById('ytLightbox').addEventListener('click',e=>{if(e.target.id==='ytLightbox')closeYtLightbox();});
+// Escape cierra primero el video (sin cerrar el perfil que está detrás)
+document.addEventListener('keydown',e=>{
+  const lb=document.getElementById('ytLightbox');
+  if(e.key==='Escape'&&lb&&!lb.hidden){e.stopImmediatePropagation();closeYtLightbox();}
+},true);
 // ── INSCRIPCIÓN A EVENTOS / TALLERES ─────────────────────────────
 function _esc(str){
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -2572,6 +2702,11 @@ function bwStep5(c){
     window._bookToOpen=decodeURIComponent(book);
   }
 })();
+
+/* Detectar #reservar (enlace desde podcast.html) y abrir el wizard */
+if(window.location.hash==='#reservar'){
+  window.addEventListener('load',()=>{history.replaceState(null,'',window.location.pathname);openBookingWizard();});
+}
 
 /* Wire svcBookBtn — abre wizard con el servicio del modal activo */
 document.addEventListener('DOMContentLoaded',()=>{
