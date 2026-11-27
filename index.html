@@ -2383,7 +2383,7 @@ function bwPickExtraSvc(i){
   bwS.servicio=s.servicio;
   bwS._svcDur=60;
   bwS._isExtraSvc=true;
-  bwS._extraSvcPrice={sede:s.precioSede||0,dom:s.precioDom||0};
+  bwS._extraSvcPrice={sede:s.precioSede||0,dom:s.precioDom||0,pct:s.anticipoPct===100?100:50};
   bwS._cachedSlots=null;bwS._slotPage=0;
   bwS.step=2;bwRender();
 }
@@ -2577,23 +2577,24 @@ async function bwSubmit(e){
 function bwStep4(c){
   // Calcular anticipo: servicio adicional (SERVICIOS COLA) o servicio de Koneksi
   let anticipo=0;
+  const pctAnt=bwS._isExtraSvc&&bwS._extraSvcPrice&&bwS._extraSvcPrice.pct===100?100:50;
   if(bwS._isExtraSvc&&bwS._extraSvcPrice){
     const precio=bwS.modalidad==='Domicilio'?bwS._extraSvcPrice.dom:bwS._extraSvcPrice.sede;
-    anticipo=Math.round((precio||0)/2);
+    anticipo=Math.round((precio||0)*pctAnt/100);
   }else{
     const svc=SERVICES.find(s=>(s.name||s.nombre||'')=== bwS.servicio);
     anticipo=svc?(bwS.modalidad==='Domicilio'?Math.round((svc.priceDom||0)/2):Math.round((svc.priceSede||0)/2)):0;
   }
   const anticipoFmt = anticipo ? '$'+anticipo.toLocaleString('es-CO') : '—';
   c.innerHTML=`
-  <p class="bw-label">Pago del anticipo</p>
+  <p class="bw-label">${pctAnt===100?'Pago del servicio':'Pago del anticipo'}</p>
   <div class="bw-pay-box">
     <div class="bw-pay-amount">
-      <span class="bw-pay-label">Anticipo requerido (50&nbsp;%)</span>
+      <span class="bw-pay-label">${pctAnt===100?'Pago total requerido (100&nbsp;%)':'Anticipo requerido (50&nbsp;%)'}</span>
       <span class="bw-pay-value">${anticipoFmt}</span>
     </div>
     <div class="bw-pay-policy">
-      <p>Para consolidar tu reserva debes realizar el pago del <strong>50 % del valor total</strong> del servicio.</p>
+      <p>Para consolidar tu reserva debes realizar el pago del <strong>${pctAnt===100?'100 % (valor total)':'50 % del valor total'}</strong> del servicio.</p>
       <p>En caso de cancelación <strong>hasta 24 horas antes</strong>, comunícate al <strong>3202561705</strong>; podrás cambiar el horario o solicitar la devolución del dinero con un descuento del <strong>10 % del valor pagado</strong>.</p>
       <p>Si la cancelación ocurre <strong>el mismo día</strong> de la reserva, <strong>no habrá devolución del dinero</strong>.</p>
     </div>
@@ -2636,7 +2637,8 @@ async function bwPagar(){
     // Servicio adicional: pasar el monto (anticipo = 50 % del precio) al GAS directamente
     if(bwS._isExtraSvc&&bwS._extraSvcPrice){
       const precio=bwS.modalidad==='Domicilio'?bwS._extraSvcPrice.dom:bwS._extraSvcPrice.sede;
-      const anticipo=Math.round((precio||0)/2);
+      const pct=bwS._extraSvcPrice.pct===100?100:50;
+      const anticipo=Math.round((precio||0)*pct/100);
       if(anticipo>0)params.set('monto',anticipo.toString());
     }
     const r=await fetch(GAS_CONTACT+'?'+params.toString());

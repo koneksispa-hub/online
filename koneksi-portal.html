@@ -423,6 +423,14 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
   display:inline-block;padding:2px 7px;border-radius:20px;
   background:var(--sage-lt);color:var(--sage);font-size:.72rem;font-weight:600;white-space:nowrap
 }
+.svc-ant-badge{display:inline-block;padding:2px 7px;border-radius:20px;background:#FFF3E0;color:#B26A00;font-size:.72rem;font-weight:600;white-space:nowrap}
+.svc-ant-badge.full{background:#E3F2FD;color:#1565C0}
+.ant-toggle{display:flex;gap:8px}
+.ant-opt{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;background:var(--surface);transition:border-color .15s,background .15s}
+.ant-opt input{display:none}
+.ant-opt b{display:block;font-size:1.05rem;color:var(--text)}
+.ant-opt span{font-size:.72rem;color:var(--text2)}
+.ant-opt:has(input:checked){border-color:var(--rose-dk);background:var(--rose-lt, #fdeeee)}
 .svc-obs{font-size:.78rem;color:var(--text2);margin-top:5px;line-height:1.45;word-break:break-word}
 .svc-actions{display:flex;gap:4px;flex-shrink:0}
 .svc-empty{text-align:center;padding:28px 16px;color:var(--text3);font-size:.88rem;line-height:1.6}
@@ -838,6 +846,13 @@ body{min-height:100vh;background:var(--bg);overflow-x:hidden}
             <div class="field">
               <label>Precio domicilio</label>
               <input type="number" id="svcPrecioDom" placeholder="Ej: 60000" min="0" step="1000">
+            </div>
+          </div>
+          <div class="field">
+            <label>¿Cuánto paga el cliente al reservar?</label>
+            <div class="ant-toggle" role="radiogroup" aria-label="Valor del anticipo">
+              <label class="ant-opt"><input type="radio" name="svcAnticipo" value="50" checked><b>50 %</b><span>Anticipo · el resto el día del servicio</span></label>
+              <label class="ant-opt"><input type="radio" name="svcAnticipo" value="100"><b>100 %</b><span>Pago total al reservar</span></label>
             </div>
           </div>
           <div class="field">
@@ -1984,6 +1999,9 @@ function renderServices() {
     var sede = s.precioSede ? '🏢 $' + Number(s.precioSede).toLocaleString('es-CO') : '';
     var dom  = s.precioDom  ? '🏠 $' + Number(s.precioDom).toLocaleString('es-CO')  : '';
     var dimBadge = s.dimension ? '<span class="svc-dim-badge">🌿 ' + esc(s.dimension) + '</span>' : '';
+    var antBadge = s.anticipoPct === 100
+      ? '<span class="svc-ant-badge full" title="El cliente paga el 100 % al reservar">💳 Pago 100 %</span>'
+      : '<span class="svc-ant-badge" title="El cliente paga el 50 % al reservar">💳 Anticipo 50 %</span>';
     var obsTxt   = s.observacion ? '<div class="svc-obs">📝 ' + esc(s.observacion) + '</div>' : '';
     return '<div class="svc-row">'
       + '<div class="svc-info">'
@@ -1991,6 +2009,7 @@ function renderServices() {
       + '<div class="svc-prices">'
       + (sede ? '<span class="svc-price">' + sede + '</span>' : '')
       + (dom  ? '<span class="svc-price">' + dom  + '</span>' : '')
+      + antBadge
       + dimBadge
       + '</div>'
       + obsTxt
@@ -2017,6 +2036,7 @@ function showServiceForm(row) {
       document.getElementById('svcPrecioDom').value    = s.precioDom   || '';
       document.getElementById('svcObservacion').value  = s.observacion || '';
       document.getElementById('svcDimension').value    = s.dimension   || '';
+      _setAnticipoRadio(s.anticipoPct === 100 ? 100 : 50);
     }
     title.textContent = 'Editar servicio';
   } else {
@@ -2025,10 +2045,19 @@ function showServiceForm(row) {
     document.getElementById('svcPrecioDom').value    = '';
     document.getElementById('svcObservacion').value  = '';
     document.getElementById('svcDimension').value    = '';
+    _setAnticipoRadio(50);
     title.textContent = 'Nuevo servicio';
   }
   document.getElementById('serviceFormWrap').classList.remove('hidden');
   document.getElementById('svcNombre').focus();
+}
+
+function _setAnticipoRadio(v) {
+  document.querySelectorAll('input[name="svcAnticipo"]').forEach(function(r) { r.checked = (r.value === String(v)); });
+}
+function _getAnticipoRadio() {
+  var r = document.querySelector('input[name="svcAnticipo"]:checked');
+  return r && r.value === '100' ? 100 : 50;
 }
 
 function hideServiceForm() {
@@ -2042,11 +2071,12 @@ function saveService() {
   const precioDom   = document.getElementById('svcPrecioDom').value.trim();
   const observacion = document.getElementById('svcObservacion').value.trim();
   const dimension   = document.getElementById('svcDimension').value.trim();
+  const anticipoPct = _getAnticipoRadio();
   if (!nombre) { toast('Ingresa el nombre del servicio', 'err'); return; }
 
   showLoading();
   if (_editingSvcRow) {
-    runGAS('updateService', [SESSION.correo, SESSION.clave, _editingSvcRow, nombre, precioSede, precioDom, observacion, dimension], function(r) {
+    runGAS('updateService', [SESSION.correo, SESSION.clave, _editingSvcRow, nombre, precioSede, precioDom, observacion, dimension, anticipoPct], function(r) {
       hideLoading();
       if (!r) return;
       toast(r.msg || 'Servicio actualizado', 'ok');
@@ -2054,7 +2084,7 @@ function saveService() {
       loadServices();
     });
   } else {
-    runGAS('addService', [SESSION.correo, SESSION.clave, nombre, precioSede, precioDom, (SESSION.codigo||''), observacion, dimension], function(r) {
+    runGAS('addService', [SESSION.correo, SESSION.clave, nombre, precioSede, precioDom, (SESSION.codigo||''), observacion, dimension, anticipoPct], function(r) {
       hideLoading();
       if (!r) return;
       toast(r.msg || 'Servicio agregado', 'ok');
