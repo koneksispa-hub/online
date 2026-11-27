@@ -36,6 +36,10 @@ a{color:var(--caramel-dk)}
 .inp:focus{border-color:var(--caramel);box-shadow:0 0 0 3px rgba(191,155,111,.2)}
 .inp[readonly]{background:var(--bg-alt);color:var(--muted)}
 textarea.inp{resize:vertical;min-height:80px}
+.pw-wrap{position:relative}
+.pw-wrap .inp{padding-right:44px}
+.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:color .15s,background .15s}
+.pw-eye:hover{color:var(--caramel-dk);background:var(--bg-alt)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:50px;font-weight:500;font-size:.88rem;transition:background .15s,transform .1s,opacity .15s;white-space:nowrap}
 .btn:active{transform:scale(.97)}
 .btn:disabled{opacity:.55;cursor:not-allowed}
@@ -183,7 +187,12 @@ select.ver{padding:5px 8px;border-radius:8px;border:1.5px solid var(--border);ba
     <h1>Koneksi</h1>
     <p class="sub">Panel de administración</p>
     <div class="field"><label for="lgCorreo">Correo</label><input class="inp" id="lgCorreo" type="email" autocomplete="username" required></div>
-    <div class="field"><label for="lgClave">Clave de acceso</label><input class="inp" id="lgClave" type="password" autocomplete="current-password" required></div>
+    <div class="field"><label for="lgClave">Clave de acceso</label>
+      <div class="pw-wrap"><input class="inp" id="lgClave" type="password" autocomplete="current-password" required>
+        <button type="button" class="pw-eye" id="lgEye" aria-label="Mostrar clave" title="Mostrar clave">
+          <svg class="eye-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </button></div></div>
     <button class="btn btn-p btn-block" id="lgBtn" type="submit">Ingresar</button>
     <div id="lgMsg"></div>
     <p style="font-size:.74rem;color:var(--muted);margin-top:14px;text-align:center">Acceso exclusivo para super usuarios de Koneksi.</p>
@@ -354,6 +363,15 @@ async function api(action, ...args) {
 }
 
 /* ── Login ── */
+$('lgEye').addEventListener('click', () => {
+  const inp = $('lgClave'), ver = inp.type === 'password';
+  inp.type = ver ? 'text' : 'password';
+  $('lgEye').querySelector('.eye-on').hidden = ver;
+  $('lgEye').querySelector('.eye-off').hidden = !ver;
+  $('lgEye').setAttribute('aria-label', ver ? 'Ocultar clave' : 'Mostrar clave');
+  $('lgEye').title = ver ? 'Ocultar clave' : 'Mostrar clave';
+  inp.focus();
+});
 $('loginForm').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = $('lgBtn'); btn.disabled = true; btn.textContent = 'Verificando…'; $('lgMsg').innerHTML = '';
@@ -371,7 +389,7 @@ $('loginForm').addEventListener('submit', async e => {
 function logout() {
   try { sessionStorage.removeItem('kx_admin'); } catch (_) {}
   SES = null; D = null; REP = null;
-  $('app').hidden = true; $('login').hidden = false; $('lgClave').value = '';
+  $('app').hidden = true; $('login').hidden = false; $('lgClave').value = ''; $('lgClave').type = 'password'; $('lgEye').querySelector('.eye-on').hidden = false; $('lgEye').querySelector('.eye-off').hidden = true;
 }
 (function restore() {
   try { const s = JSON.parse(sessionStorage.getItem('kx_admin') || 'null'); if (s && s.correo) { SES = s; startApp(); } } catch (_) {}
