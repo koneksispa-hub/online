@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Koneksi · Panel de Administración</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<style>
+[hidden]{display:none!important}
+:root{
+  --bg:#FAF4EC;--bg-alt:#F3E8D8;--surface:#FFFFFF;--espresso:#2D1A10;--brown:#6B3D2E;
+  --caramel:#BF9B6F;--caramel-dk:#A07845;--caramel-lt:#E8D5BB;
+  --text:#1A0F08;--text-mid:#5C3A2A;--muted:#9A7060;--border:rgba(191,155,111,.28);
+  --ok:#2e7d32;--ok-lt:#e8f5e9;--err:#c62828;--err-lt:#fdecea;--warn:#B26A00;--warn-lt:#FFF3E0;
+  --fd:'Cormorant Garant',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;
+  --sh:0 4px 20px rgba(45,26,16,.09);--r:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:var(--caramel-dk)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 18px}
+
+/* LOGIN */
+#login{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,var(--espresso),var(--brown))}
+.login-card{background:var(--surface);border-radius:20px;padding:34px 30px;width:100%;max-width:390px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-card h1{font-family:var(--fd);font-size:2.2rem;font-weight:600;color:var(--espresso);line-height:1}
+.login-card .sub{color:var(--caramel-dk);font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;margin:6px 0 22px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--text-mid);margin-bottom:5px}
+.inp{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);outline:none;transition:border-color .15s,box-shadow .15s}
+.inp:focus{border-color:var(--caramel);box-shadow:0 0 0 3px rgba(191,155,111,.2)}
+.inp[readonly]{background:var(--bg-alt);color:var(--muted)}
+textarea.inp{resize:vertical;min-height:80px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:50px;font-weight:500;font-size:.88rem;transition:background .15s,transform .1s,opacity .15s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn-p{background:var(--caramel);color:#fff}.btn-p:hover{background:var(--caramel-dk)}
+.btn-d{background:var(--espresso);color:#fff}.btn-d:hover{background:var(--brown)}
+.btn-o{border:1.5px solid var(--caramel);color:var(--caramel-dk)}.btn-o:hover{background:var(--caramel);color:#fff}
+.btn-g{background:#1D6F42;color:#fff}.btn-g:hover{background:#155a35}
+.btn-sm{padding:6px 12px;font-size:.8rem}
+.btn-block{width:100%}
+.msg{padding:9px 12px;border-radius:10px;font-size:.84rem;margin-top:10px}
+.msg.err{background:var(--err-lt);color:var(--err)}
+.msg.ok{background:var(--ok-lt);color:var(--ok)}
+.msg.warn{background:var(--warn-lt);color:var(--warn)}
+
+/* APP */
+header.top{background:var(--espresso);color:#fff;position:sticky;top:0;z-index:50}
+.top-in{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{font-family:var(--fd);font-size:1.6rem;font-weight:600}
+.brand small{font-family:var(--fb);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--caramel);margin-left:8px}
+.who{display:flex;align-items:center;gap:12px;font-size:.85rem;color:rgba(255,255,255,.8)}
+.who .btn{color:#fff;border:1px solid rgba(255,255,255,.35);padding:5px 12px}
+nav.tabs{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:60px;z-index:40;overflow-x:auto}
+.tabs-in{display:flex;gap:4px;min-width:max-content}
+.tab{padding:13px 16px;font-size:.88rem;color:var(--text-mid);border-bottom:2.5px solid transparent;transition:color .15s,border-color .15s}
+.tab:hover{color:var(--caramel-dk)}
+.tab.active{color:var(--espresso);border-bottom-color:var(--caramel);font-weight:500}
+main{padding:24px 0 60px}
+.sec-h{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.sec-h h2{font-family:var(--fd);font-size:1.9rem;font-weight:600;color:var(--espresso);line-height:1.1}
+.sec-h p{color:var(--muted);font-size:.85rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh)}
+.pad{padding:18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.kpi{padding:14px 16px}
+.kpi .l{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--fd);font-size:1.75rem;font-weight:600;color:var(--espresso);line-height:1.15;margin-top:2px}
+.kpi .v.ok{color:var(--ok)}
+.kpi .s{font-size:.75rem;color:var(--muted)}
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:14px}
+.pcard{padding:16px;display:flex;flex-direction:column;gap:10px}
+.pcard-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pcard-h b{font-size:1rem}
+.pcard-h small{display:block;color:var(--muted);font-size:.75rem}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mini{background:var(--bg);border-radius:10px;padding:7px 8px;text-align:center}
+.mini b{display:block;font-size:.95rem;color:var(--espresso)}
+.mini span{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.b-pro{background:linear-gradient(135deg,#b8860b,#daa520);color:#fff}
+.b-plus{background:linear-gradient(135deg,#5e35b1,#8e24aa);color:#fff}
+.b-std{background:var(--bg-alt);color:var(--text-mid)}
+.b-off{background:var(--err-lt);color:var(--err)}
+.b-on{background:var(--ok-lt);color:var(--ok)}
+.stars{color:#E0A526;letter-spacing:1px}
+
+/* TABLA */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r)}
+table.t{width:100%;border-collapse:collapse;font-size:.84rem}
+table.t th{background:var(--espresso);color:#fff;font-weight:500;padding:9px 10px;text-align:left;white-space:nowrap;font-size:.76rem;letter-spacing:.02em}
+table.t td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.t tr:hover td{background:#fffaf3}
+table.t .r{text-align:right;white-space:nowrap}
+table.t tr.sub td{background:var(--bg-alt);font-weight:700}
+table.t tr.tot td{background:var(--espresso);color:#fff;font-weight:700}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.toolbar .field{margin:0}
+.toolbar .inp{padding:8px 10px}
+
+/* SWITCH */
+.sw{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0}
+.sw span{position:absolute;inset:0;background:#d7ccc8;border-radius:24px;transition:background .2s;cursor:pointer}
+.sw span::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw input:checked+span{background:var(--ok)}
+.sw input:checked+span::before{transform:translateX(20px)}
+.sw input:disabled+span{opacity:.5;cursor:wait}
+.sw-lbl{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-mid)}
+select.ver{padding:5px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.8rem}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(20,10,5,.55);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:30px 14px;overflow-y:auto}
+.modal{width:100%;max-width:860px;background:var(--surface);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.modal-h{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-h h3{font-family:var(--fd);font-size:1.5rem;font-weight:600;color:var(--espresso)}
+.modal-b{padding:18px 20px}
+.modal-f{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border)}
+.x{width:34px;height:34px;border-radius:50%;background:var(--bg-alt);font-size:1rem}
+.fgroup{margin-bottom:16px}
+.fgroup h4{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--caramel-dk);margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 14px}
+.fgrid .full{grid-column:1/-1}
+
+/* RATINGS */
+.rating-big{display:flex;align-items:center;gap:12px}
+.rating-big .n{font-family:var(--fd);font-size:2.4rem;font-weight:600;color:var(--espresso);line-height:1}
+.dist{display:flex;flex-direction:column;gap:3px;font-size:.74rem}
+.dist div{display:flex;align-items:center;gap:6px}
+.dist i{flex:1;height:7px;background:var(--bg-alt);border-radius:4px;overflow:hidden;display:block}
+.dist i b{display:block;height:100%;background:#E0A526;border-radius:4px}
+.comments{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.comment{background:var(--bg);border-radius:10px;padding:8px 10px;font-size:.82rem}
+
+/* CONFIG */
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.pct-inp{display:flex;align-items:center;gap:6px}
+.pct-inp .inp{text-align:right;font-weight:700;font-size:1.05rem}
+.example{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:.8rem;color:var(--text-mid);margin-top:8px;line-height:1.6}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:190px;overflow-y:auto;margin-bottom:10px}
+.chip{background:var(--bg-alt);border-radius:20px;padding:4px 10px;font-size:.78rem}
+.chip small{color:var(--muted)}
+.dim-row{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.dim-row b{font-size:.85rem;color:var(--espresso)}
+.dim-row p{font-size:.78rem;color:var(--text-mid);margin:3px 0 8px}
+.inline{display:flex;gap:6px}
+.inline .inp{padding:7px 10px;font-size:.84rem}
+
+.loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--muted)}
+.spin{width:26px;height:26px;border:3px solid var(--caramel-lt);border-top-color:var(--caramel);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:300;padding:11px 20px;border-radius:50px;color:#fff;font-size:.88rem;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:92vw}
+.empty{text-align:center;padding:30px;color:var(--muted)}
+
+/* IMPRESIÓN: solo el informe */
+@media print{
+  body{background:#fff}
+  header.top,nav.tabs,.no-print,#toast{display:none!important}
+  main{padding:0}
+  .view{display:none!important}
+  #v-informe{display:block!important}
+  .card{box-shadow:none;border:none}
+  table.t{font-size:9.5px}
+  table.t th{background:#2D1A10!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  table.t tr.sub td,table.t tr.tot td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .print-head{display:block!important}
+  .prof-block{break-inside:avoid}
+}
+.print-head{display:none;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<!-- ═════════════ LOGIN ═════════════ -->
+<section id="login">
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <h1>Koneksi</h1>
+    <p class="sub">Panel de administración</p>
+    <div class="field"><label for="lgCorreo">Correo</label><input class="inp" id="lgCorreo" type="email" autocomplete="username" required></div>
+    <div class="field"><label for="lgClave">Clave de acceso</label><input class="inp" id="lgClave" type="password" autocomplete="current-password" required></div>
+    <button class="btn btn-p btn-block" id="lgBtn" type="submit">Ingresar</button>
+    <div id="lgMsg"></div>
+    <p style="font-size:.74rem;color:var(--muted);margin-top:14px;text-align:center">Acceso exclusivo para super usuarios de Koneksi.</p>
+  </form>
+</section>
+
+<!-- ═════════════ APP ═════════════ -->
+<div id="app" hidden>
+  <header class="top">
+    <div class="wrap top-in">
+      <div class="brand">Koneksi<small>Admin</small></div>
+      <div class="who"><span id="whoName"></span><button class="btn" onclick="logout()">Salir</button></div>
+    </div>
+  </header>
+  <nav class="tabs" aria-label="Secciones">
+    <div class="wrap tabs-in">
+      <button class="tab active" data-v="resumen">📊 Resumen</button>
+      <button class="tab" data-v="profesionales">👥 Profesionales</button>
+      <button class="tab" data-v="informe">💰 Informe de ingresos</button>
+      <button class="tab" data-v="valoraciones">⭐ Valoraciones</button>
+      <button class="tab" data-v="config">⚙️ Configuración</button>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <div id="globalLoading" class="loading"><div class="spin"></div>Cargando datos…</div>
+
+    <!-- RESUMEN -->
+    <section class="view" id="v-resumen" hidden>
+      <div class="sec-h"><div><h2>Resumen</h2><p id="resPeriodo"></p></div></div>
+      <div class="kpis" id="resKpis"></div>
+      <div class="grid-cards" id="resCards"></div>
+    </section>
+
+    <!-- PROFESIONALES -->
+    <section class="view" id="v-profesionales" hidden>
+      <div class="sec-h">
+        <div><h2>Profesionales</h2><p>Activa o desactiva su visibilidad en la página principal, cambia la versión y edita sus datos.</p></div>
+        <button class="btn btn-p" onclick="openProfModal(null)">➕ Nuevo profesional</button>
+      </div>
+      <div class="toolbar"><input class="inp" id="profSearch" placeholder="Buscar por nombre, correo, código o ciudad…" style="max-width:360px"></div>
+      <div class="card tbl-wrap"><table class="t" id="profTable"></table></div>
+    </section>
+
+    <!-- INFORME -->
+    <section class="view" id="v-informe" hidden>
+      <div class="sec-h no-print">
+        <div><h2>Informe de ingresos</h2><p>Por fecha en que se recibió el pago. Comisión sobre el valor total del servicio.</p></div>
+      </div>
+      <div class="card pad no-print" style="margin-bottom:16px">
+        <div class="toolbar" style="margin:0">
+          <div class="field"><label>Desde</label><input class="inp" type="date" id="repDesde"></div>
+          <div class="field"><label>Hasta</label><input class="inp" type="date" id="repHasta"></div>
+          <div class="field"><label>Profesional</label><select class="inp" id="repProf"><option value="">Todos</option></select></div>
+          <div class="field"><label>Rápido</label>
+            <select class="inp" id="repRapido">
+              <option value="">—</option><option value="ayer">Ayer</option><option value="hoy">Hoy</option>
+              <option value="semana">Últimos 7 días</option><option value="mes">Este mes</option><option value="mesant">Mes anterior</option>
+            </select></div>
+          <button class="btn btn-p" onclick="loadReport()">Generar</button>
+          <span style="flex:1"></span>
+          <button class="btn btn-o btn-sm" onclick="printReport()" id="btnPrint" disabled>🖨️ Imprimir / PDF</button>
+          <button class="btn btn-g btn-sm" onclick="downloadExcel()" id="btnXls" disabled>⬇️ Excel</button>
+          <button class="btn btn-d btn-sm" onclick="emailReport()" id="btnMail">✉️ Enviar por correo</button>
+        </div>
+      </div>
+      <div id="reportArea"><p class="empty">Elige un rango de fechas y presiona <b>Generar</b>.</p></div>
+    </section>
+
+    <!-- VALORACIONES -->
+    <section class="view" id="v-valoraciones" hidden>
+      <div class="sec-h"><div><h2>Valoraciones y comentarios</h2><p>Opiniones que dejan los clientes en el perfil de cada profesional.</p></div></div>
+      <div class="kpis" id="valKpis"></div>
+      <div class="grid-cards" id="valCards"></div>
+    </section>
+
+    <!-- CONFIGURACIÓN -->
+    <section class="view" id="v-config" hidden>
+      <div class="sec-h"><div><h2>Configuración</h2><p>Los cambios se guardan en la hoja LISTAS y se usan de inmediato en el informe.</p></div></div>
+      <div class="cfg-grid">
+        <div class="card pad">
+          <h3 style="font-family:var(--fd);font-size:1.35rem;margin-bottom:12px">Comisiones e IVA</h3>
+          <div class="field"><label>Comisión general (servicios)</label><div class="pct-inp"><input class="inp" type="number" step="0.1" min="0" max="100" id="cfgGen"><b>%</b></div></div>
+          <div class="field"><label>Comisión talleres / eventos grupales</label><div class="pct-inp"><input class="inp" type="number" step="0.1" min="0" max="100" id="cfgTal"><b>%</b></div></div>
+          <div class="field"><label>IVA (se aplica sobre la comisión)</label><div class="pct-inp"><input class="inp" type="number" step="0.1" min="0" max="100" id="cfgIva"><b>%</b></div></div>
+          <div class="example" id="cfgEjemplo"></div>
+          <button class="btn btn-p" style="margin-top:12px" onclick="saveCfg()">💾 Guardar porcentajes</button>
+        </div>
+        <div class="card pad">
+          <h3 style="font-family:var(--fd);font-size:1.35rem;margin-bottom:12px">Ciudades y países</h3>
+          <div class="chips" id="cfgCiudades"></div>
+          <div class="inline" style="flex-wrap:wrap">
+            <input class="inp" id="newCiudad" placeholder="Nueva ciudad" style="flex:1;min-width:130px">
+            <input class="inp" id="newPais" placeholder="País" list="paisesList" style="flex:1;min-width:110px">
+            <datalist id="paisesList"></datalist>
+            <button class="btn btn-p btn-sm" onclick="addLista('ciudad')">➕ Agregar</button>
+          </div>
+        </div>
+        <div class="card pad" style="grid-column:1/-1">
+          <h3 style="font-family:var(--fd);font-size:1.35rem;margin-bottom:12px">Dimensiones y categorías de bienestar</h3>
+          <div id="cfgDims"></div>
+          <div class="dim-row" style="background:var(--bg)">
+            <b>Nueva dimensión</b>
+            <div class="inline" style="margin-top:8px;flex-wrap:wrap">
+              <input class="inp" id="newDim" placeholder="Ej: NUTRICIONAL" style="flex:1;min-width:160px">
+              <input class="inp" id="newDimCat" placeholder="Categorías separadas por coma" style="flex:2;min-width:220px">
+              <button class="btn btn-p btn-sm" onclick="addLista('dimension')">➕ Crear dimensión</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL PROFESIONAL -->
+<div class="modal-bg" id="profModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
+    <div class="modal-h"><h3 id="pmTitle">Profesional</h3><button class="x" onclick="closeProfModal()" aria-label="Cerrar">✕</button></div>
+    <div class="modal-b" id="pmBody"></div>
+    <div class="modal-f"><span id="pmMsg" style="flex:1"></span><button class="btn btn-o" onclick="closeProfModal()">Cancelar</button><button class="btn btn-p" id="pmSave" onclick="saveProf()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+
+<script>
+/* ═════════════════════════════════════════════════════════════
+   CONFIGURACIÓN — pega aquí la URL /exec del Apps Script "Koneksi Admin"
+   ═════════════════════════════════════════════════════════════ */
+const ADMIN_API = 'https://script.google.com/macros/s/AKfycbzcxsyf-wOP9d7bDxBIKe3FTrJUjOfofXpf4EGSjLLRKdjRhvvbcGuq8ulRapnxWQ/exec';
+
+/* ── Estado ── */
+let SES = null;          // { correo, clave, nombre }
+let D = null;            // dashboard
+let REP = null;          // último informe
+let H = {};              // índice de encabezados normalizados → columna
+let editRow = null;
+
+/* ── Utilidades ── */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const norm = s => String(s == null ? '' : s).trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const cop = n => { const v = Math.round(n || 0); return (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('es-CO'); };
+const pctTxt = p => (Math.round(p * 1000) / 10).toLocaleString('es-CO') + ' %';
+const isoLocal = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const isSi = v => norm(v) === 'si';
+const verLabel = v => { const n = norm(v); return n === 'pro' ? 'PRO' : n === 'plus' ? 'PLUS' : 'Estándar'; };
+const verBadge = v => { const l = verLabel(v); return '<span class="badge ' + (l === 'PRO' ? 'b-pro' : l === 'PLUS' ? 'b-plus' : 'b-std') + '">' + l + '</span>'; };
+const starsTxt = a => { const r = Math.round(a); return '★★★★★'.slice(0, r) + '☆☆☆☆☆'.slice(0, 5 - r); };
+
+function toast(t, tipo) {
+  const el = $('toast');
+  el.textContent = t; el.style.background = tipo === 'err' ? 'var(--err)' : tipo === 'ok' ? 'var(--ok)' : 'var(--espresso)';
+  el.hidden = false; clearTimeout(el._t); el._t = setTimeout(() => el.hidden = true, 3500);
+}
+
+async function api(action, ...args) {
+  if (ADMIN_API.indexOf('PEGA_AQUI') === 0) throw new Error('Falta configurar ADMIN_API en koneksi-admin.html');
+  const r = await fetch(ADMIN_API, {
+    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, args: [SES.correo, SES.clave, ...args] })
+  });
+  const j = await r.json();
+  if (j && j.auth === false) { logout(); throw new Error(j.error); }
+  if (!j || !j.ok) throw new Error((j && j.error) || 'Error desconocido');
+  return j;
+}
+
+/* ── Login ── */
+$('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = $('lgBtn'); btn.disabled = true; btn.textContent = 'Verificando…'; $('lgMsg').innerHTML = '';
+  SES = { correo: $('lgCorreo').value.trim(), clave: $('lgClave').value };
+  try {
+    const r = await api('adminLogin');
+    SES.nombre = r.nombre;
+    try { sessionStorage.setItem('kx_admin', JSON.stringify(SES)); } catch (_) {}
+    startApp();
+  } catch (err) {
+    SES = null;
+    $('lgMsg').innerHTML = '<div class="msg err">' + esc(err.message) + '</div>';
+  } finally { btn.disabled = false; btn.textContent = 'Ingresar'; }
+});
+function logout() {
+  try { sessionStorage.removeItem('kx_admin'); } catch (_) {}
+  SES = null; D = null; REP = null;
+  $('app').hidden = true; $('login').hidden = false; $('lgClave').value = '';
+}
+(function restore() {
+  try { const s = JSON.parse(sessionStorage.getItem('kx_admin') || 'null'); if (s && s.correo) { SES = s; startApp(); } } catch (_) {}
+})();
+
+/* ── Navegación ── */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showView(t.dataset.v)));
+function showView(v) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.v === v));
+  document.querySelectorAll('.view').forEach(s => s.hidden = s.id !== 'v-' + v);
+  if (v === 'informe' && !REP) loadReport();
+}
+
+async function startApp() {
+  $('login').hidden = true; $('app').hidden = false;
+  $('whoName').textContent = SES.nombre || SES.correo;
+  $('globalLoading').hidden = false;
+  document.querySelectorAll('.view').forEach(s => s.hidden = true);
+  try {
+    D = await api('getDashboard');
+    H = {}; D.headers.forEach((h, i) => { const k = norm(h); if (k && !(k in H)) H[k] = i; });
+    $('globalLoading').hidden = true;
+    renderProfOptions(); renderResumen(); renderProfTable(); renderValoraciones(); renderConfig();
+    setRapido('ayer');
+    showView(document.querySelector('.tab.active').dataset.v);
+  } catch (err) {
+    $('globalLoading').innerHTML = '<div class="msg err">' + esc(err.message) + '</div>';
+  }
+}
+const val = (p, key) => { const i = H[norm(key)]; return i == null ? '' : (p.values[i] || ''); };
+
+/* ═════════════ RESUMEN ═════════════ */
+async function renderResumen() {
+  const hoy = new Date();
+  const ini = isoLocal(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
+  $('resPeriodo').textContent = 'Mes en curso: ' + hoy.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+  const S = D.stats || {};
+  let mesRec = 0, mesRes = 0, prox = 0, visibles = 0;
+  Object.values(S).forEach(s => { mesRec += s.mesRecibido; mesRes += s.mesReservas; prox += s.proximas; });
+  D.profesionales.forEach(p => { if (isSi(val(p, 'visible'))) visibles++; });
+  const kp = (l, v, s, ok) => '<div class="card kpi"><div class="l">' + l + '</div><div class="v' + (ok ? ' ok' : '') + '">' + v + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + '</div>';
+  $('resKpis').innerHTML = kp('Profesionales', D.profesionales.length, visibles + ' visibles en la web')
+    + kp('Reservas del mes', mesRes, prox + ' citas próximas')
+    + kp('Recibido en el mes', cop(mesRec), 'según fecha de la cita')
+    + '<div class="card kpi" id="kpiCom"><div class="l">Comisión Koneksi del mes</div><div class="v">…</div><div class="s">comisión + IVA</div></div>';
+
+  $('resCards').innerHTML = D.profesionales.map(p => {
+    const cod = norm(val(p, 'codigo')), s = S[cod] || {}, rv = (D.reviews || {})[cod] || { avg: 0, count: 0 };
+    return '<div class="card pcard"><div class="pcard-h"><div><b>' + esc(val(p, 'colaborador')) + '</b><small>' + esc(cod.toUpperCase()) + ' · ' + esc(val(p, 'ciudad')) + '</small></div>'
+      + '<div style="text-align:right">' + verBadge(val(p, 'version')) + '<br><span class="badge ' + (isSi(val(p, 'visible')) ? 'b-on">Visible' : 'b-off">Oculto') + '</span></div></div>'
+      + '<div class="minis"><div class="mini"><b>' + (s.reservas || 0) + '</b><span>Reservas</span></div><div class="mini"><b>' + (s.pagadas || 0) + '</b><span>Pagadas</span></div><div class="mini"><b>' + (s.proximas || 0) + '</b><span>Próximas</span></div>'
+      + '<div class="mini" style="grid-column:span 2"><b>' + cop(s.recibido || 0) + '</b><span>Recibido histórico</span></div><div class="mini"><b>' + (s.eventos || 0) + '</b><span>Eventos</span></div></div>'
+      + '<div style="font-size:.82rem"><span class="stars">' + starsTxt(rv.avg) + '</span> <b>' + (rv.count ? rv.avg.toFixed(1) : '—') + '</b> <span style="color:var(--muted)">(' + rv.count + ' opiniones)</span></div></div>';
+  }).join('') || '<p class="empty">Sin profesionales.</p>';
+
+  try {
+    const r = await api('getReport', ini, isoLocal(hoy), '');
+    $('kpiCom').querySelector('.v').textContent = cop(r.totales.descontar);
+    $('kpiCom').querySelector('.s').textContent = r.totales.n + ' pagos · ' + cop(r.totales.anticipo) + ' recibidos';
+  } catch (_) { $('kpiCom').querySelector('.v').textContent = '—'; }
+}
+
+/* ═════════════ PROFESIONALES ═════════════ */
+function renderProfOptions() {
+  $('repProf').innerHTML = '<option value="">Todos</option>' + D.profesionales
+    .filter(p => val(p, 'codigo'))
+    .map(p => '<option value="' + esc(norm(val(p, 'codigo'))) + '">' + esc(val(p, 'colaborador')) + ' (' + esc(val(p, 'codigo')) + ')</option>').join('');
+}
+
+$('profSearch').addEventListener('input', renderProfTable);
+function renderProfTable() {
+  const q = norm($('profSearch').value);
+  const list = D.profesionales.filter(p => !q || norm(['colaborador', 'correo', 'codigo', 'ciudad'].map(k => val(p, k)).join(' ')).includes(q));
+  const sw = (p, key, label) => H[norm(key)] == null ? '' :
+    '<label class="sw-lbl"><span class="sw"><input type="checkbox" ' + (isSi(val(p, key)) ? 'checked' : '') + ' onchange="toggleSiNo(' + p.row + ',\'' + key + '\',this)"><span></span></span>' + label + '</label>';
+  $('profTable').innerHTML = '<thead><tr><th>Profesional</th><th>Ciudad</th><th>Visible en la web</th><th>Versión</th><th>Pasarela propia</th><th>Super usuario</th><th></th></tr></thead><tbody>'
+    + list.map(p => {
+      const v = norm(val(p, 'version'));
+      return '<tr><td><b>' + esc(val(p, 'colaborador')) + '</b><br><small style="color:var(--muted)">' + esc(val(p, 'codigo')) + ' · ' + esc(val(p, 'correo')) + '</small></td>'
+        + '<td>' + esc(val(p, 'ciudad')) + '</td>'
+        + '<td>' + sw(p, 'visible', isSi(val(p, 'visible')) ? 'Sí' : 'No') + '</td>'
+        + '<td><select class="ver" onchange="setVersion(' + p.row + ',this)">'
+        + '<option value="No"' + (v !== 'pro' && v !== 'plus' ? ' selected' : '') + '>Estándar</option>'
+        + '<option value="PRO"' + (v === 'pro' ? ' selected' : '') + '>PRO</option>'
+        + '<option value="PLUS"' + (v === 'plus' ? ' selected' : '') + '>PLUS</option></select></td>'
+        + '<td>' + sw(p, 'pasarela propia', isSi(val(p, 'pasarela propia')) ? 'Sí' : 'No') + '</td>'
+        + '<td>' + sw(p, 'super usuario', isSi(val(p, 'super usuario')) ? 'Sí' : 'No') + '</td>'
+        + '<td><button class="btn btn-o btn-sm" onclick="openProfModal(' + p.row + ')">✏️ Editar</button></td></tr>';
+    }).join('') + '</tbody>';
+  if (!list.length) $('profTable').innerHTML += '<tr><td colspan="7" class="empty">Sin resultados</td></tr>';
+}
+const profByRow = row => D.profesionales.find(p => p.row === row);
+
+async function updateCells(row, cambios) {
+  await api('updateProfesional', row, cambios);
+  const p = profByRow(row);
+  Object.keys(cambios).forEach(i => p.values[i] = cambios[i]);
+}
+async function toggleSiNo(row, key, el) {
+  const v = el.checked ? 'Sí' : 'No';
+  if (key === 'super usuario' && el.checked && !confirm('¿Dar acceso de SUPER USUARIO a este profesional? Podrá ver toda la información y recibirá el informe diario.')) { el.checked = false; return; }
+  el.disabled = true;
+  try {
+    await updateCells(row, { [H[norm(key)]]: v });
+    el.parentElement.parentElement.lastChild.textContent = v;
+    toast((key === 'visible' ? (el.checked ? 'Ahora es visible en la página principal' : 'Oculto de la página principal') : 'Guardado'), 'ok');
+    renderResumen();
+  } catch (err) { el.checked = !el.checked; toast(err.message, 'err'); }
+  finally { el.disabled = false; }
+}
+async function setVersion(row, sel) {
+  const prev = val(profByRow(row), 'version');
+  sel.disabled = true;
+  try { await updateCells(row, { [H['version']]: sel.value }); toast('Versión actualizada a ' + verLabel(sel.value), 'ok'); renderResumen(); }
+  catch (err) { sel.value = verLabel(prev) === 'Estándar' ? 'No' : verLabel(prev); toast(err.message, 'err'); }
+  finally { sel.disabled = false; }
+}
+
+/* Modal de edición / creación */
+const GRUPOS = [
+  ['Acceso', ['colaborador', 'correo', 'clave acceso', 'codigo', 'super usuario']],
+  ['Configuración en Koneksi', ['visible', 'version', 'pasarela propia', 'trabaja en koneksi', 'valoracion', 'ultimo_acceso']],
+  ['Identificación y contacto', ['doc identidad', 'telefono', 'telegram_id']],
+  ['Ubicación', ['ciudad', 'pais', 'direccion sede']],
+  ['Perfil público', ['descripcion', 'servicios', 'horarios', 'dias', 'foto perfil']],
+  ['Enlaces', ['link', 'link_servicios', 'url personal', 'url tienda', 'url podcast']]
+];
+const SINO = ['visible', 'pasarela propia', 'trabaja en koneksi', 'super usuario'];
+const LARGOS = ['descripcion', 'servicios'];
+const RO = ['ultimo_acceso', 'valoracion'];
+
+function fieldHtml(i, header, value, isNew) {
+  const k = norm(header), id = 'pf_' + i;
+  const ro = RO.includes(k) || (k === 'codigo' && !isNew);
+  let inp;
+  if (SINO.includes(k)) {
+    inp = '<select class="inp" id="' + id + '"><option' + (isSi(value) ? ' selected' : '') + '>Sí</option><option' + (!isSi(value) ? ' selected' : '') + '>No</option></select>';
+  } else if (k === 'version') {
+    const v = norm(value);
+    inp = '<select class="inp" id="' + id + '"><option value="No"' + (v !== 'pro' && v !== 'plus' ? ' selected' : '') + '>Estándar (No)</option><option value="PRO"' + (v === 'pro' ? ' selected' : '') + '>PRO</option><option value="PLUS"' + (v === 'plus' ? ' selected' : '') + '>PLUS</option></select>';
+  } else if (k === 'ciudad' || k === 'pais') {
+    const opts = k === 'ciudad' ? [...new Set(D.listas.ciudades.map(c => c.ciudad))] : D.listas.paises;
+    const all = value && !opts.some(o => norm(o) === norm(value)) ? [value, ...opts] : opts;
+    inp = '<select class="inp" id="' + id + '"><option value=""></option>' + all.map(o => '<option' + (norm(o) === norm(value) ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>';
+  } else if (LARGOS.includes(k)) {
+    inp = '<textarea class="inp" id="' + id + '" rows="' + (k === 'descripcion' ? 4 : 2) + '">' + esc(value) + '</textarea>';
+  } else {
+    const type = k === 'correo' ? 'email' : 'text';
+    const ph = k === 'codigo' && isNew ? 'Se asigna solo (k08…)' : k === 'link' && isNew ? 'Se genera solo' : '';
+    inp = '<input class="inp" id="' + id + '" type="' + type + '" value="' + esc(value) + '"' + (ro ? ' readonly' : '') + (ph ? ' placeholder="' + ph + '"' : '') + '>';
+  }
+  const lbl = esc(header) + (['colaborador', 'correo', 'clave acceso'].includes(k) ? ' *' : '') + (k === 'version' ? ' <small style="color:var(--muted)">(No = Estándar)</small>' : '');
+  return '<div class="field' + (LARGOS.includes(k) ? ' full' : '') + '"><label for="' + id + '">' + lbl + '</label>' + inp + '</div>';
+}
+
+function openProfModal(row) {
+  editRow = row;
+  const isNew = !row;
+  const p = isNew ? { values: D.headers.map(() => '') } : profByRow(row);
+  if (isNew) { ['visible', 'trabaja en koneksi', 'super usuario', 'pasarela propia'].forEach(k => { if (H[k] != null) p.values[H[k]] = 'No'; }); if (H['version'] != null) p.values[H['version']] = 'No'; if (H['pais'] != null) p.values[H['pais']] = 'Colombia'; }
+  const usados = new Set();
+  let html = '';
+  GRUPOS.forEach(([titulo, keys]) => {
+    const campos = [];
+    keys.forEach(k => D.headers.forEach((h, i) => {
+      if (norm(h) === k && !usados.has(i)) { usados.add(i); campos.push(fieldHtml(i, h, p.values[i] || '', isNew)); }
+    }));
+    if (campos.length) html += '<div class="fgroup"><h4>' + titulo + '</h4><div class="fgrid">' + campos.join('') + '</div></div>';
+  });
+  const resto = D.headers.map((h, i) => (!usados.has(i) && h) ? fieldHtml(i, h, p.values[i] || '', isNew) : '').join('');
+  if (resto) html += '<div class="fgroup"><h4>Otros datos</h4><div class="fgrid">' + resto + '</div></div>';
+  $('pmBody').innerHTML = html;
+  $('pmTitle').textContent = isNew ? 'Nuevo profesional' : 'Editar · ' + val(p, 'colaborador');
+  $('pmMsg').innerHTML = '';
+  $('profModal').hidden = false;
+}
+function closeProfModal() { $('profModal').hidden = true; editRow = null; }
+$('profModal').addEventListener('click', e => { if (e.target.id === 'profModal') closeProfModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('profModal').hidden) closeProfModal(); });
+
+async function saveProf() {
+  const isNew = !editRow;
+  const p = isNew ? null : profByRow(editRow);
+  const cambios = {};
+  D.headers.forEach((h, i) => {
+    const el = $('pf_' + i); if (!el || el.readOnly) return;
+    const v = el.value.trim();
+    if (isNew ? v !== '' : v !== String(p.values[i] || '').trim()) cambios[i] = v;
+  });
+  if (!Object.keys(cambios).length && !isNew) { closeProfModal(); return; }
+  if (!isNew && cambios[H['super usuario']] === 'No' && p.row === myRow()) { $('pmMsg').innerHTML = '<span style="color:var(--err)">No puedes quitarte tu propio rol de super usuario.</span>'; return; }
+  const btn = $('pmSave'); btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    if (isNew) {
+      const r = await api('addProfesional', cambios);
+      toast('Profesional creado con código ' + (r.codigo || ''), 'ok');
+      closeProfModal();
+      await reloadDashboard();
+    } else {
+      await updateCells(editRow, cambios);
+      toast('Datos actualizados', 'ok'); closeProfModal();
+      renderProfTable(); renderResumen(); renderProfOptions();
+    }
+  } catch (err) { $('pmMsg').innerHTML = '<span style="color:var(--err)">' + esc(err.message) + '</span>'; }
+  finally { btn.disabled = false; btn.textContent = '💾 Guardar'; }
+}
+const myRow = () => { const p = D.profesionales.find(x => norm(val(x, 'correo')) === norm(SES.correo) && isSi(val(x, 'super usuario'))); return p ? p.row : 0; };
+async function reloadDashboard() {
+  D = await api('getDashboard');
+  H = {}; D.headers.forEach((h, i) => { const k = norm(h); if (k && !(k in H)) H[k] = i; });
+  renderProfOptions(); renderResumen(); renderProfTable(); renderValoraciones(); renderConfig();
+}
+
+/* ═════════════ INFORME ═════════════ */
+$('repRapido').addEventListener('change', e => { if (e.target.value) { setRapido(e.target.value); loadReport(); } });
+function setRapido(k) {
+  const h = new Date(); let a = new Date(h), b = new Date(h);
+  if (k === 'ayer') { a.setDate(h.getDate() - 1); b = new Date(a); }
+  else if (k === 'semana') a.setDate(h.getDate() - 6);
+  else if (k === 'mes') a = new Date(h.getFullYear(), h.getMonth(), 1);
+  else if (k === 'mesant') { a = new Date(h.getFullYear(), h.getMonth() - 1, 1); b = new Date(h.getFullYear(), h.getMonth(), 0); }
+  $('repDesde').value = isoLocal(a); $('repHasta').value = isoLocal(b);
+}
+async function loadReport() {
+  const d = $('repDesde').value, h = $('repHasta').value;
+  if (!d || !h) { toast('Elige las fechas', 'err'); return; }
+  $('reportArea').innerHTML = '<div class="loading"><div class="spin"></div>Calculando…</div>';
+  $('btnPrint').disabled = $('btnXls').disabled = true;
+  try {
+    REP = await api('getReport', d, h, $('repProf').value);
+    renderReport();
+    $('btnPrint').disabled = $('btnXls').disabled = false;
+  } catch (err) { $('reportArea').innerHTML = '<div class="msg err">' + esc(err.message) + '</div>'; }
+}
+const fmtK = k => k.split('-').reverse().join('/');
+function periodoTxt() { return REP.desde === REP.hasta ? fmtK(REP.desde) : fmtK(REP.desde) + ' al ' + fmtK(REP.hasta); }
+function profNombreFiltro() { const o = $('repProf').selectedOptions[0]; return $('repProf').value ? o.textContent : 'Todos los profesionales'; }
+
+function renderReport() {
+  const R = REP, t = R.totales, c = R.cfg;
+  let h = '<div class="print-head"><h2 style="font-family:var(--fd);font-size:1.6rem">Koneksi · Informe de ingresos</h2><p>' + periodoTxt() + ' · ' + esc(profNombreFiltro()) + '</p></div>';
+  h += '<p style="font-size:.8rem;color:var(--muted);margin-bottom:10px">Periodo <b>' + periodoTxt() + '</b> · Comisión general <b>' + pctTxt(c.comGen) + '</b> · Eventos grupales <b>' + pctTxt(c.comTal) + '</b> · IVA sobre comisión <b>' + pctTxt(c.iva) + '</b> · PLUS con pasarela propia: sin descuento.</p>';
+  const kp = (l, v, ok) => '<div class="card kpi"><div class="l">' + l + '</div><div class="v' + (ok ? ' ok' : '') + '">' + v + '</div></div>';
+  h += '<div class="kpis">' + kp('Pagos recibidos', t.n) + kp('Ingresos recibidos', cop(t.anticipo)) + kp('Comisión', cop(t.comision)) + kp('IVA', cop(t.iva)) + kp('A transferir', cop(t.transferir), 1) + '</div>';
+  if (!R.rows.length) { $('reportArea').innerHTML = h + '<div class="card empty">No se registraron ingresos en este periodo.</div>'; return; }
+
+  R.profesionales.forEach(P => {
+    const k = P.codigo || norm(P.nombre);
+    const filas = R.rows.filter(r => (r.codigo || norm(r.profesional)) === k);
+    h += '<div class="prof-block" style="margin-bottom:18px"><h3 style="font-family:var(--fd);font-size:1.35rem;margin:6px 0">' + esc(P.nombre) + ' ' + verBadge(P.version) + (P.exento ? ' <span class="badge b-on">Pasarela propia · sin descuento</span>' : '') + '</h3>'
+      + '<div class="card tbl-wrap"><table class="t"><thead><tr><th>Fecha pago</th><th>Fecha cita</th><th>Cliente</th><th>Servicio / evento</th><th>Tipo</th><th class="r">Valor servicio</th><th class="r">Anticipo recibido</th><th class="r">% Com.</th><th class="r">Comisión</th><th class="r">IVA</th><th class="r">A descontar</th><th class="r">A transferir</th></tr></thead><tbody>'
+      + filas.map(r => '<tr><td>' + r.fechaPago + '</td><td>' + r.fechaCita + ' ' + esc(r.hora) + '</td><td>' + esc(r.cliente) + '</td><td>' + esc(r.servicio) + '</td><td>' + r.tipo + '</td><td class="r">' + cop(r.valor) + '</td><td class="r">' + cop(r.anticipo) + '</td><td class="r">' + pctTxt(r.pct) + '</td><td class="r">' + cop(r.comision) + '</td><td class="r">' + cop(r.iva) + '</td><td class="r">' + cop(r.descontar) + '</td><td class="r"><b>' + cop(r.transferir) + '</b></td></tr>').join('')
+      + '<tr class="sub"><td colspan="5">Subtotal ' + esc(P.nombre) + '</td><td class="r">' + cop(P.total.valor) + '</td><td class="r">' + cop(P.total.anticipo) + '</td><td></td><td class="r">' + cop(P.total.comision) + '</td><td class="r">' + cop(P.total.iva) + '</td><td class="r">' + cop(P.total.descontar) + '</td><td class="r">' + cop(P.total.transferir) + '</td></tr>'
+      + '</tbody></table></div></div>';
+  });
+
+  h += '<div class="prof-block"><h3 style="font-family:var(--fd);font-size:1.5rem;margin:24px 0 8px;border-top:2px solid var(--caramel);padding-top:14px">Resumen de transferencias por profesional</h3>'
+    + '<div class="card tbl-wrap"><table class="t"><thead><tr><th>Profesional</th><th>Versión</th><th>Datos para transferir</th><th class="r">Por servicios</th><th class="r">Por eventos grupales</th><th class="r">Gran total</th></tr></thead><tbody>'
+    + R.profesionales.map(P => '<tr><td><b>' + esc(P.nombreCompleto) + '</b><br><small style="color:var(--muted)">CC ' + esc(P.cedula || '—') + (P.telefono ? ' · Tel ' + esc(P.telefono) : '') + (P.correo ? '<br>' + esc(P.correo) : '') + '</small></td>'
+      + '<td>' + verBadge(P.version) + (P.pasarela ? '<br><small>Pasarela propia</small>' : '') + '</td>'
+      + '<td>' + (P.contrato ? esc(P.banco) + ' · ' + esc(P.tipoCuenta) + '<br>N° <b>' + esc(P.numCuenta) + '</b>' : '<span style="color:var(--err);font-size:.8rem">Sin datos bancarios en CONTRATOS<br>(cédula ' + esc(P.cedula || 'no registrada') + ')</span>') + '</td>'
+      + '<td class="r">' + cop(P.servicios.transferir) + '<br><small style="color:var(--muted)">' + P.servicios.n + ' servicio(s)</small></td>'
+      + '<td class="r">' + cop(P.eventos.transferir) + '<br><small style="color:var(--muted)">' + P.eventos.n + ' inscripción(es)</small></td>'
+      + '<td class="r"><b style="color:var(--ok);font-size:1rem">' + cop(P.total.transferir) + '</b></td></tr>').join('')
+    + '<tr class="tot"><td colspan="5">GRAN TOTAL A TRANSFERIR</td><td class="r">' + cop(t.transferir) + '</td></tr></tbody></table></div>'
+    + '<p style="font-size:.76rem;color:var(--muted);margin-top:8px">Los eventos grupales se muestran aparte para decidir si se transfiere ahora una parte del anticipo o el total el día después del evento.</p></div>';
+  $('reportArea').innerHTML = h;
+}
+
+function printReport() { if (REP) window.print(); }
+
+let _xlsxLoading = null;
+function loadXLSX() {
+  if (window.XLSX) return Promise.resolve();
+  if (_xlsxLoading) return _xlsxLoading;
+  _xlsxLoading = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload = res; s.onerror = () => { _xlsxLoading = null; rej(new Error('No se pudo cargar la librería de Excel')); };
+    document.head.appendChild(s);
+  });
+  return _xlsxLoading;
+}
+async function downloadExcel() {
+  if (!REP) return;
+  const detalle = [['Fecha pago', 'Fecha cita', 'Hora', 'Profesional', 'Código', 'Versión', 'Cliente', 'Servicio / evento', 'Tipo', 'Valor servicio', 'Anticipo recibido', '% Comisión', 'Comisión', 'IVA', 'A descontar', 'A transferir', 'Saldo por cobrar al cliente']];
+  const verDe = {}; REP.profesionales.forEach(P => verDe[P.codigo || norm(P.nombre)] = P.version);
+  REP.rows.forEach(r => detalle.push([r.fechaPago, r.fechaCita, r.hora, r.profesional, r.codigo, verDe[r.codigo || norm(r.profesional)] || '', r.cliente, r.servicio, r.tipo, r.valor, r.anticipo, r.pct, r.comision, r.iva, r.descontar, r.transferir, r.saldoCliente]));
+  const t = REP.totales;
+  detalle.push(['TOTAL', '', '', '', '', '', '', '', '', t.valor, t.anticipo, '', t.comision, t.iva, t.descontar, t.transferir, '']);
+  const resumen = [['Nombre completo', 'Cédula', 'Versión', 'Pasarela propia', 'Banco', 'Tipo de cuenta', 'N° de cuenta', 'Teléfono', 'Correo', 'Pagos servicios', 'A transferir por servicios', 'Inscripciones eventos', 'A transferir por eventos grupales', 'Gran total a transferir']];
+  REP.profesionales.forEach(P => resumen.push([P.nombreCompleto, P.cedula, P.version, P.pasarela ? 'Sí' : 'No', P.banco, P.tipoCuenta, P.numCuenta, P.telefono, P.correo, P.servicios.n, P.servicios.transferir, P.eventos.n, P.eventos.transferir, P.total.transferir]));
+  resumen.push(['GRAN TOTAL', '', '', '', '', '', '', '', '', '', '', '', '', t.transferir]);
+  const nombre = 'Koneksi_ingresos_' + REP.desde + (REP.hasta !== REP.desde ? '_a_' + REP.hasta : '') + ($('repProf').value ? '_' + $('repProf').value : '');
+  try {
+    await loadXLSX();
+    const wb = XLSX.utils.book_new();
+    const s1 = XLSX.utils.aoa_to_sheet(detalle), s2 = XLSX.utils.aoa_to_sheet(resumen);
+    s1['!cols'] = detalle[0].map((h, i) => ({ wch: i === 6 || i === 7 ? 28 : 15 }));
+    s2['!cols'] = resumen[0].map((h, i) => ({ wch: i === 0 ? 32 : 17 }));
+    // formatos: dinero y porcentaje
+    const fmt = (ws, cols, z) => { const rg = XLSX.utils.decode_range(ws['!ref']); for (let r = 1; r <= rg.e.r; r++) cols.forEach(c => { const a = XLSX.utils.encode_cell({ r, c }); if (ws[a] && typeof ws[a].v === 'number') ws[a].z = z; }); };
+    fmt(s1, [9, 10, 12, 13, 14, 15, 16], '"$"#,##0'); fmt(s1, [11], '0.0%'); fmt(s2, [10, 12, 13], '"$"#,##0');
+    XLSX.utils.book_append_sheet(wb, s1, 'Detalle');
+    XLSX.utils.book_append_sheet(wb, s2, 'Transferencias');
+    XLSX.writeFile(wb, nombre + '.xlsx');
+  } catch (err) {
+    // Respaldo: CSV que abre Excel
+    const csv = '﻿' + detalle.concat([[]], resumen).map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = nombre + '.csv'; a.click();
+    toast('Se descargó en CSV (Excel no disponible)', '');
+  }
+}
+async function emailReport() {
+  const d = $('repDesde').value, h = $('repHasta').value;
+  if (!d || !h) { toast('Elige las fechas', 'err'); return; }
+  if (!confirm('¿Enviar el informe de ' + (d === h ? fmtK(d) : fmtK(d) + ' al ' + fmtK(h)) + ' (todos los profesionales) a koneksispa@gmail.com y a los super usuarios?')) return;
+  const b = $('btnMail'); b.disabled = true; b.textContent = 'Enviando…';
+  try { const r = await api('sendReportNow', d, h); toast('Informe enviado a ' + r.enviadoA.join(', '), 'ok'); }
+  catch (err) { toast(err.message, 'err'); }
+  finally { b.disabled = false; b.textContent = '✉️ Enviar por correo'; }
+}
+
+/* ═════════════ VALORACIONES ═════════════ */
+function renderValoraciones() {
+  const R = D.reviews || {};
+  const items = D.profesionales.map(p => ({ p, cod: norm(val(p, 'codigo')), rv: R[norm(val(p, 'codigo'))] || { avg: 0, count: 0, dist: [0, 0, 0, 0, 0], comments: [] } }))
+    .sort((a, b) => b.rv.avg - a.rv.avg || b.rv.count - a.rv.count);
+  let tot = 0, sum = 0, com = 0;
+  items.forEach(x => { tot += x.rv.count; sum += x.rv.avg * x.rv.count; com += x.rv.comments.length; });
+  const kp = (l, v) => '<div class="card kpi"><div class="l">' + l + '</div><div class="v">' + v + '</div></div>';
+  $('valKpis').innerHTML = kp('Opiniones totales', tot) + kp('Promedio general', tot ? (sum / tot).toFixed(2) + ' ★' : '—') + kp('Comentarios escritos', com);
+  $('valCards').innerHTML = items.map(({ p, rv }) => {
+    const max = Math.max(1, ...rv.dist);
+    return '<div class="card pcard"><div class="pcard-h"><div><b>' + esc(val(p, 'colaborador')) + '</b><small>' + esc(val(p, 'codigo')) + '</small></div>' + verBadge(val(p, 'version')) + '</div>'
+      + '<div class="rating-big"><div class="n">' + (rv.count ? rv.avg.toFixed(1) : '—') + '</div><div><div class="stars">' + starsTxt(rv.avg) + '</div><small style="color:var(--muted)">' + rv.count + ' opiniones</small></div></div>'
+      + '<div class="dist">' + [5, 4, 3, 2, 1].map(n => '<div><span>' + n + '★</span><i><b style="width:' + (rv.dist[n - 1] / max * 100) + '%"></b></i><span>' + rv.dist[n - 1] + '</span></div>').join('') + '</div>'
+      + (rv.comments.length ? '<details><summary style="cursor:pointer;font-size:.82rem;color:var(--caramel-dk)">Ver ' + rv.comments.length + ' comentario(s)</summary><div class="comments" style="margin-top:6px">' + rv.comments.map(c => '<div class="comment"><span class="stars">' + starsTxt(c.rating) + '</span><br>' + esc(c.comment) + '</div>').join('') + '</div></details>' : '<small style="color:var(--muted)">Sin comentarios escritos</small>')
+      + '</div>';
+  }).join('');
+}
+
+/* ═════════════ CONFIGURACIÓN ═════════════ */
+function renderConfig() {
+  const c = D.cfg;
+  $('cfgGen').value = +(c.comGen * 100).toFixed(2); $('cfgTal').value = +(c.comTal * 100).toFixed(2); $('cfgIva').value = +(c.iva * 100).toFixed(2);
+  updEjemplo();
+  $('cfgCiudades').innerHTML = D.listas.ciudades.map(x => '<span class="chip">' + esc(x.ciudad) + ' <small>' + esc(x.pais) + '</small></span>').join('');
+  $('paisesList').innerHTML = D.listas.paises.map(p => '<option value="' + esc(p) + '">').join('');
+  $('cfgDims').innerHTML = D.listas.dimensiones.map((d, i) => '<div class="dim-row"><b>' + esc(d.dimension) + '</b><p>' + esc(d.categorias || '—') + '</p>'
+    + '<div class="inline"><input class="inp" id="cat_' + i + '" placeholder="Agregar categoría a ' + esc(d.dimension) + '" style="flex:1"><button class="btn btn-o btn-sm" onclick="addCategoria(' + i + ')">➕</button></div></div>').join('');
+}
+['cfgGen', 'cfgTal', 'cfgIva'].forEach(id => $(id).addEventListener('input', updEjemplo));
+function updEjemplo() {
+  const g = +$('cfgGen').value / 100 || 0, t = +$('cfgTal').value / 100 || 0, iva = +$('cfgIva').value / 100 || 0;
+  const ej = (valor, ant, p) => { const com = Math.round(valor * p), i = Math.round(com * iva); return 'comisión ' + cop(com) + ' + IVA ' + cop(i) + ' = descontar <b>' + cop(com + i) + '</b> → transferir <b>' + cop(ant - com - i) + '</b>'; };
+  $('cfgEjemplo').innerHTML = '<b>Ejemplo servicio</b> de $100.000 con anticipo de $50.000: ' + ej(100000, 50000, g)
+    + '<br><b>Ejemplo taller</b> de $100.000 con anticipo de $50.000: ' + ej(100000, 50000, t);
+}
+async function saveCfg() {
+  try { const r = await api('saveConfig', $('cfgIva').value, $('cfgGen').value, $('cfgTal').value); D.cfg = r.cfg; renderConfig(); REP = null; toast('Porcentajes guardados', 'ok'); }
+  catch (err) { toast(err.message, 'err'); }
+}
+async function addLista(tipo) {
+  const v = tipo === 'ciudad' ? $('newCiudad').value : $('newDim').value;
+  const x = tipo === 'ciudad' ? $('newPais').value : $('newDimCat').value;
+  try {
+    const r = await api('addListItem', tipo, v, x); D.listas = r.listas; renderConfig();
+    if (tipo === 'ciudad') { $('newCiudad').value = ''; } else { $('newDim').value = ''; $('newDimCat').value = ''; }
+    toast('Lista actualizada', 'ok');
+  } catch (err) { toast(err.message, 'err'); }
+}
+async function addCategoria(i) {
+  const d = D.listas.dimensiones[i], v = $('cat_' + i).value;
+  try { const r = await api('addListItem', 'categoria', d.dimension, v); D.listas = r.listas; renderConfig(); toast('Categoría agregada a ' + d.dimension, 'ok'); }
+  catch (err) { toast(err.message, 'err'); }
+}
+</script>
+</body>
+</html>
